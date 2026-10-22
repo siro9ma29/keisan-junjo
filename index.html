@@ -177,7 +177,8 @@ const LEVELS = [
   { id: 4, name: "レベル4", tags: ["＋ − × ÷", "（ ）あり・なし", "記号は3つ"], ops: "+-*/", n: 3, paren: 0.5, needMD: true,  needAS: false, boring: 0.15 },
   { id: 5, name: "イラスト1", mode: "ill", kind: "build", tags: ["＋ と （ ）", "（ ）の中を先に作る"] },
   { id: 6, name: "イラスト2", mode: "ill", kind: "set",   tags: ["＋ と ×", "×を先に"] },
-  { id: 7, name: "イラスト3", mode: "ill", kind: "set",   tags: ["＋ と × と （ ）", "（ ）の中 → × の順"] }
+  { id: 7, name: "イラスト3", mode: "ill", kind: "set",   tags: ["＋ と × と （ ）", "（ ）の中 → × の順"] },
+  { id: 8, name: "イラスト4", mode: "ill", kind: "set",   tags: ["÷ で ピザを分ける", "×÷は左から順に", "（ ）・×÷を先に"] }
 ];
 LEVELS.forEach(L => { if (!L.mode) L.mode = "num"; });
 const SYM = { "+": "＋", "-": "−", "*": "×", "/": "÷" };
@@ -470,6 +471,8 @@ const SITEMS = {
   "ハンバーガー": { unit: "こ", svg: '<path d="M8 28 Q8 8 30 8 Q52 8 52 28Z" fill="#e0a252" stroke="#a96f25" stroke-width="1.5"/><rect x="6" y="28" width="48" height="5" rx="2" fill="#69db7c"/><rect x="7" y="33" width="46" height="9" rx="4" fill="#7b3f1d"/><path d="M8 42 H52 Q52 52 42 52 H18 Q8 52 8 42Z" fill="#e0a252" stroke="#a96f25" stroke-width="1.5"/>' },
   "ポテト": { unit: "こ", svg: '<g fill="#ffd43b" stroke="#e8a400" stroke-width="1"><rect x="18" y="6" width="5" height="26"/><rect x="25" y="4" width="5" height="28"/><rect x="32" y="7" width="5" height="25"/><rect x="38" y="9" width="5" height="23"/></g><path d="M14 24 H46 L42 56 H18Z" fill="#e03131" stroke="#a51111" stroke-width="1.5"/>' }
 };
+SITEMS["ピザ"] = { unit: "まい", round: true, svg: '<circle cx="30" cy="31" r="28" fill="#e0a252" stroke="#a96f25" stroke-width="1.5"/><circle cx="30" cy="31" r="23" fill="#ffd54f"/><g fill="#d6336c"><circle cx="22" cy="20" r="4"/><circle cx="40" cy="22" r="4"/><circle cx="18" cy="36" r="4"/><circle cx="34" cy="42" r="4"/><circle cx="43" cy="34" r="3.5"/><circle cx="28" cy="30" r="3.5"/></g><g fill="none" stroke="#2f9e44" stroke-width="2"><path d="M30 14 q3 2 0 4"/><path d="M14 27 q3 2 0 4"/><path d="M44 45 q3 2 0 4"/><path d="M25 46 q3 2 0 4"/></g>' };
+const SET4_PROBLEMS = ["ジュース+ピザ/4", "ピザ/4*3", "お茶+ピザ/4*2", "ピザ/(2*2)", "(ピザ+ジュース)/2", "ピザ/8*3+ジュース"];
 const SET2_PROBLEMS = ["お茶+おにぎり*3", "ジュース+ドーナツ*4", "ケーキ+いちご*3", "りんご*2+バナナ*3", "ジュース*2+ドーナツ*2", "いちご+ケーキ*2"];
 const SET3_PROBLEMS = ["(ジュース+ドーナツ)*3", "(おにぎり+からあげ)*2", "(ハンバーガー+ポテト)*2+ジュース", "お茶+(おにぎり+からあげ)*2", "(りんご+バナナ)*4", "(ケーキ+いちご)*2+お茶"];
 
@@ -497,34 +500,60 @@ function parseIll(prob, kind) {
 }
 
 /* ---- 組み合わせる ---- */
-function setLabel(gs) {
-  return gs.map(g => g.item ? (g.n === 1 ? g.item : `${g.item}${g.n}${SITEMS[g.item].unit}`) : `${setLabel(g.set)}のセット${g.n}つ`).join("と");
+// ならべるものは groups：{ item, n, div } または { set, n }。div があるときは「div 等分した1つ分」が n こ
+const gcd = (a, b) => b ? gcd(b, a % b) : a;
+function qtyText(item, n, d) {
+  const u = SITEMS[item].unit; d = d || 1;  // 約分はしない（4年生向け）
+  return n % d === 0 ? `${n / d}${u}` : `${d}分の${n}${u}`;
 }
+function setLabel(gs) {
+  return gs.map(g => g.item
+    ? (g.div ? `${g.item}${qtyText(g.item, g.n, g.div)}` : (g.n === 1 ? g.item : `${g.item}${g.n}${SITEMS[g.item].unit}`))
+    : `${setLabel(g.set)}のセット${g.n}つ`).join("と");
+}
+function mergeGroups(gs) {
+  const out = [];
+  gs.forEach(g => {
+    const m = g.item && out.find(o => o.item === g.item && (o.div || 1) === (g.div || 1));
+    if (m) m.n += g.n; else out.push(Object.assign({}, g));
+  });
+  return out;
+}
+function divGroups(gs, k) {
+  return gs.map(g => g.item
+    ? Object.assign({}, g, { div: (g.div || 1) * k })
+    : { set: divGroups(g.set, k), n: g.n });
+}
+const mk = gs => ({ groups: gs, label: setLabel(gs) });
 function combine(a, op, b) {
   if (a.theme || b.theme) {
     if (op !== "+" || !a.theme || !b.theme) return null;
     const ls = a.layers.concat(b.layers.filter(x => !a.layers.includes(x)));
     return { theme: a.theme, layers: ls, label: "" };
   }
-  if (op === "+") {
-    if (!a.groups || !b.groups) return null;
-    const gs = a.groups.concat(b.groups);
-    return { groups: gs, label: setLabel(gs) };
+  if (a.num !== undefined && b.num !== undefined) {
+    const r = calc(a.num, op, b.num);
+    return (r === null || r <= 0) ? null : { num: r, label: String(r) };
   }
+  if (op === "+") return (a.groups && b.groups) ? mk(mergeGroups(a.groups.concat(b.groups))) : null;
   if (op === "*") {
     const k = a.num !== undefined ? a.num : b.num, g = a.groups || b.groups;
     if (k === undefined || !g) return null;
-    const gs = (g.length === 1 && g[0].item) ? [{ item: g[0].item, n: g[0].n * k }] : [{ set: g, n: k }];
-    return { groups: gs, label: setLabel(gs) };
+    return mk((g.length === 1 && g[0].item) ? [Object.assign({}, g[0], { n: g[0].n * k })] : [{ set: g, n: k }]);
+  }
+  if (op === "/") {
+    if (!a.groups || b.num === undefined) return null;
+    return mk(divGroups(a.groups, b.num));
   }
   return null;
 }
-// 全部計算する。how: "normal"（きまりどおり）/ "ltr"（×÷も左から）
-function evalAll(t, how) {
+// 全部計算する。how: "normal"（きまりどおり）/ "ltr"（×÷も左から）。first：最初に計算する記号の場所
+function evalAll(t, how, first) {
   t = t.slice();
   while (t.length > 1) {
     let k;
-    if (how === "ltr") {
+    if (first !== undefined) { k = first; first = undefined; }
+    else if (how === "ltr") {
       const R = regions(t), [s, e] = R.list[0];
       for (let i = s; i < e; i++) if (t[i].t === "op") { k = i; break; }
     } else k = validOps(t)[0];
@@ -535,20 +564,49 @@ function evalAll(t, how) {
   }
   return t[0].v;
 }
+// もの別の量を分数 [分子, 分母] で
 function countItems(gs, mult, out) {
   out = out || {};
-  gs.forEach(g => { if (g.item) out[g.item] = (out[g.item] || 0) + g.n * mult; else countItems(g.set, g.n * mult, out); });
+  gs.forEach(g => {
+    if (g.set) { countItems(g.set, g.n * mult, out); return; }
+    const [n0, d0] = out[g.item] || [0, 1], n1 = g.n * mult, d1 = g.div || 1;
+    out[g.item] = d0 === d1 ? [n0 + n1, d0] : (n0 === 0 ? [n1, d1] : [n0 * d1 + n1 * d0, d0 * d1]);
+  });
   return out;
 }
 
 /* ---- 絵をかく ---- */
+let clipSeq = 0;
 function svgItem(k, s) { return `<svg viewBox="0 0 60 60" width="${s}" height="${s}">${SITEMS[k].svg}</svg>`; }
+// d 等分した p こ分。ピザは扇形、ほかは下から p/d の高さ
+function svgFrac(k, p, d, s) {
+  const id = "cp" + (++clipSeq), body = SITEMS[k].svg;
+  let clip, lines = "";
+  if (SITEMS[k].round) {
+    const cx = 30, cy = 31, r = 29, a0 = -Math.PI / 2, a1 = a0 + 2 * Math.PI * p / d;
+    const pt = a => `${(cx + r * Math.cos(a)).toFixed(2)} ${(cy + r * Math.sin(a)).toFixed(2)}`;
+    clip = p >= d ? `<circle cx="${cx}" cy="${cy}" r="${r}"/>`
+      : `<path d="M${cx} ${cy} L${pt(a0)} A${r} ${r} 0 ${p / d > 0.5 ? 1 : 0} 1 ${pt(a1)}Z"/>`;
+    for (let i = 0; i < d && d > 1 && d <= 12; i++) lines += `<line x1="${cx}" y1="${cy}" x2="${pt(a0 + 2 * Math.PI * i / d).replace(" ", '" y2="')}" stroke="#fff" stroke-width="1.5"/>`;
+  } else {
+    const h = 58 * p / d;
+    clip = `<rect x="0" y="${(60 - h).toFixed(2)}" width="60" height="${h.toFixed(2)}"/>`;
+    for (let i = 1; i < d; i++) lines += `<line x1="4" x2="56" y1="${(60 - 58 * i / d).toFixed(2)}" y2="${(60 - 58 * i / d).toFixed(2)}" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 2"/>`;
+  }
+  return `<svg viewBox="0 0 60 60" width="${s}" height="${s}"><defs><clipPath id="${id}">${clip}</clipPath></defs>` +
+    `<g opacity=".18">${body}</g><g clip-path="url(#${id})">${body}</g>${lines}</svg>`;
+}
+function itemHTML(g, s) {
+  if (!g.div || g.div === 1) return svgItem(g.item, s).repeat(g.n);
+  let h = "";
+  for (let left = g.n; left > 0; left -= g.div) h += svgFrac(g.item, Math.min(left, g.div), g.div, s);
+  return h;
+}
 function grpHTML(gs, s) {
-  return gs.map(g => g.item
-    ? svgItem(g.item, s).repeat(g.n)
+  return gs.map(g => g.item ? itemHTML(g, s)
     : `<div class="box">${grpHTML(g.set, s * 0.85)}</div>`.repeat(g.n)).join("");
 }
-function iconCount(gs) { return gs.reduce((a, g) => a + (g.item ? g.n : g.n * iconCount(g.set)), 0); }
+function iconCount(gs) { return gs.reduce((a, g) => a + (g.item ? Math.ceil(g.n / (g.div || 1)) : g.n * iconCount(g.set)), 0); }
 function picHTML(v, S, noFit) {
   if (v.theme) {
     const th = THEMES[v.theme], [w, h] = th.vb;
@@ -578,15 +636,20 @@ function wrongPreview(t, k, rule, prob, kind) {
     return r ? { pic: r, text: prob.oops } : null;
   }
   let w = null;
-  if (rule === 1) w = evalAll(t.filter(x => x.t !== "(" && x.t !== ")"), "normal");
+  const nums = t[k - 1].t === "num" && t[k + 1].t === "num";
+  if (rule === 1) w = nums ? evalAll(t, "normal", k) : null;
+  if (rule === 1 && !w) w = evalAll(t.filter(x => x.t !== "(" && x.t !== ")"), "normal");
   else if (rule === 2) w = evalAll(t, "ltr");
+  else if (rule === 3 && nums) w = evalAll(t, "normal", k);
   const c = evalAll(t, "normal");
   if (!w || !c || !w.groups || !c.groups) return null;
   const cw = countItems(w.groups, 1), cc = countItems(c.groups, 1);
-  const name = Object.keys(cc).find(x => cw[x] !== cc[x]);
+  const same = (x, y) => x && y && x[0] * y[1] === y[0] * x[1];
+  const name = Object.keys(cc).find(x => !same(cw[x], cc[x]));
   if (!name) return null;
-  const u = SITEMS[name].unit, n = cw[name] || 0;
-  const text = n > cc[name] ? `${name}が ${n}${u} になっちゃった！` : `${name}が ${n}${u} しかないよ！`;
+  const [wn, wd] = cw[name] || [0, 1], [cn, cd] = cc[name];
+  const q = qtyText(name, wn, wd);
+  const text = wn * cd > cn * wd ? `${name}が ${q} になっちゃった！` : `${name}が ${q} しかないよ！`;
   return { pic: w, text };
 }
 
@@ -633,7 +696,7 @@ function newSet() {
     const L = curL();
     const list = L.kind === "build"
       ? BUILD_PROBLEMS.map(p => Object.assign({}, p, { e: Math.random() < 0.7 ? `${p.x}+(${p.a}+${p.b})` : `(${p.a}+${p.b})+${p.x}` }))
-      : (L.id === 6 ? SET2_PROBLEMS : SET3_PROBLEMS).slice();
+      : ({ 6: SET2_PROBLEMS, 7: SET3_PROBLEMS, 8: SET4_PROBLEMS })[L.id].slice();
     for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
     set = list.slice(0, PER);
   }
