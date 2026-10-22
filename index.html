@@ -152,7 +152,7 @@
 /* ================= 設定 ================= */
 const PER = 10; // 1レベルの問題数
 const LEVELS = [
-  { id: 1, name: "レベル1", tags: ["＋ − だけ", "（ ）が1組", "記号は2つ"], ops: "+-",   n: 2, paren: 1,   needMD: false, needAS: false, boring: 0 },
+  { id: 1, name: "レベル1", tags: ["＋ − だけ", "（ ）あり・なし 半分ずつ", "記号は2つ"], ops: "+-",   n: 2, paren: 1,   needMD: false, needAS: false, boring: 0, mixParen: true },
   { id: 2, name: "レベル2", tags: ["＋ − × ÷", "（ ）が1組", "記号は2つ"], ops: "+-*/", n: 2, paren: 1,   needMD: true,  needAS: false, boring: 0, meaningful: 0.5 },
   { id: 3, name: "レベル3", tags: ["＋ − × ÷", "（ ）なし",   "記号は2つ"], ops: "+-*/", n: 2, paren: 0,   needMD: true,  needAS: true,  boring: 0.15 },
   { id: 4, name: "レベル4", tags: ["＋ − × ÷", "（ ）あり・なし", "記号は3つ"], ops: "+-*/", n: 3, paren: 0.5, needMD: true,  needAS: false, boring: 0.15 }
@@ -294,13 +294,13 @@ function trace(t) {
   }
   return { order, ans: t[0].v };
 }
-function genOnce(L, wantInteresting, wantMeaning) {
+function genOnce(L, wantInteresting, wantMeaning, forceParen) {
   const n = L.n, ops = [];
   for (let i = 0; i < n; i++) ops.push(pick(L.ops.split("")));
   if (L.needMD && !ops.some(isMD)) return null;
   if (L.needAS && !ops.some(o => !isMD(o))) return null;
   let span = null;
-  if (Math.random() < L.paren) {
+  if (forceParen === undefined ? Math.random() < L.paren : forceParen) {
     const spans = [];
     for (let a = 0; a < n; a++) for (let b = a + 1; b <= n; b++) if (!(a === 0 && b === n)) spans.push([a, b]);
     span = pick(spans);
@@ -329,6 +329,8 @@ function genOnce(L, wantInteresting, wantMeaning) {
   const naive = [...Array(n).keys()].join(",");
   const ord = tr.order.join(",");
   let interesting = ord !== naive, meaning = false;
+  // ＋−だけで（ ）なし：最初が「−」の式だけが、左から計算しないと答えが変わる（例 560−320＋110）
+  if (!span && !ops.some(isMD) && ops[0] === "-") interesting = true;
   if (span) {
     const np = trace(t.filter(x => x.t === "num" || x.t === "op"));
     if (!np || np.order.join(",") !== ord) { interesting = true; meaning = true; }
@@ -337,10 +339,10 @@ function genOnce(L, wantInteresting, wantMeaning) {
   if (wantInteresting && !interesting) return null;
   return toAscii(t);
 }
-function generate(L) {
+function generate(L, forceParen) {
   const want = Math.random() >= L.boring;
   const mean = Math.random() < (L.meaningful || 0);
-  for (let k = 0; k < 20000; k++) { const p = genOnce(L, want, mean); if (p) return p; }
+  for (let k = 0; k < 20000; k++) { const p = genOnce(L, want, mean, forceParen); if (p) return p; }
   return null;
 }
 
@@ -376,9 +378,21 @@ function newSet() {
   if (lv === 0) set = custom.slice();
   else {
     const L = LEVELS[lv - 1], seen = new Set(); set = [];
-    for (let g = 0; set.length < PER && g < 200; g++) {
-      const p = generate(L);
-      if (p && !seen.has(p)) { seen.add(p); set.push(p); }
+    if (L.mixParen) {
+      // （ ）ありとなしを半分ずつ作って、順番をまぜる
+      for (const withP of [true, false]) {
+        const goal = set.length + (withP ? Math.ceil(PER / 2) : Math.floor(PER / 2));
+        for (let g = 0; set.length < goal && g < 200; g++) {
+          const p = generate(L, withP);
+          if (p && !seen.has(p)) { seen.add(p); set.push(p); }
+        }
+      }
+      for (let i = set.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [set[i], set[j]] = [set[j], set[i]]; }
+    } else {
+      for (let g = 0; set.length < PER && g < 200; g++) {
+        const p = generate(L);
+        if (p && !seen.has(p)) { seen.add(p); set.push(p); }
+      }
     }
   }
   solved = set.map(() => false);
