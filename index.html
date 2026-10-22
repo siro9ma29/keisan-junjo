@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>計算の順じょ</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px;
+    font-family: "Hiragino Maru Gothic ProN", "BIZ UDPGothic", "Meiryo", sans-serif;
+    background: #fdf8ee; color: #333;
+    touch-action: manipulation;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 26px; margin: 4px 0 12px; color: #2f5d8a; }
+  .card { background: #fff; border-radius: 16px; padding: 16px 18px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+
+  .rules { display: flex; flex-wrap: wrap; gap: 8px; font-size: 16px; }
+  .rules span { background: #eef5ff; border-radius: 10px; padding: 6px 10px; }
+  .rules b { color: #2f5d8a; }
+
+  .levels { display: flex; flex-wrap: wrap; gap: 8px; }
+  .levels button {
+    font: inherit; font-size: 18px; font-weight: bold; padding: 10px 16px;
+    border-radius: 12px; border: 3px solid #c9d6e6; background: #fff; color: #2f5d8a; cursor: pointer;
+  }
+  .levels button.cur { background: #2f5d8a; border-color: #2f5d8a; color: #fff; }
+  .levels button .star { color: #f2a900; margin-left: 4px; }
+  .levels button.teacher { font-size: 15px; color: #666; }
+  .levels button.teacher.cur { background: #666; border-color: #666; color: #fff; }
+  #lvdesc { margin: 10px 0 0; font-size: 17px; color: #444; }
+  #lvdesc .tag { display: inline-block; background: #fff2cc; border-radius: 8px; padding: 2px 10px; margin: 2px 4px 2px 0; }
+
+  #prog { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
+  #prog i { width: 16px; height: 16px; border-radius: 50%; background: #e3e8ef; display: inline-block; }
+  #prog i.ok { background: #2a9d55; }
+  #prog i.now { background: #2f5d8a; box-shadow: 0 0 0 3px #bcd3ea; }
+  .qno { text-align: center; color: #888; font-size: 15px; margin: 0 0 4px; }
+
+  .guide { text-align: center; font-size: 17px; margin: 0 0 6px; }
+  .key { display: inline-block; background: #eef5ff; border-radius: 6px; padding: 0 6px; margin: 0 2px; font-weight: bold; }
+
+  #expr {
+    display: flex; justify-content: center; align-items: center; flex-wrap: wrap;
+    min-height: 110px; padding: 12px 0;
+    font-size: clamp(30px, 7vw, 56px); font-weight: bold; font-variant-numeric: tabular-nums;
+  }
+  #expr span { padding: 4px 2px; border-radius: 10px; transition: background .2s; }
+  #expr .par { color: #7a5bb5; }
+  #expr .fresh { color: #d6336c; }
+  #expr .hl { background: #ffe066; }
+  #expr .op {
+    font: inherit; font-size: 1em; font-weight: bold; color: #2f5d8a;
+    background: #eef5ff; border: 3px solid #bcd3ea; border-radius: 14px;
+    min-width: 1.4em; margin: 0 6px; padding: 0 6px; cursor: pointer; line-height: 1.3;
+  }
+  #expr .op:active { transform: scale(.94); }
+  #expr .op.hl { background: #ffe066; border-color: #f2a900; }
+  #expr .op.hint { animation: glow 1s infinite; border-color: #f08c00; }
+  #expr .op.ng { background: #ffd6d6; border-color: #e03131; color: #b03030; animation: shake .4s; }
+
+  #msg { min-height: 52px; text-align: center; font-size: 20px; border-radius: 12px; padding: 12px; }
+  #msg.ok   { background: #e6f7ec; color: #1f7a43; }
+  #msg.bad  { background: #ffeaea; color: #b03030; }
+  #msg.info { background: #fff6e0; color: #8a5a00; }
+  #msg.done { background: #ffe9f1; color: #c2255c; font-weight: bold; font-size: 24px; }
+
+  .result { text-align: center; padding: 10px 0; }
+  .result .big { font-size: 34px; font-weight: bold; color: #d6336c; margin: 6px 0; }
+  .result p { font-size: 20px; margin: 6px 0; }
+
+  .btns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 12px; }
+  .btn {
+    font: inherit; font-size: 18px; font-weight: bold; padding: 10px 20px;
+    border-radius: 12px; border: none; cursor: pointer; color: #fff;
+  }
+  .btn.hintb { background: #f08c00; }
+  .btn.reset { background: #868e96; }
+  .btn.next  { background: #2f5d8a; }
+  .btn.next.big { background: #d6336c; font-size: 22px; padding: 12px 28px; animation: pulse 1.2s infinite; }
+  .btn.again { background: #2a9d55; }
+
+  #log { font-size: clamp(18px, 3.4vw, 26px); line-height: 1.8; font-variant-numeric: tabular-nums; }
+  #log .line { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+  #log .eq { width: 1.2em; color: #888; }
+  #log .empty { color: #aaa; font-size: 16px; }
+  .ttl { font-size: 15px; color: #888; margin: 0 0 6px; }
+
+  details summary { cursor: pointer; color: #666; font-size: 15px; }
+  .add { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .add input { flex: 1; min-width: 200px; font-size: 18px; padding: 8px 10px; border-radius: 10px; border: 2px solid #c9d6e6; }
+  .add button { font-size: 16px; padding: 8px 14px; border-radius: 10px; border: none; background: #2f5d8a; color: #fff; cursor: pointer; }
+  .add button.sub { background: #adb5bd; }
+  #addMsg { font-size: 15px; margin-top: 6px; min-height: 1.2em; }
+  #customList { font-size: 15px; color: #555; margin-top: 6px; }
+  .small { font-size: 14px; color: #777; }
+
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  @keyframes glow { 0%,100%{box-shadow:0 0 0 0 rgba(240,140,0,.6)} 50%{box-shadow:0 0 0 8px rgba(240,140,0,0)} }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>計算の順じょ マスター</h1>
+
+  <div class="card">
+    <div class="rules">
+      <span><b>①</b> （ ）の中を先に</span>
+      <span><b>②</b> ×・÷ を ＋・− より先に</span>
+      <span><b>③</b> あとは 左から順に</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="ttl">レベルをえらぶ</p>
+    <div class="levels" id="levels"></div>
+    <div id="lvdesc"></div>
+  </div>
+
+  <div class="card">
+    <div id="prog"></div>
+    <p class="qno" id="qno"></p>
+    <p class="guide" id="guide">はじめに計算するところの 記号 <span class="key">＋</span><span class="key">−</span><span class="key">×</span><span class="key">÷</span> をタップしよう。</p>
+    <div id="expr"></div>
+    <div id="msg"></div>
+    <div class="btns" id="btns"></div>
+  </div>
+
+  <div class="card">
+    <p class="ttl">計算のあしあと</p>
+    <div id="log"></div>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>先生用：問題を追加する（「先生の問題」に入ります）</summary>
+      <div class="add">
+        <input id="addInput" placeholder="例）300-120÷4　（全角・半角どちらでもOK）">
+        <button id="addBtn">追加</button>
+        <button class="sub" id="clearCustom">追加した問題をすべて消す</button>
+      </div>
+      <div id="addMsg"></div>
+      <div id="customList"></div>
+      <p class="small">使える記号：＋ − × ÷ （ ）。わり切れない÷や、とちゅうや答えがマイナスになる式は追加できません。追加した問題はこの端末のブラウザに保存されます。</p>
+    </details>
+  </div>
+</div>
+
+<script>
+/* ================= 設定 ================= */
+const PER = 10; // 1レベルの問題数
+const LEVELS = [
+  { id: 1, name: "レベル1", tags: ["＋ − だけ", "（ ）が1組", "記号は2つ"], ops: "+-",   n: 2, paren: 1,   needMD: false, needAS: false, boring: 0 },
+  { id: 2, name: "レベル2", tags: ["＋ − × ÷", "（ ）が1組", "記号は2つ"], ops: "+-*/", n: 2, paren: 1,   needMD: true,  needAS: false, boring: 0, meaningful: 0.5 },
+  { id: 3, name: "レベル3", tags: ["＋ − × ÷", "（ ）なし",   "記号は2つ"], ops: "+-*/", n: 2, paren: 0,   needMD: true,  needAS: true,  boring: 0.15 },
+  { id: 4, name: "レベル4", tags: ["＋ − × ÷", "（ ）あり・なし", "記号は3つ"], ops: "+-*/", n: 3, paren: 0.5, needMD: true,  needAS: false, boring: 0.15 }
+];
+const SYM = { "+": "＋", "-": "−", "*": "×", "/": "÷" };
+const isMD = v => v === "*" || v === "/";
+
+/* ================= 保存（使えない環境でも動く） ================= */
+function load(key, def) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
+function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+
+let custom = load("junjo_custom", []);
+let best = load("junjo_best", {});
+let lv = 1, set = [], qi = 0, tokens = [], lines = [], mistakes = 0, totalMiss = 0;
+let busy = false, done = false, finished = false, solved = [];
+
+/* ================= 式の読み取り ================= */
+function normalize(s) {
+  return s.replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+    .replace(/＋/g, "+").replace(/[－−ー‐―‑]/g, "-")
+    .replace(/[×xX＊]/g, "*").replace(/[÷／]/g, "/")
+    .replace(/（/g, "(").replace(/）/g, ")")
+    .replace(/[\s　,，]/g, "");
+}
+function tokenize(str) {
+  const s = normalize(str), out = [];
+  let i = 0;
+  while (i < s.length) {
+    const c = s[i];
+    if (/\d/.test(c)) { let j = i; while (j < s.length && /\d/.test(s[j])) j++; out.push({ t: "num", v: Number(s.slice(i, j)) }); i = j; }
+    else if ("+-*/".includes(c)) { out.push({ t: "op", v: c }); i++; }
+    else if (c === "(" || c === ")") { out.push({ t: c }); i++; }
+    else return null;
+  }
+  return out;
+}
+function toStr(t) {
+  return t.map(x => x.t === "num" ? String(x.v) : x.t === "op" ? SYM[x.v] : (x.t === "(" ? "（" : "）")).join("");
+}
+function toAscii(t) {
+  return t.map(x => x.t === "num" ? String(x.v) : x.t === "op" ? x.v : x.t).join("");
+}
+function stripLoneParens(t) {
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let i = 0; i + 2 < t.length; i++) {
+      if (t[i].t === "(" && t[i + 1].t === "num" && t[i + 2].t === ")") {
+        t = t.slice(0, i).concat([t[i + 1]], t.slice(i + 3)); changed = true; break;
+      }
+    }
+  }
+  if (t.length >= 2 && t[0].t === "(" && t[t.length - 1].t === ")") {
+    // 式全体をかこむ（ ）は外す（中で閉じていない場合のみ）
+    let d = 0, whole = true;
+    for (let i = 0; i < t.length; i++) { if (t[i].t === "(") d++; if (t[i].t === ")") d--; if (d === 0 && i < t.length - 1) { whole = false; break; } }
+    if (whole) return stripLoneParens(t.slice(1, -1));
+  }
+  return t;
+}
+
+/* ================= 計算の順じょのきまり ================= */
+// いちばん内側の（ ）の中。（ ）がなければ式全体
+function regions(t) {
+  const r = []; let open = -1;
+  for (let i = 0; i < t.length; i++) {
+    if (t[i].t === "(") open = i;
+    else if (t[i].t === ")") { if (open >= 0) r.push([open + 1, i]); open = -1; }
+  }
+  return r.length ? { list: r, paren: true } : { list: [[0, t.length]], paren: false };
+}
+function validInRegion(t, s, e) {
+  const ops = [];
+  for (let i = s; i < e; i++) if (t[i].t === "op") ops.push(i);
+  if (!ops.length) return [];
+  if (ops.some(i => isMD(t[i].v))) {
+    // ×÷のまとまりごとに、いちばん左の×÷
+    return ops.filter(i => isMD(t[i].v) && !(i - 2 >= s && t[i - 2].t === "op" && isMD(t[i - 2].v)));
+  }
+  return [ops[0]];
+}
+function validOps(t) {
+  const R = regions(t); let v = [];
+  for (const [s, e] of R.list) v = v.concat(validInRegion(t, s, e));
+  return v;
+}
+function checkStep(t, k) {
+  if (validOps(t).includes(k)) return { ok: true };
+  const R = regions(t);
+  const reg = R.list.find(([s, e]) => k >= s && k < e);
+  if (R.paren && !reg) return { ok: false, rule: 1, msg: "（ ）の中を先に計算しよう。" };
+  const [s, e] = reg;
+  let hasMD = false;
+  for (let i = s; i < e; i++) if (t[i].t === "op" && isMD(t[i].v)) hasMD = true;
+  if (hasMD && !isMD(t[k].v)) return { ok: false, rule: 2, msg: "×や÷は、＋や−より先に計算しよう。" };
+  return { ok: false, rule: 3, msg: "同じなかまの記号は、左から順に計算しよう。" };
+}
+function calc(a, op, b) {
+  if (op === "+") return a + b;
+  if (op === "-") return a - b;
+  if (op === "*") return a * b;
+  if (op === "/") return (b !== 0 && a % b === 0) ? a / b : null;
+}
+function applyStep(t, k) {
+  const a = t[k - 1].v, b = t[k + 1].v, r = calc(a, t[k].v, b);
+  const plain = x => { const c = Object.assign({}, x); delete c.fresh; return c; };
+  const nt = stripLoneParens(t.slice(0, k - 1).map(plain).concat([{ t: "num", v: r, fresh: true }], t.slice(k + 2).map(plain)));
+  return { tokens: nt, a, b, r };
+}
+
+/* ================= 問題をつくる ================= */
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function bigNum(L) {
+  const x = Math.random();
+  if (L.id === 1) {
+    if (x < 0.35) return rnd(11, 99);
+    if (x < 0.75) return rnd(10, 99) * 10;
+    if (x < 0.9) return rnd(2, 9) * 100;
+    return 1000;
+  }
+  if (x < 0.6) return rnd(11, 99);
+  if (x < 0.9) return rnd(10, 50) * 10;
+  return rnd(2, 9) * 100;
+}
+// 計算を最後まで進めて、とちゅうの数を確かめる
+function trace(t) {
+  t = t.map(x => Object.assign({}, x));
+  const order = [];
+  while (t.length > 1) {
+    const v = validOps(t);
+    if (!v.length) return null;
+    const k = v[0];
+    const r = calc(t[k - 1].v, t[k].v, t[k + 1].v);
+    if (r === null || r <= 0 || r > 2000 || !Number.isInteger(r)) return null;
+    if (t[k].v === "/" && r < 2) return null; // ÷で答えが1になる式はさける
+    order.push(t[k].id);
+    t = stripLoneParens(t.slice(0, k - 1).concat([{ t: "num", v: r }], t.slice(k + 2)));
+  }
+  return { order, ans: t[0].v };
+}
+function genOnce(L, wantInteresting, wantMeaning) {
+  const n = L.n, ops = [];
+  for (let i = 0; i < n; i++) ops.push(pick(L.ops.split("")));
+  if (L.needMD && !ops.some(isMD)) return null;
+  if (L.needAS && !ops.some(o => !isMD(o))) return null;
+  let span = null;
+  if (Math.random() < L.paren) {
+    const spans = [];
+    for (let a = 0; a < n; a++) for (let b = a + 1; b <= n; b++) if (!(a === 0 && b === n)) spans.push([a, b]);
+    span = pick(spans);
+  }
+  const nums = [];
+  for (let i = 0; i <= n; i++) {
+    const md = (i > 0 && isMD(ops[i - 1])) || (i < n && isMD(ops[i]));
+    nums.push(md ? (Math.random() < 0.65 ? rnd(2, 9) : rnd(11, 30)) : bigNum(L));
+  }
+  // わる数が数字1つなら、わられる数をわり切れる数にする（右から）
+  for (let i = n - 1; i >= 0; i--) {
+    if (ops[i] === "/" && !(span && span[0] === i + 1) && !(span && span[1] === i)) {
+      nums[i] = nums[i + 1] * rnd(2, 12);
+    }
+  }
+  const t = [];
+  for (let i = 0; i <= n; i++) {
+    if (span && span[0] === i) t.push({ t: "(" });
+    t.push({ t: "num", v: nums[i] });
+    if (span && span[1] === i) t.push({ t: ")" });
+    if (i < n) t.push({ t: "op", v: ops[i], id: i });
+  }
+  const tr = trace(t);
+  if (!tr || tr.ans === 0) return null;
+  // 「×1」「÷1」「0」などがないか
+  const naive = [...Array(n).keys()].join(",");
+  const ord = tr.order.join(",");
+  let interesting = ord !== naive, meaning = false;
+  if (span) {
+    const np = trace(t.filter(x => x.t === "num" || x.t === "op"));
+    if (!np || np.order.join(",") !== ord) { interesting = true; meaning = true; }
+  }
+  if (wantMeaning && !meaning) return null; // （ ）がないと順じょが変わる式
+  if (wantInteresting && !interesting) return null;
+  return toAscii(t);
+}
+function generate(L) {
+  const want = Math.random() >= L.boring;
+  const mean = Math.random() < (L.meaningful || 0);
+  for (let k = 0; k < 20000; k++) { const p = genOnce(L, want, mean); if (p) return p; }
+  return null;
+}
+
+/* ================= 画面 ================= */
+const $ = id => document.getElementById(id);
+
+function renderLevels() {
+  const box = $("levels"); box.innerHTML = "";
+  LEVELS.forEach(L => {
+    const b = document.createElement("button");
+    b.innerHTML = L.name + (best[L.id] !== undefined ? '<span class="star">★</span>' : "");
+    if (lv === L.id) b.className = "cur";
+    b.onclick = () => { lv = L.id; newSet(); };
+    box.appendChild(b);
+  });
+  const tb = document.createElement("button");
+  tb.className = "teacher" + (lv === 0 ? " cur" : "");
+  tb.textContent = "先生の問題";
+  tb.onclick = () => { lv = 0; newSet(); };
+  box.appendChild(tb);
+
+  if (lv === 0) {
+    $("lvdesc").innerHTML = custom.length ? `先生が追加した問題（${custom.length}問）` : "まだ問題がありません。下の「先生用：問題を追加する」から追加できます。";
+  } else {
+    const L = LEVELS[lv - 1];
+    $("lvdesc").innerHTML = L.tags.map(s => `<span class="tag">${s}</span>`).join("") +
+      (best[lv] !== undefined ? `　<span class="small">これまでのいちばん：まちがい ${best[lv]} 回</span>` : "");
+  }
+}
+
+function newSet() {
+  finished = false; totalMiss = 0; qi = 0;
+  if (lv === 0) set = custom.slice();
+  else {
+    const L = LEVELS[lv - 1], seen = new Set(); set = [];
+    for (let g = 0; set.length < PER && g < 200; g++) {
+      const p = generate(L);
+      if (p && !seen.has(p)) { seen.add(p); set.push(p); }
+    }
+  }
+  solved = set.map(() => false);
+  renderLevels();
+  startQ();
+}
+
+function startQ() {
+  mistakes = 0; done = false; busy = false;
+  if (!set.length) {
+    tokens = []; lines = [];
+    $("expr").innerHTML = ""; setMsg("", ""); $("prog").innerHTML = ""; $("qno").textContent = "";
+    $("btns").innerHTML = ""; renderLog(); return;
+  }
+  tokens = stripLoneParens(tokenize(set[qi]));
+  lines = [toStr(tokens)];
+  setMsg("", "");
+  render();
+}
+
+function setMsg(cls, text) { const m = $("msg"); m.className = cls; m.textContent = text; }
+
+function render() {
+  // 進みぐあい
+  $("prog").innerHTML = set.map((_, i) => `<i class="${solved[i] ? "ok" : ""}${i === qi && !finished ? " now" : ""}"></i>`).join("");
+  $("qno").textContent = finished ? "" : `${qi + 1} 問目 ／ ${set.length} 問`;
+  $("guide").style.display = finished ? "none" : "";
+
+  const ex = $("expr"); ex.innerHTML = "";
+  if (finished) { renderResult(); renderLog(); return; }
+  tokens.forEach((x, i) => {
+    let el;
+    if (x.t === "op") {
+      el = document.createElement("button");
+      el.className = "op"; el.textContent = SYM[x.v];
+      el.onclick = () => tap(i);
+      if (done) el.disabled = true;
+    } else {
+      el = document.createElement("span");
+      if (x.t === "num") { el.textContent = x.v; if (x.fresh) el.className = "fresh"; }
+      else { el.textContent = x.t === "(" ? "（" : "）"; el.className = "par"; }
+    }
+    el.dataset.k = i;
+    ex.appendChild(el);
+  });
+  renderButtons();
+  renderLog();
+}
+
+function renderButtons() {
+  const b = $("btns"); b.innerHTML = "";
+  const mk = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; b.appendChild(e); return e; };
+  if (!done) mk("hintb", "ヒント", hint);
+  mk("reset", "やり直し", () => startQ());
+  const last = qi === set.length - 1;
+  mk("next" + (done ? " big" : ""), last ? (done ? "けっかを見る ▶" : "おわる ▶") : "つぎの問題 ▶", next);
+}
+
+function renderLog() {
+  const lg = $("log");
+  if (!lines.length || finished) { lg.innerHTML = '<div class="empty">計算すると、ここに式の流れが残ります。</div>'; return; }
+  lg.innerHTML = lines.map((s, i) => `<div class="line"><span class="eq">${i ? "＝" : ""}</span><span>${s}</span></div>`).join("");
+}
+
+function opEl(k) { return $("expr").querySelector(`[data-k="${k}"]`); }
+
+function tap(k) {
+  if (busy || done) return;
+  $("expr").querySelectorAll(".op").forEach(e => e.classList.remove("ng", "hint"));
+  const res = checkStep(tokens, k);
+  if (!res.ok) {
+    mistakes++; totalMiss++;
+    const e = opEl(k); void e.offsetWidth; e.classList.add("ng");
+    setMsg("bad", res.msg);
+    return;
+  }
+  busy = true;
+  [k - 1, k, k + 1].forEach(i => opEl(i).classList.add("hl"));
+  const step = applyStep(tokens, k);
+  setMsg("ok", `${step.a} ${SYM[tokens[k].v]} ${step.b} ＝ ${step.r}`);
+  setTimeout(() => {
+    tokens = step.tokens;
+    lines.push(toStr(tokens));
+    busy = false;
+    if (tokens.length === 1) {
+      done = true; solved[qi] = true;
+      setMsg("done", `答えは ${tokens[0].v}！` + (mistakes === 0 ? " ノーミス！" : ""));
+    }
+    render();
+  }, 650);
+}
+
+function hint() {
+  if (busy || done) return;
+  const v = validOps(tokens);
+  if (!v.length) return;
+  $("expr").querySelectorAll(".op").forEach(e => e.classList.remove("ng", "hint"));
+  v.forEach(k => opEl(k).classList.add("hint"));
+  const R = regions(tokens);
+  let why = "左から順に計算します。";
+  if (R.paren) why = "（ ）の中を先に計算します。";
+  else if (v.some(k => isMD(tokens[k].v)) && tokens.some(x => x.t === "op" && !isMD(x.v))) why = "×・÷を、＋・−より先に計算します。";
+  setMsg("info", "光っている記号からだよ。" + why);
+}
+
+function next() {
+  if (busy) return;
+  if (qi < set.length - 1) { qi++; startQ(); }
+  else { finished = true; if (lv > 0 && solved.every(Boolean)) { if (best[lv] === undefined || totalMiss < best[lv]) best[lv] = totalMiss; save("junjo_best", best); } renderLevels(); render(); }
+}
+
+function renderResult() {
+  const solvedN = solved.filter(Boolean).length;
+  const all = solvedN === set.length;
+  const name = lv === 0 ? "先生の問題" : LEVELS[lv - 1].name;
+  $("expr").innerHTML = `<div class="result">
+    <div class="big">${all ? name + " クリア！" : name + " おつかれさま"}</div>
+    <p>${set.length}問中 ${solvedN}問 とけました</p>
+    <p>まちがえた回数：${totalMiss}回</p></div>`;
+  setMsg(all && totalMiss === 0 ? "done" : "", all && totalMiss === 0 ? "パーフェクト！すごい！" : "");
+  const b = $("btns"); b.innerHTML = "";
+  const mk = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; b.appendChild(e); };
+  mk("again", lv === 0 ? "もう一度" : "ちがう問題でもう一度", newSet);
+  if (lv >= 1 && lv < 4) mk("next big", "レベル" + (lv + 1) + " へ ▶", () => { lv++; newSet(); });
+}
+
+/* ================= 先生用：問題の追加 ================= */
+function validate(str) {
+  const t = tokenize(str);
+  if (!t || !t.length) return { ok: false, err: "使えない文字があります。" };
+  let d = 0, prev = null, ops = 0;
+  for (const x of t) {
+    const p = prev ? prev.t : null;
+    if (x.t === "num" && !(p === null || p === "op" || p === "(")) return { ok: false, err: "式の形がおかしいところがあります。" };
+    if (x.t === "op" && !(p === "num" || p === ")")) return { ok: false, err: "記号の前に数がありません。" };
+    if (x.t === "(" && !(p === null || p === "op" || p === "(")) return { ok: false, err: "（ の前には記号が必要です。" };
+    if (x.t === ")" && !(p === "num" || p === ")")) return { ok: false, err: "） の前に数がありません。" };
+    if (x.t === "(") d++;
+    if (x.t === ")") { d--; if (d < 0) return { ok: false, err: "（ ）の数が合いません。" }; }
+    if (x.t === "op") ops++;
+    prev = x;
+  }
+  if (d !== 0 || !(prev.t === "num" || prev.t === ")")) return { ok: false, err: "（ ）の数が合わないか、式が記号で終わっています。" };
+  if (!ops) return { ok: false, err: "記号が1つ以上ある式を入れてください。" };
+  let s = stripLoneParens(t);
+  while (s.length > 1) {
+    const k = validOps(s)[0];
+    const r = calc(s[k - 1].v, s[k].v, s[k + 1].v);
+    if (r === null) return { ok: false, err: "わり切れない÷があります。" };
+    if (r < 0) return { ok: false, err: "とちゅうで答えがマイナスになります。" };
+    s = stripLoneParens(s.slice(0, k - 1).concat([{ t: "num", v: r }], s.slice(k + 2)));
+  }
+  return { ok: true, norm: toAscii(t), ans: s[0].v };
+}
+function renderCustomList() {
+  $("customList").textContent = custom.length ? "追加した問題：" + custom.map(p => toStr(tokenize(p))).join("　") : "";
+}
+$("addBtn").onclick = () => {
+  const v = validate($("addInput").value);
+  const m = $("addMsg");
+  if (!v.ok) { m.style.color = "#b03030"; m.textContent = v.err; return; }
+  if (custom.includes(v.norm)) { m.style.color = "#b03030"; m.textContent = "その問題はもう入っています。"; return; }
+  custom.push(v.norm); save("junjo_custom", custom);
+  m.style.color = "#1f7a43"; m.textContent = `追加しました（答え ${v.ans}）。「先生の問題」で出題されます。`;
+  $("addInput").value = "";
+  renderCustomList();
+  if (lv === 0) newSet(); else renderLevels();
+};
+$("clearCustom").onclick = () => {
+  if (!custom.length) return;
+  if (!confirm("追加した問題をすべて消しますか？")) return;
+  custom = []; save("junjo_custom", custom); renderCustomList();
+  $("addMsg").textContent = "";
+  if (lv === 0) newSet(); else renderLevels();
+};
+
+renderCustomList();
+newSet();
+</script>
+</body>
+</html>
