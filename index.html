@@ -35,15 +35,17 @@
     border: 3px solid #2a9d55; background: #fff; color: #2a9d55;
   }
   .modes button:first-child { border-radius: 12px 0 0 12px; }
-  .modes button:last-child { border-radius: 0 12px 12px 0; border-left: none; }
+  .modes button:last-child { border-radius: 0 12px 12px 0; }
+  .modes button:not(:first-child) { border-left: none; }
   .modes button.cur { background: #2a9d55; color: #fff; }
+  @media (max-width: 480px) { .modes button { font-size: 15px; padding: 8px 10px; white-space: nowrap; } }
   #lvdesc { margin: 10px 0 0; font-size: 17px; color: #444; }
   #lvdesc .tag { display: inline-block; background: #fff2cc; border-radius: 8px; padding: 2px 10px; margin: 2px 4px 2px 0; }
 
-  #prog { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
-  #prog i { width: 16px; height: 16px; border-radius: 50%; background: #e3e8ef; display: inline-block; }
-  #prog i.ok { background: #2a9d55; }
-  #prog i.now { background: #2f5d8a; box-shadow: 0 0 0 3px #bcd3ea; }
+  #prog, #kprog { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
+  #prog i, #kprog i { width: 16px; height: 16px; border-radius: 50%; background: #e3e8ef; display: inline-block; }
+  #prog i.ok, #kprog i.ok { background: #2a9d55; }
+  #prog i.now, #kprog i.now { background: #2f5d8a; box-shadow: 0 0 0 3px #bcd3ea; }
   .qno { text-align: center; color: #888; font-size: 15px; margin: 0 0 4px; }
 
   .guide { text-align: center; font-size: 17px; margin: 0 0 6px; }
@@ -78,11 +80,12 @@
   .box { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; border: 2px dashed #adb5bd; border-radius: 10px; padding: 3px; }
   #msg .oops { margin-top: 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 18px; }
   #msg .oops small { font-size: 15px; color: #888; }
-  #msg { min-height: 52px; text-align: center; font-size: 20px; border-radius: 12px; padding: 12px; }
-  #msg.ok   { background: #e6f7ec; color: #1f7a43; }
-  #msg.bad  { background: #ffeaea; color: #b03030; }
-  #msg.info { background: #fff6e0; color: #8a5a00; }
-  #msg.done { background: #ffe9f1; color: #c2255c; font-weight: bold; font-size: 24px; }
+  #msg, #kmsg { min-height: 52px; text-align: center; font-size: 20px; border-radius: 12px; padding: 12px; }
+  #msg.ok, #kmsg.ok     { background: #e6f7ec; color: #1f7a43; }
+  #msg.bad, #kmsg.bad   { background: #ffeaea; color: #b03030; }
+  #msg.info, #kmsg.info { background: #fff6e0; color: #8a5a00; }
+  #msg.done, #kmsg.done { background: #ffe9f1; color: #c2255c; font-weight: bold; font-size: 24px; }
+  #kmsg small { font-size: 16px; color: #666; font-weight: normal; }
 
   .result { text-align: center; padding: 10px 0; }
   .result .big { font-size: 34px; font-weight: bold; color: #d6336c; margin: 6px 0; }
@@ -99,10 +102,52 @@
   .btn.next.big { background: #d6336c; font-size: 22px; padding: 12px 28px; animation: pulse 1.2s infinite; }
   .btn.again { background: #2a9d55; }
 
-  #log { font-size: clamp(18px, 3.4vw, 26px); line-height: 1.8; font-variant-numeric: tabular-nums; }
-  #log .line { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-  #log .eq { width: 1.2em; color: #888; }
-  #log .empty { color: #aaa; font-size: 16px; }
+  #log, #klog { font-size: clamp(18px, 3.4vw, 26px); line-height: 1.8; font-variant-numeric: tabular-nums; }
+  #log .line, #klog .line { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+  #log .eq, #klog .eq { width: 1.2em; color: #888; }
+  #log .empty, #klog .empty { color: #aaa; font-size: 16px; }
+
+  /* ---- くふうモード ---- */
+  body.kufu .junjo-only { display: none; }
+  body:not(.kufu) .kufu-only { display: none; }
+  #kexpr {
+    display: flex; justify-content: center; align-items: center; flex-wrap: wrap;
+    min-height: 110px; padding: 12px 0;
+    font-size: clamp(28px, 6.5vw, 52px); font-weight: bold; font-variant-numeric: tabular-nums;
+  }
+  #kexpr .par { color: #7a5bb5; }
+  #kexpr .kox { color: #2f5d8a; margin: 0 8px; }
+  #kexpr .kn {
+    font: inherit; font-size: 1em; font-weight: bold; color: #333; cursor: pointer;
+    background: #fff; border: 3px solid #c9d6e6; border-radius: 14px; padding: 0 12px; line-height: 1.35; min-width: 1.6em;
+  }
+  #kexpr .kn.sel { background: #eef5ff; border-color: #2f5d8a; color: #2f5d8a; }
+  #kexpr .kn:disabled { cursor: default; }
+  #kexpr .op {
+    font: inherit; font-size: 1em; font-weight: bold; color: #2f5d8a;
+    background: #eef5ff; border: 3px solid #bcd3ea; border-radius: 14px;
+    min-width: 1.4em; margin: 0 6px; padding: 0 6px; cursor: pointer; line-height: 1.3;
+  }
+  #kexpr .kn:active, #kexpr .op:active { transform: scale(.94); }
+  #kexpr .hint { animation: glow 1s infinite; border-color: #f08c00; }
+  #kexpr .ng { background: #ffd6d6; border-color: #e03131; color: #b03030; animation: shake .4s; }
+  #kexpr .kpair { display: inline-flex; align-items: center; border: 3px dashed #f08c00; background: #fff4e6; border-radius: 16px; padding: 0 8px; }
+  #kexpr .kq { letter-spacing: 1px; }
+  #kchoices { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 0 0 12px; }
+  #kchoices:empty { display: none; }
+  #kchoices button {
+    font: inherit; font-size: clamp(20px, 4vw, 28px); font-weight: bold; color: #333; cursor: pointer;
+    flex: 1 1 220px; max-width: 300px; padding: 14px 10px; border-radius: 14px; border: 3px solid #c9d6e6; background: #fff;
+  }
+  #kchoices button.wrong { border-color: #e03131; background: #ffeaea; color: #b03030; }
+  #kchoices button.right { border-color: #2a9d55; background: #e6f7ec; color: #1f7a43; }
+  #kchoices button.off { opacity: .35; }
+  #kchoices button.hint { animation: glow 1s infinite; border-color: #f08c00; }
+  #kchoices button:disabled { cursor: default; }
+  #kfig { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
+  #kfig:empty { display: none; }
+  #kfig svg { max-width: 100%; height: auto; }
+  #kfig .cap { font-size: 17px; color: #444; margin: 4px 0 0; text-align: center; }
   .ttl { font-size: 15px; color: #888; margin: 0 0 6px; }
 
   details summary { cursor: pointer; color: #666; font-size: 15px; }
@@ -123,11 +168,19 @@
 <div class="wrap">
   <h1>計算の順じょ マスター</h1>
 
-  <div class="card">
+  <div class="card junjo-only">
     <div class="rules">
       <span><b>①</b> （ ）の中を先に</span>
       <span><b>②</b> ×・÷ を ＋・− より先に</span>
       <span><b>③</b> あとは 左から順に</span>
+    </div>
+  </div>
+
+  <div class="card kufu-only">
+    <div class="rules">
+      <span><b>いれかえる</b> ＋や×は、入れかえても答えは同じ</span>
+      <span><b>（ ）をつけかえる</b> ＋だけ・×だけなら、どこから計算しても同じ</span>
+      <span><b>わける・まとめる</b> （■＋●）×▲ ＝ ■×▲＋●×▲</span>
     </div>
   </div>
 
@@ -138,7 +191,23 @@
     <div id="lvdesc"></div>
   </div>
 
-  <div class="card">
+  <div class="card kufu-only">
+    <div id="kprog"></div>
+    <p class="qno" id="kqno"></p>
+    <p class="guide" id="kguide"></p>
+    <div id="kexpr"></div>
+    <div id="kchoices"></div>
+    <div id="kmsg"></div>
+    <div id="kfig"></div>
+    <div class="btns" id="kbtns"></div>
+  </div>
+
+  <div class="card kufu-only">
+    <p class="ttl">式のへんしん</p>
+    <div id="klog"></div>
+  </div>
+
+  <div class="card junjo-only">
     <div id="prog"></div>
     <p class="qno" id="qno"></p>
     <p class="guide" id="guide">はじめに計算する（作る）ところの 記号 <span class="key">＋</span><span class="key">−</span><span class="key">×</span><span class="key">÷</span> をタップしよう。</p>
@@ -147,12 +216,12 @@
     <div class="btns" id="btns"></div>
   </div>
 
-  <div class="card">
+  <div class="card junjo-only">
     <p class="ttl">計算のあしあと</p>
     <div id="log"></div>
   </div>
 
-  <div class="card">
+  <div class="card junjo-only">
     <details>
       <summary>先生用：問題を追加する（「先生の問題」に入ります）</summary>
       <div class="add">
@@ -178,7 +247,11 @@ const LEVELS = [
   { id: 5, name: "イラスト1", mode: "ill", kind: "build", tags: ["＋ と （ ）", "（ ）の中を先に作る"] },
   { id: 6, name: "イラスト2", mode: "ill", kind: "set",   tags: ["＋ と ×", "×を先に"] },
   { id: 7, name: "イラスト3", mode: "ill", kind: "set",   tags: ["＋ と × と （ ）", "（ ）の中 → × の順"] },
-  { id: 8, name: "イラスト4", mode: "ill", kind: "set",   tags: ["÷ で ピザを分ける", "×÷は左から順に", "（ ）・×÷を先に"] }
+  { id: 8, name: "イラスト4", mode: "ill", kind: "set",   tags: ["÷ で ピザを分ける", "×÷は左から順に", "（ ）・×÷を先に"] },
+  { id: 9,  name: "くふうA", mode: "kufu", kind: "A", tags: ["いれかえる", "＋や×は 入れかえても答えは同じ", "キリのいい数を左に"] },
+  { id: 10, name: "くふうB", mode: "kufu", kind: "B", tags: ["（ ）をつけかえる", "＋だけ・×だけなら どこから計算しても同じ"] },
+  { id: 11, name: "くふうC", mode: "kufu", kind: "C", tags: ["わける・まとめる", "（■＋●）×▲ ＝ ■×▲＋●×▲"] },
+  { id: 12, name: "くふうD", mode: "kufu", kind: "D", tags: ["ミックス・たしかめ", "同じ答えになる式をえらぶ"] }
 ];
 LEVELS.forEach(L => { if (!L.mode) L.mode = "num"; });
 const SYM = { "+": "＋", "-": "−", "*": "×", "/": "÷" };
@@ -658,10 +731,10 @@ const $ = id => document.getElementById(id);
 
 function renderLevels() {
   const mb = $("modes"); mb.innerHTML = "";
-  [["num", "数字モード"], ["ill", "イラストモード"]].forEach(([m, txt]) => {
+  [["num", "数字モード"], ["ill", "イラストモード"], ["kufu", "くふうモード"]].forEach(([m, txt]) => {
     const b = document.createElement("button");
     b.textContent = txt; if (mode === m) b.className = "cur";
-    b.onclick = () => { if (mode === m) return; mode = m; lv = m === "num" ? 1 : 5; newSet(); };
+    b.onclick = () => { if (mode === m) return; mode = m; lv = { num: 1, ill: 5, kufu: 9 }[m]; newSet(); };
     mb.appendChild(b);
   });
   const box = $("levels"); box.innerHTML = "";
@@ -690,6 +763,8 @@ function renderLevels() {
 }
 
 function newSet() {
+  document.body.classList.toggle("kufu", mode === "kufu");
+  if (lv > 0 && curL().mode === "kufu") { renderLevels(); kNewSet(); return; }
   finished = false; totalMiss = 0; qi = 0;
   if (lv === 0) set = custom.slice();
   else if (curL().mode === "ill") {
@@ -863,6 +938,416 @@ function renderResult() {
   const nx = lv > 0 && LEVELS.find(L => L.id === lv + 1 && L.mode === curL().mode);
   if (nx) mk("next big", nx.name + " へ ▶", () => { lv = nx.id; newSet(); });
 }
+
+/* ================= くふうモード（交換・結合・分配） ================= */
+const KPER = 10;
+let kset = [], kqi = 0, ksolved = [], kTotalMiss = 0, kfinished = false, ks = null;
+const ODD = [3, 7, 9, 11, 13, 17, 19, 23, 37];
+const kpretty = t => t.map(x => x.t === "num" ? String(x.v) : x.t === "op" ? ` ${SYM[x.v]} ` : (x.t === "(" ? "（" : "）")).join("");
+const kP = s => kpretty(tokenize(s));
+function kSteps(s) {
+  let t = stripLoneParens(tokenize(s));
+  const out = [kpretty(t)];
+  while (t.length > 1) {
+    const k = validOps(t)[0];
+    const r = calc(t[k - 1].v, t[k].v, t[k + 1].v);
+    t = stripLoneParens(t.slice(0, k - 1).concat([{ t: "num", v: r }], t.slice(k + 2)));
+    out.push(kpretty(t));
+  }
+  return out;
+}
+const kVal = s => { const a = kSteps(s); return Number(a[a.length - 1]); };
+const kFriendly = (op, x, y) => (op === "+" ? x + y : x * y) % 10 === 0;
+const kShuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const kPairsAdd = () => { const T = pick([100, 100, 200]); const x = rnd(T - 89, T - 11); return x % 10 === 0 ? null : [x, T - x]; };
+const kPairsMul = () => pick([[25, 4], [25, 8], [125, 8], [5, 2], [50, 4], [5, 8], [2, 50], [4, 25]]);
+
+/* ---- 問題をつくる ---- */
+// A：いれかえる。キリのいい組をいちばん左にならべる
+function kGenA() {
+  for (let g = 0; g < 2000; g++) {
+    const op = Math.random() < 0.5 ? "+" : "*";
+    const pr = op === "+" ? kPairsAdd() : kPairsMul();
+    if (!pr) continue;
+    let [x, y] = Math.random() < 0.5 ? pr : [pr[1], pr[0]];
+    const b = op === "+" ? rnd(11, 99) : pick(ODD);
+    const nums = Math.random() < 0.5 ? [x, b, y] : [b, x, y];
+    const fr = [[0, 1], [0, 2], [1, 2]].filter(([i, j]) => kFriendly(op, nums[i], nums[j]));
+    if (fr.length !== 1 || fr[0][0] === 0 && fr[0][1] === 1) continue;
+    return { kind: "A", op, nums };
+  }
+}
+// B：（ ）をつけかえる。キリのいい組に（ ）をうつす
+function kGenB() {
+  for (let g = 0; g < 2000; g++) {
+    const n = Math.random() < 0.5 ? 3 : 4, op = Math.random() < 0.5 ? "+" : "*";
+    const pr = op === "+" ? kPairsAdd() : kPairsMul();
+    if (!pr) continue;
+    const nums = [];
+    for (let i = 0; i < n; i++) nums.push(op === "+" ? rnd(11, 99) : pick(ODD));
+    const f = rnd(0, n - 2);
+    [nums[f], nums[f + 1]] = Math.random() < 0.5 ? pr : [pr[1], pr[0]];
+    const fr = [...Array(n - 1).keys()].filter(i => kFriendly(op, nums[i], nums[i + 1]));
+    if (fr.length !== 1) continue;
+    if (op === "*" && nums.reduce((a, b) => a * b, 1) > 50000) continue;
+    const others = [...Array(n - 1).keys()].filter(i => i !== f);
+    return { kind: "B", op, nums, f, p: pick(others) };
+  }
+}
+// C1：まとめる　a×c ± b×c → （a ± b）×c
+function kGenC1() {
+  for (let g = 0; g < 2000; g++) {
+    const sg = Math.random() < 0.6 ? "+" : "-", T = pick([10, 10, 100]);
+    let a, b;
+    if (sg === "+") { a = T === 10 ? rnd(2, 8) : rnd(11, 89); b = T - a; }
+    else { a = T === 10 ? rnd(12, 19) : rnd(102, 129); b = a - T; }
+    const c = rnd(3, 9);
+    if (c === a || c === b || a === b || (T === 100 && a % 10 === 0)) continue;
+    return { kind: "C1", a, b, c, sg, T };
+  }
+}
+// C2：わける　98×c → （100−2）×c → 100×c − 2×c
+function kGenC2() {
+  const d = rnd(1, 3), sg = Math.random() < 0.6 ? "-" : "+", n = sg === "-" ? 100 - d : 100 + d, c = rnd(3, 9);
+  const h = Math.floor(n / 2);
+  return { kind: "C2", n, c, d, sg, opts: kShuffle([
+    { s: `(100${sg}${d})`, ok: true },
+    { s: `(90+${n - 90})` },
+    { s: `(${h}+${n - h})` }
+  ]) };
+}
+// D：同じ答えになる式をえらぶ
+function kGenD(type) {
+  for (let g = 0; g < 2000; g++) {
+    const a = rnd(3, 9), b = rnd(2, 9), c = rnd(3, 9);
+    if (b === c || (type !== 4 && a === c)) continue; // 同じ数がならぶと説明がわかりにくい
+    let q, opts;
+    if (type === 0) {
+      if (a === b) continue;
+      q = `(${a}+${b})*${c}`; opts = [
+        { s: `${a}*${c}+${b}*${c}`, ok: true, why: `（ ）の中の ${a} にも ${b} にも、それぞれ × ${c} しているね。` },
+        { s: `${a}+${b}*${c}`, why: `×が先なので、${a} には ${c} をかけていないよ。` },
+        { s: `${a}*${c}+${b}`, why: `${b} にも × ${c} をしよう。` }];
+    } else if (type === 1) {
+      if (a === b) continue;
+      q = `${a}*${c}+${b}*${c}`; opts = [
+        { s: `(${a}+${b})*${c}`, ok: true, why: `同じ「× ${c}」を まとめたね。` },
+        { s: `${a}+${b}*${c}`, why: `（ ）がないと ×を先に計算するので、${a} に ${c} をかけていないことになるよ。` },
+        { s: `${a}*${b}*${c}`, why: `＋が ×にかわっているよ。` }];
+    } else if (type === 2) {
+      const [y, z] = kPairsMul(), x = pick(ODD);
+      q = `${x}*${y}*${z}`; opts = [
+        { s: `${x}*(${y}*${z})`, ok: true, why: `×だけの式は、どこから計算しても答えは同じ。${y} × ${z} を先にするとかんたん！` },
+        { s: `${x}+${y}*${z}`, why: `×が＋にかわると、答えもかわるよ。` },
+        { s: `(${x}+${y})*${z}`, why: `×が＋にかわると、答えもかわるよ。` }];
+    } else if (type === 3) {
+      const d = rnd(1, 3), n = 100 - d;
+      q = `${n}*${c}`; opts = [
+        { s: `(100-${d})*${c}`, ok: true, why: `${n} は 100 より ${d} 小さい数。100 をつかうとかんたん！` },
+        { s: `100*${c}-${d}`, why: `${d} にも × ${c} をしよう。` },
+        { s: `(100+${d})*${c}`, why: `${n} は 100 より ${d} 小さいよ。` }];
+    } else {
+      const A = rnd(30, 90);
+      if (b * c >= A) continue;
+      q = `(${A}-${b})*${c}`; opts = [
+        { s: `${A}*${c}-${b}*${c}`, ok: true, why: `（ ）の中の ${A} にも ${b} にも、それぞれ × ${c} しているね。` },
+        { s: `${A}*${c}-${b}`, why: `${b} にも × ${c} をしよう。` },
+        { s: `${A}-${b}*${c}`, why: `×が先なので、${A} には ${c} をかけていないよ。` }];
+    }
+    const V = kVal(q);
+    if (opts.some(o => !o.ok && kVal(o.s) === V)) continue;
+    return { kind: "D", q, opts: kShuffle(opts) };
+  }
+}
+function kNewSet() {
+  const kind = curL().kind;
+  kset = [];
+  for (let i = 0; i < KPER; i++) {
+    if (kind === "A") kset.push(kGenA());
+    else if (kind === "B") kset.push(kGenB());
+    else if (kind === "C") kset.push(i % 2 ? kGenC2() : kGenC1());
+    else kset.push(i % 2 ? kGenD(Math.floor(i / 2) % 5) : [kGenA, kGenB, kGenC1, kGenC2, kGenC1][Math.floor(i / 2)]());
+  }
+  if (kind !== "A" && kind !== "B") kShuffle(kset);
+  ksolved = kset.map(() => false); kqi = 0; kTotalMiss = 0; kfinished = false;
+  kStart();
+}
+
+/* ---- 1問の進行 ---- */
+function kStart() {
+  ks = JSON.parse(JSON.stringify(kset[kqi]));
+  Object.assign(ks, { sel: null, miss: 0, done: false, phase: "split", wrong: [], off: null });
+  kClear();
+  ks.lines = [kCur()];
+  kMsg("", "");
+  kRender();
+}
+function kClear() { Object.assign(ks, { hn: [], ho: [], ng: null, ngo: null, hint: null }); }
+function kMiss() { ks.miss++; kTotalMiss++; }
+function kMsg(cls, html) { const m = $("kmsg"); m.className = cls; m.innerHTML = html; }
+function kBStr(s) { return s.nums.map((v, i) => (i === s.p ? "(" : "") + v + (i === s.p + 1 ? ")" : "")).join(s.op); }
+function kCur() {
+  const s = ks;
+  if (s.kind === "A") return s.nums.join(s.op);
+  if (s.kind === "B") return kBStr(s);
+  if (s.kind === "C1") return s.done ? `(${s.a}${s.sg}${s.b})*${s.c}` : `${s.a}*${s.c}${s.sg}${s.b}*${s.c}`;
+  if (s.kind === "C2") return s.phase === "split" ? `${s.n}*${s.c}` : s.phase === "dist" ? `(100${s.sg}${s.d})*${s.c}` : `100*${s.c}${s.sg}${s.d}*${s.c}`;
+  return s.q;
+}
+function kWin(text) {
+  const s = ks;
+  s.done = true; ksolved[kqi] = true;
+  const st = kSteps(s.lines[s.lines.length - 1]);
+  s.lines = s.lines.concat(st.slice(1));
+  kMsg("done", `${text}<br>答えは ${st[st.length - 1]}${s.miss === 0 ? "　ノーミス！" : ""}`);
+  kRender();
+}
+
+function kTapNum(i) {
+  const s = ks; kClear();
+  if (s.sel === null) {
+    s.sel = i;
+    kMsg("info", s.kind === "A" ? "もう1つタップすると、入れかわるよ。" : "同じ数を、もう1つタップしよう。");
+    kRender(); return;
+  }
+  if (s.sel === i) { s.sel = null; kMsg("", ""); kRender(); return; }
+  const j = s.sel; s.sel = null;
+  if (s.kind === "A") {
+    [s.nums[i], s.nums[j]] = [s.nums[j], s.nums[i]];
+    s.lines.push(kCur());
+    if (kFriendly(s.op, s.nums[0], s.nums[1])) {
+      const v = s.op === "+" ? s.nums[0] + s.nums[1] : s.nums[0] * s.nums[1];
+      kWin(`${s.nums[0]} ${SYM[s.op]} ${s.nums[1]} ＝ ${v}！ キリのいい数ができた。`);
+    } else {
+      kMiss();
+      kMsg("bad", "入れかえたけど、左の2つで キリのいい数にならないね。");
+      kRender();
+    }
+    return;
+  }
+  // C1：「×c」の c を2つえらぶ
+  if ((i === 1 && j === 3) || (i === 3 && j === 1)) {
+    s.done = true; s.lines.push(kCur());
+    kWin(`同じ「× ${s.c}」をまとめると、（ ${s.a} ${SYM[s.sg]} ${s.b} ）＝ ${s.T} になってかんたん！`);
+  } else {
+    kMiss(); s.ng = i;
+    kMsg("bad", "同じ数を2つえらぼう。2回出てくる数はどれかな？");
+    kRender();
+  }
+}
+function kTapOp(i) {
+  const s = ks; kClear();
+  if (s.kind === "B") {
+    const x = s.nums[i], y = s.nums[i + 1], v = s.op === "+" ? x + y : x * y;
+    if (i === s.p) { kMsg("info", `いまは ここに（ ）があるよ。（ ${x} ${SYM[s.op]} ${y} ）＝ ${v}。ほかの場所はどうかな？`); kRender(); return; }
+    s.p = i; s.lines.push(kCur());
+    if (i === s.f) kWin(`（ ${x} ${SYM[s.op]} ${y} ）＝ ${v}！ キリのいい数ができた。`);
+    else { kMiss(); s.ngo = i; kMsg("bad", `（ ${x} ${SYM[s.op]} ${y} ）＝ ${v}。まだ キリがわるいね。`); kRender(); }
+    return;
+  }
+  if (s.kind === "C2" && s.phase === "dist") {
+    s.phase = "done"; s.lines.push(kCur());
+    kWin(`100 と ${s.d} の それぞれに × ${s.c} をすると、かんたんに計算できる！`);
+  }
+}
+function kChoose(i) {
+  const s = ks, o = s.opts[i]; kClear();
+  if (s.kind === "C2") {
+    if (o.ok) { s.phase = "dist"; s.lines.push(kCur()); kMsg("ok", `${s.n} ＝ ${kP(o.s)}。つぎは × をタップしよう。`); }
+    else { kMiss(); s.wrong.push(i); kMsg("bad", "その分け方でも まちがいではないけど、100 をつかうと もっとかんたん！"); }
+    kRender(); return;
+  }
+  if (o.ok) { s.lines.push(o.s); kWin(`正解！ ${o.why}`); }
+  else {
+    kMiss(); s.wrong.push(i);
+    kMsg("bad", `${o.why}<br><small>${kP(o.s)} ＝ ${kVal(o.s)}　／　もとの式 ＝ ${kVal(s.q)}</small>`);
+    kRender();
+  }
+}
+function kHint() {
+  const s = ks;
+  if (!s || s.done) return;
+  kClear(); s.sel = null;
+  if (s.kind === "A") {
+    s.hn = [[0, 1], [0, 2], [1, 2]].find(([i, j]) => kFriendly(s.op, s.nums[i], s.nums[j]));
+    kMsg("info", `${s.nums[s.hn[0]]} と ${s.nums[s.hn[1]]} で キリのいい数になるよ。この2つを左にならべよう。`);
+  } else if (s.kind === "B") {
+    s.ho = [s.f]; kMsg("info", "光っている記号のところに（ ）をつけてみよう。");
+  } else if (s.kind === "C1") {
+    s.hn = [1, 3]; kMsg("info", `「× ${s.c}」が2回出てくるね。`);
+  } else if (s.kind === "C2") {
+    if (s.phase === "split") { s.hint = s.opts.findIndex(o => o.ok); kMsg("info", `${s.n} は 100 に近い数だね。`); }
+    else { s.ho = [0]; kMsg("info", "× をタップしよう。"); }
+  } else {
+    const w = s.opts.findIndex((o, i) => !o.ok && !s.wrong.includes(i));
+    if (s.off === null && w >= 0) { s.off = w; kMsg("info", "ちがう式を1つ消したよ。"); }
+    else kMsg("info", "（ ）の中の数 それぞれに、同じようにかけているかな？");
+  }
+  kRender();
+}
+function kNext() {
+  if (kqi < kset.length - 1) { kqi++; kStart(); return; }
+  kfinished = true;
+  if (ksolved.every(Boolean) && (best[lv] === undefined || kTotalMiss < best[lv])) { best[lv] = kTotalMiss; save("junjo_best", best); }
+  renderLevels(); kMsg("", ""); kRender();
+}
+
+/* ---- 画面 ---- */
+function kGuide() {
+  const s = ks;
+  if (s.done) return "きまりをつかうと、計算がかんたんになるね。";
+  if (s.kind === "A") return "数字を2つタップして入れかえよう。キリのいい数（10・100 など）になる2つを、左にならべてね。";
+  if (s.kind === "B") return "記号をタップすると、そこに（ ）がうつるよ。キリのいい数ができるところに（ ）をつけよう。";
+  if (s.kind === "C1") return "同じ数を2つタップして、まとめよう。";
+  if (s.kind === "C2") return s.phase === "split" ? `${s.n} を、計算しやすい形に分けよう。` : "× をタップして、（ ）の中の数 それぞれにかけよう。";
+  return "もとの式と、答えが同じになる式はどれ？";
+}
+function kNumBtn(v, i) {
+  const c = ["kn"];
+  if (ks.sel === i) c.push("sel");
+  if (ks.hn.includes(i)) c.push("hint");
+  if (ks.ng === i) c.push("ng");
+  return `<button class="${c.join(" ")}" data-n="${i}">${v}</button>`;
+}
+function kOpBtn(op, i) {
+  const c = ["op"];
+  if (ks.ho.includes(i)) c.push("hint");
+  if (ks.ngo === i) c.push("ng");
+  return `<button class="${c.join(" ")}" data-o="${i}">${SYM[op]}</button>`;
+}
+const kOx = op => `<span class="kox">${SYM[op]}</span>`;
+const kSp = v => `<span>${v}</span>`;
+const LP = '<span class="par">（</span>', RP = '<span class="par">）</span>';
+function kExprHTML() {
+  const s = ks;
+  if (s.kind === "A") {
+    if (s.done) return `<span class="kpair">${kSp(s.nums[0])}${kOx(s.op)}${kSp(s.nums[1])}</span>${kOx(s.op)}${kSp(s.nums[2])}`;
+    return s.nums.map((v, i) => kNumBtn(v, i)).join(kOx(s.op));
+  }
+  if (s.kind === "B") {
+    let h = "";
+    s.nums.forEach((v, i) => {
+      if (i > 0) h += s.done ? kOx(s.op) : kOpBtn(s.op, i - 1);
+      if (i === s.p) h += (s.done ? '<span class="kpair">' : "") + LP;
+      h += kSp(v);
+      if (i === s.p + 1) h += RP + (s.done ? "</span>" : "");
+    });
+    return h;
+  }
+  if (s.kind === "C1") {
+    if (s.done) return `${LP}<span class="kpair">${kSp(s.a)}${kOx(s.sg)}${kSp(s.b)}</span>${RP}${kOx("*")}${kSp(s.c)}`;
+    return kNumBtn(s.a, 0) + kOx("*") + kNumBtn(s.c, 1) + kOx(s.sg) + kNumBtn(s.b, 2) + kOx("*") + kNumBtn(s.c, 3);
+  }
+  if (s.kind === "C2") {
+    if (s.phase === "split") return kSp(s.n) + kOx("*") + kSp(s.c);
+    if (s.phase === "dist") return LP + kSp(100) + kOx(s.sg) + kSp(s.d) + RP + kOpBtn("*", 0) + kSp(s.c);
+    return `<span class="kpair">${kSp(100)}${kOx("*")}${kSp(s.c)}</span>${kOx(s.sg)}${kSp(s.d)}${kOx("*")}${kSp(s.c)}`;
+  }
+  return `<span class="kq">${kP(s.q)}</span>`;
+}
+function kChoicesHTML() {
+  const s = ks;
+  if (s.kind === "C2" && s.phase === "split")
+    return s.opts.map((o, i) => `<button data-ch="${i}" class="${s.wrong.includes(i) ? "wrong" : ""}${s.hint === i ? " hint" : ""}"${s.wrong.includes(i) ? " disabled" : ""}>${kP(o.s)}</button>`).join("");
+  if (s.kind === "D")
+    return s.opts.map((o, i) => {
+      const cls = s.done && o.ok ? "right" : s.wrong.includes(i) ? "wrong" : s.off === i ? "off" : "";
+      return `<button data-ch="${i}" class="${cls}"${s.done || cls ? " disabled" : ""}>${kP(o.s)}</button>`;
+    }).join("");
+  return "";
+}
+// 面積図：p1 と p2 をあわせる（＋）／p1 から p2 をとる（−）、たては c
+function kArea(p1, p2, sg, c) {
+  const BL = "#a5c8f0", OR = "#ffc078", total = sg === "+" ? p1 + p2 : p1;
+  const L = 40, TOP = 34;
+  let body = "", W, H, w1;
+  if (total <= 15 && c <= 9) {
+    const cs = Math.min(30, Math.floor(360 / total));
+    const cut = sg === "+" ? p1 : p1 - p2;
+    W = total * cs; H = c * cs; w1 = cut * cs;
+    for (let r = 0; r < c; r++) for (let q = 0; q < total; q++) {
+      const o = q >= cut;
+      body += `<rect x="${L + q * cs + 1.5}" y="${TOP + r * cs + 1.5}" width="${cs - 3}" height="${cs - 3}" rx="3" fill="${o ? OR : BL}"${o && sg === "-" ? ' fill-opacity=".4" stroke="#f08c00" stroke-dasharray="3 2"' : ""}/>`;
+    }
+  } else {
+    W = 360; H = 110;
+    const w2 = Math.max(28, Math.round(W * p2 / total));
+    w1 = W - w2;
+    body = `<rect x="${L}" y="${TOP}" width="${w1}" height="${H}" fill="${BL}" stroke="#2f5d8a" stroke-width="2"/>` +
+      `<rect x="${L + w1}" y="${TOP}" width="${w2}" height="${H}" fill="${OR}" stroke="#f08c00" stroke-width="2"${sg === "-" ? ' fill-opacity=".4" stroke-dasharray="5 3"' : ""}/>`;
+  }
+  const w2 = W - w1, txt = (x, y, s, col) => `<text x="${x}" y="${y}" text-anchor="middle" font-size="18" font-weight="bold" fill="${col || "#333"}">${s}</text>`;
+  let lab = txt(L / 2, TOP + H / 2 + 6, c);
+  const by = TOP + H + 24;
+  if (sg === "+") {
+    lab += txt(L + w1 / 2, TOP - 10, p1, "#2f5d8a") + txt(L + w1 + w2 / 2, TOP - 10, p2, "#d9480f");
+    lab += `<path d="M${L} ${TOP + H + 6} v6 h${W} v-6" fill="none" stroke="#555" stroke-width="2"/>` + txt(L + W / 2, by + 6, `あわせて ${p1 + p2}`);
+  } else {
+    lab += `<path d="M${L} ${TOP - 6} v-6 h${W} v6" fill="none" stroke="#555" stroke-width="2"/>` + txt(L + W / 2, TOP - 16, p1);
+    lab += txt(L + w1 / 2, by, p1 - p2, "#2f5d8a") + txt(L + w1 + w2 / 2, by, `−${p2}`, "#d9480f");
+  }
+  const VW = L + W + 12, VH = by + 14;
+  return `<svg viewBox="-4 -14 ${VW + 8} ${VH + 14}" width="${VW + 8}" role="img" aria-label="面積図">${body}${lab}</svg>`;
+}
+function kFig() {
+  const s = ks, c = s.c;
+  let html, cap;
+  if (s.kind === "C1") {
+    html = kArea(s.a, s.b, s.sg, c);
+    cap = s.sg === "+" ? `${s.a}×${c} と ${s.b}×${c} をくっつけると、${s.T}×${c} の長方形になる` : `${s.a}×${c} から ${s.b}×${c} をとると、${s.T}×${c} の長方形になる`;
+  } else {
+    html = kArea(100, s.d, s.sg, c);
+    cap = s.sg === "+" ? `100×${c} と ${s.d}×${c} をあわせると、${s.n}×${c}` : `100×${c} から ${s.d}×${c} をとると、${s.n}×${c}`;
+  }
+  return `<p class="ttl">図で見ると</p>${html}<p class="cap">${cap}</p>`;
+}
+function kButtons() {
+  const b = $("kbtns"); b.innerHTML = "";
+  const add = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; b.appendChild(e); };
+  if (!ks.done) add("hintb", "ヒント", kHint);
+  add("reset", "やり直し", kStart);
+  const last = kqi === kset.length - 1;
+  add("next" + (ks.done ? " big" : ""), last ? (ks.done ? "けっかを見る ▶" : "おわる ▶") : "つぎの問題 ▶", kNext);
+}
+function kRenderLog() {
+  const lg = $("klog");
+  if (kfinished || !ks) { lg.innerHTML = '<div class="empty">式をかえると、ここに流れが残ります。</div>'; return; }
+  lg.innerHTML = ks.lines.map((s, i) => `<div class="line"><span class="eq">${i ? "＝" : ""}</span><span>${kP(s)}</span></div>`).join("");
+}
+function kResult() {
+  const n = ksolved.filter(Boolean).length, all = n === kset.length, name = curL().name;
+  $("kexpr").innerHTML = `<div class="result"><div class="big">${name} ${all ? "クリア！" : "おつかれさま"}</div>
+    <p>${kset.length}問中 ${n}問 とけました</p><p>まちがえた回数：${kTotalMiss}回</p></div>`;
+  kMsg(all && kTotalMiss === 0 ? "done" : "", all && kTotalMiss === 0 ? "パーフェクト！すごい！" : "");
+  const b = $("kbtns"); b.innerHTML = "";
+  const add = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; b.appendChild(e); };
+  add("again", "ちがう問題でもう一度", kNewSet);
+  const nx = LEVELS.find(L => L.id === lv + 1 && L.mode === "kufu");
+  if (nx) add("next big", nx.name + " へ ▶", () => { lv = nx.id; newSet(); });
+}
+function kRender() {
+  $("kprog").innerHTML = kset.map((_, i) => `<i class="${ksolved[i] ? "ok" : ""}${i === kqi && !kfinished ? " now" : ""}"></i>`).join("");
+  $("kqno").textContent = kfinished ? "" : `${kqi + 1} 問目 ／ ${kset.length} 問`;
+  $("kchoices").innerHTML = ""; $("kfig").innerHTML = "";
+  if (kfinished) { $("kguide").textContent = ""; kResult(); kRenderLog(); return; }
+  $("kguide").textContent = kGuide();
+  $("kexpr").innerHTML = kExprHTML();
+  $("kchoices").innerHTML = kChoicesHTML();
+  if (ks.done && (ks.kind === "C1" || ks.kind === "C2")) $("kfig").innerHTML = kFig();
+  kButtons();
+  kRenderLog();
+}
+$("kexpr").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b || !ks || ks.done || kfinished) return;
+  if (b.dataset.n !== undefined) kTapNum(Number(b.dataset.n));
+  else if (b.dataset.o !== undefined) kTapOp(Number(b.dataset.o));
+});
+$("kchoices").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b || b.disabled || !ks || ks.done) return;
+  kChoose(Number(b.dataset.ch));
+});
 
 /* ================= 先生用：問題の追加 ================= */
 function validate(str) {
