@@ -38,7 +38,10 @@
   .modes button:last-child { border-radius: 0 12px 12px 0; }
   .modes button:not(:first-child) { border-left: none; }
   .modes button.cur { background: #2a9d55; color: #fff; }
-  @media (max-width: 480px) { .modes button { font-size: 15px; padding: 8px 10px; white-space: nowrap; } }
+  @media (max-width: 560px) {
+    .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .modes button, .modes button:first-child, .modes button:last-child { font-size: 15px; padding: 8px 6px; white-space: nowrap; border-radius: 10px; border-left: 3px solid #2a9d55; }
+  }
   #lvdesc { margin: 10px 0 0; font-size: 17px; color: #444; }
   #lvdesc .tag { display: inline-block; background: #fff2cc; border-radius: 8px; padding: 2px 10px; margin: 2px 4px 2px 0; }
 
@@ -159,6 +162,51 @@
   #customList { font-size: 15px; color: #555; margin-top: 6px; }
   .small { font-size: 14px; color: #777; }
 
+  /* ---- 計算モード（筆算） ---- */
+  #calc { margin: 8px auto 0; max-width: 640px; border: 3px solid #f2a900; border-radius: 16px; background: #fffdf5; padding: 12px 12px 14px; }
+  .ctop { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .ctitle { font-size: 24px; font-weight: bold; color: #333; font-variant-numeric: tabular-nums; }
+  .cbtn { font: inherit; font-size: 15px; font-weight: bold; padding: 6px 12px; border-radius: 10px; border: 2px solid #868e96; background: #fff; color: #555; cursor: pointer; }
+  .cnote { font-size: 15px; color: #666; margin: 6px 0 0; }
+  .phase { display: flex; justify-content: center; gap: 4px; margin: 10px 0 0; flex-wrap: wrap; }
+  .phase span { font-size: 16px; padding: 3px 10px; border-radius: 10px; background: #f1f3f5; color: #999; }
+  .phase span.cur { background: #2f5d8a; color: #fff; font-weight: bold; }
+  .hs { --cw: clamp(38px, 10vw, 54px); display: grid; justify-content: center; margin: 12px auto 6px;
+        font-size: calc(var(--cw) * .7); font-weight: bold; font-variant-numeric: tabular-nums; line-height: 1; }
+  .hs .hc, .hs .hl { height: calc(var(--cw) * 1.08); display: flex; align-items: center; justify-content: center; position: relative; }
+  .hs .hl { justify-content: flex-end; padding-right: 6px; color: #2f5d8a; min-width: 1.1em; }
+  .hs .m { height: calc(var(--cw) * .58); font-size: .52em; color: #e8590c; align-items: flex-end; padding-bottom: 2px; }
+  .hs .ln { border-bottom: 3px solid #333; }
+  .hs .hc.bar { border-top: 3px solid #333; }
+  .hs .divlab { padding-right: 0; color: #333; }
+  .hs .divlab .brk { font-size: 1.25em; transform: scaleY(1.25); margin: 0 0 0 2px; font-weight: normal; }
+  .hs .hc.focus { background: #e7f1ff; }
+  .hs .hc.in { color: #2f5d8a; }
+  .hs .hc.down { color: #1c7ed6; }
+  .hs .hc.down::after { content: "↓"; position: absolute; top: -2px; right: 2px; font-size: .38em; color: #1c7ed6; }
+  .hs .hc.zero { color: #c3c9cf; }
+  .hs .hc.cur { background: #fff3bf; border-radius: 8px; box-shadow: inset 0 0 0 3px #f08c00; animation: glow 1s infinite; }
+  .hs .hc.m.cur { box-shadow: inset 0 0 0 2px #f08c00; }
+  .hs .hc.ng { background: #ffd6d6; box-shadow: inset 0 0 0 3px #e03131; animation: shake .4s; }
+  .hs .hc.strike { color: #9aa1a8; background: linear-gradient(to top right, transparent calc(50% - 2px), #e03131 calc(50% - 1px), #e03131 calc(50% + 1px), transparent calc(50% + 2px)); }
+  .hs .hc.tap { cursor: pointer; border-radius: 8px; box-shadow: inset 0 0 0 2px #bcd3ea; }
+  .hs .hc.tap:active { transform: scale(.94); }
+  .hs .hc.hintc { box-shadow: inset 0 0 0 3px #f08c00; animation: glow 1s infinite; }
+  .anz { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 14px 0 6px; font-size: clamp(28px, 6vw, 40px); font-weight: bold; }
+  .anz .box { min-width: 4.2em; height: 1.5em; border: 3px solid #f08c00; border-radius: 12px; background: #fff3bf; display: flex; align-items: center; justify-content: flex-end; padding: 0 12px; font-variant-numeric: tabular-nums; color: #2f5d8a; }
+  #cmsg { min-height: 44px; text-align: center; font-size: 19px; border-radius: 12px; padding: 10px; margin-top: 6px; }
+  #cmsg.ok { background: #e6f7ec; color: #1f7a43; font-weight: bold; }
+  #cmsg.bad { background: #ffeaea; color: #b03030; }
+  #cmsg.info { background: #fff6e0; color: #8a5a00; }
+  .ckeys { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-width: 440px; margin: 10px auto 0; }
+  .ckeys button { font: inherit; font-size: 28px; font-weight: bold; padding: 8px 0; border-radius: 12px; border: 3px solid #c9d6e6; background: #fff; color: #333; cursor: pointer; }
+  .ckeys button:active { transform: scale(.94); background: #eef5ff; }
+  .ckeys button.wide { grid-column: span 2; font-size: 20px; }
+  .ckeys button.okb { background: #2a9d55; border-color: #2a9d55; color: #fff; }
+  .cfoot { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  .teinei { font-size: 16px; color: #555; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .teinei input { width: 20px; height: 20px; }
+
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
   @keyframes glow { 0%,100%{box-shadow:0 0 0 0 rgba(240,140,0,.6)} 50%{box-shadow:0 0 0 8px rgba(240,140,0,0)} }
   @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
@@ -213,6 +261,7 @@
     <p class="guide" id="guide">はじめに計算する（作る）ところの 記号 <span class="key">＋</span><span class="key">−</span><span class="key">×</span><span class="key">÷</span> をタップしよう。</p>
     <div id="expr"></div>
     <div id="msg"></div>
+    <div id="calc" style="display:none"></div>
     <div class="btns" id="btns"></div>
   </div>
 
@@ -251,7 +300,12 @@ const LEVELS = [
   { id: 9,  name: "くふうA", mode: "kufu", kind: "A", tags: ["いれかえる", "＋や×は 入れかえても答えは同じ", "キリのいい数を左に"] },
   { id: 10, name: "くふうB", mode: "kufu", kind: "B", tags: ["（ ）をつけかえる", "＋だけ・×だけなら どこから計算しても同じ"] },
   { id: 11, name: "くふうC", mode: "kufu", kind: "C", tags: ["わける・まとめる", "（■＋●）×▲ ＝ ■×▲＋●×▲"] },
-  { id: 12, name: "くふうD", mode: "kufu", kind: "D", tags: ["ミックス・たしかめ", "同じ答えになる式をえらぶ"] }
+  { id: 12, name: "くふうD", mode: "kufu", kind: "D", tags: ["ミックス・たしかめ", "同じ答えになる式をえらぶ"] },
+  // 計算モード：順じょをえらんだあと、自分で計算する（筆算つき）。数のはんいは数字モードと同じ
+  { id: 13, name: "計算1", mode: "calc", per: 6, tags: ["＋ − だけ", "（ ）あり・なし", "記号は2つ", "筆算で計算"], ops: "+-",   n: 2, paren: 1,   needMD: false, needAS: false, boring: 0, mixParen: true, base: 1 },
+  { id: 14, name: "計算2", mode: "calc", per: 6, tags: ["＋ − × ÷", "（ ）が1組", "記号は2つ", "筆算で計算"], ops: "+-*/", n: 2, paren: 1,   needMD: true,  needAS: false, boring: 0, meaningful: 0.5 },
+  { id: 15, name: "計算3", mode: "calc", per: 6, tags: ["＋ − × ÷", "（ ）なし",   "記号は2つ", "筆算で計算"], ops: "+-*/", n: 2, paren: 0,   needMD: true,  needAS: true,  boring: 0.15 },
+  { id: 16, name: "計算4", mode: "calc", per: 4, tags: ["＋ − × ÷", "（ ）あり・なし", "記号は3つ", "筆算で計算"], ops: "+-*/", n: 3, paren: 0.5, needMD: true,  needAS: false, boring: 0.15 }
 ];
 LEVELS.forEach(L => { if (!L.mode) L.mode = "num"; });
 const SYM = { "+": "＋", "-": "−", "*": "×", "/": "÷" };
@@ -266,8 +320,11 @@ let best = load("junjo_best", {});
 let lv = 1, set = [], qi = 0, tokens = [], lines = [], mistakes = 0, totalMiss = 0;
 let busy = false, done = false, finished = false, solved = [];
 let mode = "num", stepNo = 0;
+let cx = null, calcMiss = 0, totalCalcMiss = 0, calcSeq = 0, calcLock = false;
+let teinei = load("junjo_teinei", true); // くり上がり・くり下がりも自分で書く
 const curL = () => LEVELS[lv - 1];
 const isIll = () => lv > 0 && curL().mode === "ill";
+const isCalc = () => mode === "calc";
 
 /* ================= 式の読み取り ================= */
 function normalize(s) {
@@ -368,7 +425,7 @@ const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const pick = a => a[Math.floor(Math.random() * a.length)];
 function bigNum(L) {
   const x = Math.random();
-  if (L.id === 1) {
+  if (L.id === 1 || L.base === 1) {
     if (x < 0.35) return rnd(11, 99);
     if (x < 0.75) return rnd(10, 99) * 10;
     if (x < 0.9) return rnd(2, 9) * 100;
@@ -425,6 +482,7 @@ function genOnce(L, wantInteresting, wantMeaning, forceParen) {
   }
   const tr = trace(t);
   if (!tr || tr.ans === 0) return null;
+  if (L.mode === "calc" && !calcOK(t)) return null; // どのステップも筆算できる大きさか
   // 「×1」「÷1」「0」などがないか
   const naive = [...Array(n).keys()].join(",");
   const ord = tr.order.join(",");
@@ -731,10 +789,10 @@ const $ = id => document.getElementById(id);
 
 function renderLevels() {
   const mb = $("modes"); mb.innerHTML = "";
-  [["num", "数字モード"], ["ill", "イラストモード"], ["kufu", "くふうモード"]].forEach(([m, txt]) => {
+  [["num", "数字モード"], ["calc", "計算モード"], ["ill", "イラストモード"], ["kufu", "くふうモード"]].forEach(([m, txt]) => {
     const b = document.createElement("button");
     b.textContent = txt; if (mode === m) b.className = "cur";
-    b.onclick = () => { if (mode === m) return; mode = m; lv = { num: 1, ill: 5, kufu: 9 }[m]; newSet(); };
+    b.onclick = () => { if (mode === m) return; mode = m; lv = { num: 1, calc: 13, ill: 5, kufu: 9 }[m]; newSet(); };
     mb.appendChild(b);
   });
   const box = $("levels"); box.innerHTML = "";
@@ -745,7 +803,7 @@ function renderLevels() {
     b.onclick = () => { lv = L.id; newSet(); };
     box.appendChild(b);
   });
-  if (mode === "num") {
+  if (mode === "num" || mode === "calc") {
     const tb = document.createElement("button");
     tb.className = "teacher" + (lv === 0 ? " cur" : "");
     tb.textContent = "先生の問題";
@@ -765,7 +823,8 @@ function renderLevels() {
 function newSet() {
   document.body.classList.toggle("kufu", mode === "kufu");
   if (lv > 0 && curL().mode === "kufu") { renderLevels(); kNewSet(); return; }
-  finished = false; totalMiss = 0; qi = 0;
+  finished = false; totalMiss = 0; totalCalcMiss = 0; qi = 0;
+  const per = (lv > 0 && curL().per) || PER;
   if (lv === 0) set = custom.slice();
   else if (curL().mode === "ill") {
     const L = curL();
@@ -780,7 +839,7 @@ function newSet() {
     if (L.mixParen) {
       // （ ）ありとなしを半分ずつ作って、順番をまぜる
       for (const withP of [true, false]) {
-        const goal = set.length + (withP ? Math.ceil(PER / 2) : Math.floor(PER / 2));
+        const goal = set.length + (withP ? Math.ceil(per / 2) : Math.floor(per / 2));
         for (let g = 0; set.length < goal && g < 200; g++) {
           const p = generate(L, withP);
           if (p && !seen.has(p)) { seen.add(p); set.push(p); }
@@ -788,7 +847,7 @@ function newSet() {
       }
       for (let i = set.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [set[i], set[j]] = [set[j], set[i]]; }
     } else {
-      for (let g = 0; set.length < PER && g < 200; g++) {
+      for (let g = 0; set.length < per && g < 200; g++) {
         const p = generate(L);
         if (p && !seen.has(p)) { seen.add(p); set.push(p); }
       }
@@ -801,6 +860,7 @@ function newSet() {
 
 function startQ() {
   mistakes = 0; done = false; busy = false;
+  calcMiss = 0; cx = null; calcSeq++; calcLock = false; renderCalc();
   if (!set.length) {
     tokens = []; lines = [];
     $("expr").innerHTML = ""; setMsg("", ""); $("prog").innerHTML = ""; $("qno").textContent = "";
@@ -820,6 +880,9 @@ function render() {
   $("prog").innerHTML = set.map((_, i) => `<i class="${solved[i] ? "ok" : ""}${i === qi && !finished ? " now" : ""}"></i>`).join("");
   $("qno").textContent = finished ? "" : `${qi + 1} 問目 ／ ${set.length} 問`;
   $("guide").style.display = finished ? "none" : "";
+  $("guide").innerHTML = isCalc()
+    ? 'はじめに計算するところの 記号 <span class="key">＋</span><span class="key">−</span><span class="key">×</span><span class="key">÷</span> をタップして、<b>自分で計算</b>しよう。'
+    : 'はじめに計算する（作る）ところの 記号 <span class="key">＋</span><span class="key">−</span><span class="key">×</span><span class="key">÷</span> をタップしよう。';
 
   const ex = $("expr"); ex.innerHTML = "";
   if (finished) { renderResult(); renderLog(); return; }
@@ -853,7 +916,7 @@ function render() {
 function renderButtons() {
   const b = $("btns"); b.innerHTML = "";
   const mk = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; b.appendChild(e); return e; };
-  if (!done) mk("hintb", "ヒント", hint);
+  if (!done) mk("hintb", "ヒント", () => cx ? calcHint() : hint());
   mk("reset", "やり直し", () => startQ());
   const last = qi === set.length - 1;
   mk("next" + (done ? " big" : ""), last ? (done ? "けっかを見る ▶" : "おわる ▶") : "つぎの問題 ▶", next);
@@ -887,21 +950,23 @@ function tap(k) {
   }
   busy = true;
   [k - 1, k, k + 1].forEach(i => opEl(i).classList.add("hl"));
+  if (isCalc()) { startCalc(k); return; } // 計算モード：自分で計算する
   const step = applyStep(tokens, k);
   const lab = v => typeof v === "object" ? v.label : v;
   if (isIll() && curL().kind === "build") step.r.label = set[qi].names[stepNo] || "";
   stepNo++;
   setMsg("ok", `${lab(step.a)} ${SYM[tokens[k].v]} ${lab(step.b)} ＝ ${lab(step.r)}`);
-  setTimeout(() => {
-    tokens = step.tokens;
-    lines.push(toStr(tokens));
-    busy = false;
-    if (tokens.length === 1) {
-      done = true; solved[qi] = true;
-      setMsg("done", (isIll() ? "できあがり！" : `答えは ${tokens[0].v}！`) + (mistakes === 0 ? " ノーミス！" : ""));
-    }
-    render();
-  }, 650);
+  setTimeout(() => commitStep(step), 650);
+}
+function commitStep(step) {
+  tokens = step.tokens;
+  lines.push(toStr(tokens));
+  busy = false;
+  if (tokens.length === 1) {
+    done = true; solved[qi] = true;
+    setMsg("done", (isIll() ? "できあがり！" : `答えは ${tokens[0].v}！`) + (mistakes === 0 && calcMiss === 0 ? " ノーミス！" : ""));
+  }
+  render();
 }
 
 function hint() {
@@ -918,9 +983,16 @@ function hint() {
 }
 
 function next() {
-  if (busy) return;
+  if (busy && !cx) return;
+  if (calcLock) return;
   if (qi < set.length - 1) { qi++; startQ(); }
-  else { finished = true; if (lv > 0 && solved.every(Boolean)) { if (best[lv] === undefined || totalMiss < best[lv]) best[lv] = totalMiss; save("junjo_best", best); } renderLevels(); render(); }
+  else {
+    cx = null; calcSeq++; busy = false; renderCalc();
+    finished = true;
+    const miss = totalMiss + totalCalcMiss;
+    if (lv > 0 && solved.every(Boolean)) { if (best[lv] === undefined || miss < best[lv]) best[lv] = miss; save("junjo_best", best); }
+    renderLevels(); render();
+  }
 }
 
 function renderResult() {
@@ -930,14 +1002,482 @@ function renderResult() {
   $("expr").innerHTML = `<div class="result">
     <div class="big">${all ? name + " クリア！" : name + " おつかれさま"}</div>
     <p>${set.length}問中 ${solvedN}問 とけました</p>
-    <p>まちがえた回数：${totalMiss}回</p></div>`;
-  setMsg(all && totalMiss === 0 ? "done" : "", all && totalMiss === 0 ? "パーフェクト！すごい！" : "");
+    ${isCalc() ? `<p>順じょのまちがい：${totalMiss}回 ／ 計算のまちがい：${totalCalcMiss}回</p>` : `<p>まちがえた回数：${totalMiss}回</p>`}</div>`;
+  const perfect = all && totalMiss === 0 && totalCalcMiss === 0;
+  setMsg(perfect ? "done" : "", perfect ? "パーフェクト！すごい！" : "");
   const b = $("btns"); b.innerHTML = "";
   const mk = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; b.appendChild(e); };
   mk("again", lv === 0 ? "もう一度" : "ちがう問題でもう一度", newSet);
   const nx = lv > 0 && LEVELS.find(L => L.id === lv + 1 && L.mode === curL().mode);
   if (nx) mk("next big", nx.name + " へ ▶", () => { lv = nx.id; newSet(); });
 }
+
+/* ================= 計算モード（筆算） ================= */
+// 位はすべて「一の位＝0、十の位＝1…」の番号であつかう
+const digs = n => String(n).split("").map(Number);
+const PLACE = ["一", "十", "百", "千", "一万", "十万"];
+const pn = p => PLACE[p] + "の位";
+const atP = (arr, p) => (p >= 0 && p < arr.length) ? arr[arr.length - 1 - p] : null;
+const rowOf = (W, fn) => [...Array(W)].map((_, c) => fn(W - 1 - c));
+
+// かけ算の筆算：けたの多い数を上に。下の数は2けたまで（一の位が0の2けたはあつかわない）
+function mulLayout(a, b) {
+  const la = String(a).length, lb = String(b).length;
+  let top = a, bot = b, sw = false;
+  if (lb > la || (la === lb && b % 10 === 0 && a % 10 !== 0)) { top = b; bot = a; sw = true; }
+  if (String(bot).length > 2 || String(top).length > 3) return null;
+  if (bot >= 10 && bot % 10 === 0) return null;
+  return { top, bot, sw };
+}
+function hissanOK(a, op, b) {
+  if (op === "*") return !!mulLayout(a, b);
+  if (op === "/") return b < 100 && a < 10000;
+  return a < 100000 && b < 100000;
+}
+function calcOK(t) {
+  t = t.map(x => Object.assign({}, x));
+  while (t.length > 1) {
+    const k = validOps(t)[0];
+    const a = t[k - 1].v, op = t[k].v, b = t[k + 1].v;
+    if (!hissanOK(a, op, b)) return false;
+    t = stripLoneParens(t.slice(0, k - 1).concat([{ t: "num", v: calc(a, op, b) }], t.slice(k + 2)));
+  }
+  return true;
+}
+// 九九ですぐ出せる計算は、はじめは「あんざん」で答える
+const isEasy = (a, op, b) => op === "*" ? (a < 10 && b < 10) : op === "/" ? (b < 10 && a / b < 10) : false;
+
+/* ---- たし算 ---- */
+function hsAdd(a, b) {
+  const A = digs(a), B = digs(b), S = digs(a + b), W = S.length;
+  const cin = [0];
+  for (let p = 0; p < W; p++) cin[p + 1] = ((atP(A, p) || 0) + (atP(B, p) || 0) + cin[p]) >= 10 ? 1 : 0;
+  const colSum = p => (atP(A, p) || 0) + (atP(B, p) || 0) + cin[p];
+  const tasks = [];
+  for (let p = 0; p < W; p++) {
+    if (teinei && cin[p]) tasks.push({ t: "carry", p, v: 1 });
+    tasks.push({ t: "ans", p, v: atP(S, p) });
+  }
+  const ans = {}, carry = {};
+  let ti = 0;
+  const H = {
+    task: () => tasks[ti], sid: () => ti, teineiUsed: true,
+    grid() {
+      const tk = tasks[ti], fp = tk ? tk.p : -1;
+      const f = p => p === fp ? "focus" : "";
+      return { W, rows: [
+        { memo: true, cells: rowOf(W, p => ({ v: carry[p] ? "1" : "", cls: tk && tk.t === "carry" && tk.p === p ? "cur" : "" })) },
+        { cells: rowOf(W, p => ({ v: atP(A, p), cls: f(p) })) },
+        { lab: "＋", line: true, cells: rowOf(W, p => ({ v: atP(B, p), cls: f(p) })) },
+        { cells: rowOf(W, p => ({ v: ans[p], cls: tk && tk.t === "ans" && tk.p === p ? "cur" : (ans[p] !== undefined ? "in" : f(p)) })) }
+      ] };
+    },
+    input(d) {
+      const tk = tasks[ti];
+      if (d !== tk.v) {
+        if (tk.t === "carry") return { ok: false, msg: "くり上がりは 1 だよ。小さく 1 を書こう。" };
+        if (cin[tk.p] && d === (tk.v + 9) % 10) return { ok: false, msg: `${pn(tk.p - 1)}から くり上がった 1 を、たしわすれていないかな？` };
+        return { ok: false, msg: `${pn(tk.p)}を もう一度 計算してみよう。` };
+      }
+      let msg = "";
+      if (tk.t === "carry") carry[tk.p] = 1;
+      else {
+        ans[tk.p] = d;
+        if (cin[tk.p + 1]) {
+          if (teinei) msg = `10 をこえたね。${pn(tk.p + 1)}の上に、くり上がりの 1 を書こう。`;
+          else { carry[tk.p + 1] = 1; msg = `10 をこえたので、${pn(tk.p + 1)}に 1 くり上げたよ。`; }
+        }
+      }
+      ti++;
+      return { ok: true, msg, done: ti >= tasks.length };
+    },
+    hint() {
+      const tk = tasks[ti], p = tk.p;
+      if (tk.t === "carry") return `${pn(p - 1)}は ${colSum(p - 1)} で、10 をこえたね。${pn(p)}の上に 小さく 1 を書こう。`;
+      const xs = [atP(A, p), atP(B, p)].filter(x => x !== null), s = colSum(p);
+      if (!xs.length) return `くり上がりの 1 を、そのまま ${pn(p)}に書こう。`;
+      if (xs.length === 1 && !cin[p]) return `${pn(p)}は たす数がないので、${s} をそのまま書こう。`;
+      return `${pn(p)}：${xs.join("＋")}${cin[p] ? "＋1（くり上がり）" : ""}＝${s}。` + (s >= 10 ? `答えには ${s % 10} を書くよ。` : `${s} を書こう。`);
+    }
+  };
+  return H;
+}
+
+/* ---- ひき算（くり下がりは「上の数字をタップして10かりる」） ---- */
+function hsSub(a, b) {
+  const A = digs(a), B = digs(b), W = A.length, RL = String(a - b).length;
+  const orig = p => atP(A, p), bot = p => atP(B, p) || 0;
+  const cur = [...Array(W)].map((_, p) => orig(p)), recv = [], lent = [], ans = {};
+  let p = 0, acts = 0;
+  const lender = () => { for (let x = p + 1; x < W; x++) if (cur[x] > 0) return x; return -1; };
+  const need = () => cur[p] < bot(p);
+  const transfer = x => { cur[x]--; lent[x] = true; cur[x - 1] += 10; recv[x - 1] = true; };
+  const task = () => p >= RL ? undefined
+    : (teinei && need()) ? { t: "borrow", p }
+    : { t: "ans", p, v: cur[p] + (need() ? 10 : 0) - bot(p) };
+  const H = {
+    task, sid: () => acts, teineiUsed: true, hintOn: false,
+    grid() {
+      const tk = task(), fp = tk ? tk.p : -1, borrowing = tk && tk.t === "borrow";
+      const hl = H.hintOn && borrowing ? lender() : -1;
+      const f = q => q === fp ? "focus" : "";
+      return { W, rows: [
+        { memo: true, cells: rowOf(W, q => ({ v: lent[q] ? String(cur[q]) : (recv[q] ? "10" : "") })) },
+        { cells: rowOf(W, q => ({ v: orig(q), top: q,
+            cls: [lent[q] ? "strike" : f(q), borrowing ? "tap" : "", q === hl ? "hintc" : ""].join(" ") })) },
+        { lab: "−", line: true, cells: rowOf(W, q => ({ v: atP(B, q), cls: f(q) })) },
+        { cells: rowOf(W, q => ({ v: ans[q], cls: tk && tk.t === "ans" && tk.p === q ? "cur" : (ans[q] !== undefined ? "in" : f(q)) })) }
+      ] };
+    },
+    tapTop(x) {
+      const tk = task();
+      if (!tk || tk.t !== "borrow") return null;
+      if (x <= p) return { ok: false, msg: "10 をかりるのは、左がわの位からだよ。" };
+      const q = lender();
+      if (x < q) return { ok: false, msg: `${pn(x)}は 0 なので、かせないよ。もっと左の位から かりてこよう。` };
+      if (x > q) return { ok: false, msg: "もっと近くの位から かりよう。" };
+      transfer(x); acts++; H.hintOn = false;
+      const msg = x === p + 1
+        ? `${pn(x)}から 1 かりて、${pn(p)}は 10 ふえたよ。こんどは ${cur[p]}−${bot(p)} を計算しよう。`
+        : `${pn(x)}から 1 かりて、${pn(x - 1)}が 10 になったよ。こんどは ${pn(x - 1)}から かりよう。`;
+      return { ok: true, msg, done: false };
+    },
+    input(d) {
+      const tk = task();
+      if (tk.t === "borrow") {
+        if (d === bot(p) - cur[p]) return { ok: false, msg: `下の ${bot(p)} から 上の ${cur[p]} をひいていないかな？ ${cur[p]} から ${bot(p)} はひけないので、左の位から 10 かりよう（上の数字をタップ）。` };
+        return { ok: false, msg: `${cur[p]} から ${bot(p)} はひけないね。左の位から 10 かりよう（上の数字をタップ）。` };
+      }
+      if (d !== tk.v) {
+        if (need() && d === bot(p) - cur[p]) return { ok: false, msg: `下から上を ひいていないかな？ ${cur[p]} から ${bot(p)} はひけないので、左の位から 10 かりて計算するよ。` };
+        if (lent[p] && d === tk.v + 1) return { ok: false, msg: recv[p] ? `${pn(p)}は 10 になってから となりに 1 かしたので、9 になっているよ。` : `${pn(p)}は となりに 1 かしたので、${orig(p)} ではなく ${cur[p]} になっているよ。` };
+        return { ok: false, msg: `${pn(p)}を もう一度 計算してみよう。` };
+      }
+      let msg = "";
+      if (need()) { // ていねいOFFのとき：かりる手順は自動で書く
+        const q = lender(); for (let x = q; x > p; x--) transfer(x);
+        msg = "左の位から 10 かりたよ。";
+      }
+      ans[p] = d; p++; acts++; H.hintOn = false;
+      return { ok: true, msg, done: p >= RL };
+    },
+    hint() {
+      const tk = task();
+      if (tk.t === "borrow") {
+        const q = lender();
+        H.hintOn = true;
+        return `${cur[p]} から ${bot(p)} はひけないね。` + (q === p + 1 ? `${pn(q)}の数字をタップして、10 かりよう。` : `${pn(p + 1)}は 0 なので、まず ${pn(q)}の数字をタップしよう。`);
+      }
+      const c = cur[p] + (need() ? 10 : 0), bt = bot(p);
+      if (atP(B, p) === null) return `${pn(p)}は ひく数がないので、${c} をそのまま書こう。` + (lent[p] ? `（1 かしたので ${c} になっているよ）` : "");
+      if (c >= 10 && bt > 0) return `${pn(p)}：${c}−${bt}。10−${bt}＝${10 - bt}、${10 - bt}＋${c - 10}＝${c - bt}。`;
+      return `${pn(p)}：${c}−${bt}＝${c - bt}。` + (lent[p] ? `（1 かしたので ${c} になっているよ）` : "");
+    }
+  };
+  return H;
+}
+
+/* ---- かけ算 ---- */
+function hsMul(a, b) {
+  const L = mulLayout(a, b), T = digs(L.top), M = digs(L.bot), two = M.length === 2;
+  const m1 = M[M.length - 1], m10 = two ? M[0] : 0, F = L.top * L.bot, FD = digs(F);
+  const W = Math.max(T.length, M.length, FD.length);
+  const tasks = [];
+  function rowTasks(t, mul, shift) {
+    const ds = digs(L.top * mul);
+    let cin = 0;
+    for (let q = 0; q < ds.length; q++) {
+      const td = atP(T, q), pr = td === null ? cin : td * mul + cin;
+      tasks.push({ t, p: q + shift, tp: q, v: atP(ds, q), td, mul, cin, pr });
+      cin = td === null ? 0 : Math.floor(pr / 10);
+    }
+  }
+  rowTasks("p1", m1, 0);
+  if (two) {
+    rowTasks("p2", m10, 1);
+    const A1 = digs(L.top * m1), A2 = digs(L.top * m10);
+    let cin = 0;
+    for (let q = 0; q < FD.length; q++) {
+      const x = atP(A1, q), y = atP(A2, q - 1), s = (x || 0) + (y || 0) + cin;
+      tasks.push({ t: "sum", p: q, v: atP(FD, q), x, y, cin, s });
+      cin = s >= 10 ? 1 : 0;
+    }
+  }
+  const store = { p1: {}, p2: {}, sum: {} };
+  let memo = {}, ti = 0;
+  const H = {
+    task: () => tasks[ti], sid: () => ti, swapped: L.sw, top: L.top, bot: L.bot,
+    grid() {
+      const tk = tasks[ti];
+      const tdP = tk && tk.t !== "sum" && tk.td !== null ? tk.tp : -1;
+      const mP = tk ? (tk.t === "p1" ? 0 : tk.t === "p2" ? 1 : -1) : -1;
+      const sumP = tk && tk.t === "sum" ? tk.p : -1;
+      const cell = name => q => {
+        const v = store[name][q], isCur = tk && tk.t === name && tk.p === q;
+        return { v, cls: isCur ? "cur" : (name !== "sum" && q === sumP ? "focus" : (v !== undefined ? "in" : "")) };
+      };
+      const rows = [
+        { memo: true, cells: rowOf(W, q => ({ v: memo[q] })) },
+        { cells: rowOf(W, q => ({ v: atP(T, q), cls: q === tdP ? "focus" : "" })) },
+        { lab: "×", line: true, cells: rowOf(W, q => ({ v: atP(M, q), cls: q === mP ? "focus" : "" })) },
+        { cells: rowOf(W, cell("p1")) }
+      ];
+      if (two) rows.push({ line: true, cells: rowOf(W, cell("p2")) }, { cells: rowOf(W, cell("sum")) });
+      return { W, rows };
+    },
+    input(d) {
+      const tk = tasks[ti];
+      if (d !== tk.v) {
+        if (tk.t !== "sum" && tk.td !== null && tk.cin && d === (tk.td * tk.mul) % 10) return { ok: false, msg: `くり上がりの ${tk.cin} を たしわすれていないかな？` };
+        if (tk.t === "sum" && tk.cin && d === (tk.v + 9) % 10) return { ok: false, msg: "くり上がりの 1 を たしわすれていないかな？" };
+        return { ok: false, msg: "もう一度 計算してみよう。" };
+      }
+      store[tk.t][tk.p] = d;
+      if (tk.t !== "sum" && tk.td !== null && tk.pr >= 10) memo[tk.tp + 1] = Math.floor(tk.pr / 10);
+      ti++;
+      let msg = "";
+      const nx = tasks[ti];
+      if (nx && nx.t !== tk.t) {
+        memo = {};
+        msg = nx.t === "p2" ? `つぎは 十の位の ${m10} をかけるよ。1つ左に ずらして書こう。` : "さいごに、たし算をしよう。";
+      }
+      return { ok: true, msg, done: ti >= tasks.length };
+    },
+    hint() {
+      const tk = tasks[ti];
+      if (tk.t === "sum") {
+        const xs = [tk.x, tk.y].filter(x => x !== null);
+        if (xs.length === 1 && !tk.cin) return `${pn(tk.p)}は ${xs[0]} をそのまま書こう。`;
+        if (!xs.length) return `くり上がりの 1 を そのまま書こう。`;
+        return `${pn(tk.p)}：${xs.join("＋")}${tk.cin ? "＋1（くり上がり）" : ""}＝${tk.s}。` + (tk.s >= 10 ? `答えには ${tk.s % 10} を書くよ。` : "");
+      }
+      const head = tk.t === "p2" && tk.tp === 0 ? `十の位の ${m10} をかけるので、答えは ${pn(1)}から書くよ。` : "";
+      if (tk.td === null) return head + `くり上がりの ${tk.cin} を そのまま書こう。`;
+      return head + `${tk.td}×${tk.mul}＝${tk.td * tk.mul}` + (tk.cin ? `、くり上がりの ${tk.cin} をたして ${tk.pr}` : "") +
+        `。` + (tk.pr >= 10 ? `${tk.pr % 10} を書いて、${Math.floor(tk.pr / 10)} は くり上がり。` : "");
+    }
+  };
+  return H;
+}
+
+/* ---- わり算（たてる → かける → ひく → おろす） ---- */
+function hsDiv(a, b) {
+  const D = digs(a), n = D.length;
+  let i0 = 0, cv = D[0];
+  while (cv < b && i0 < n - 1) { i0++; cv = cv * 10 + D[i0]; }
+  const tasks = [];
+  let wr = 0, curRow = -1, rem = 0;
+  for (let i = i0; i < n; i++) {
+    if (i > i0) { cv = rem * 10 + D[i]; tasks.push({ t: "down", row: curRow, col: i, v: D[i] }); }
+    const q = Math.floor(cv / b);
+    tasks.push({ t: "q", col: i, v: q, cur: cv, row: curRow, first: i === i0 });
+    if (q > 0) {
+      const pr = q * b, df = cv - pr, pRow = wr++, dRow = wr++, pd = digs(pr);
+      pd.forEach((v, j) => tasks.push({ t: "prod", row: pRow, col: i - (pd.length - 1 - j), v, q, cur: cv, pr }));
+      if (df > 0 || i === n - 1) {
+        const dd = digs(df);
+        dd.forEach((v, j) => tasks.push({ t: "diff", row: dRow, col: i - (dd.length - 1 - j), v, cur: cv, pr }));
+      } else tasks.push({ t: "diff0", row: dRow, col: i, v: 0, cur: cv, pr });
+      curRow = dRow; rem = df;
+    } else rem = cv;
+  }
+  const qd = {}, work = {};
+  let ti = 0;
+  const H = {
+    task: () => tasks[ti], sid: () => ti,
+    phase() { const tk = tasks[ti]; return tk ? { q: 0, prod: 1, diff: 2, diff0: 2, down: 3 }[tk.t] : -1; },
+    grid() {
+      const tk = tasks[ti];
+      const fc = tk && tk.t === "q" ? [tk.col - String(tk.cur).length + 1, tk.col] : null;
+      const isF = (r, c) => fc && r === tk.row && c >= fc[0] && c <= fc[1];
+      const rows = [
+        { cells: D.map((_, c) => ({ v: qd[c], cls: tk && tk.t === "q" && tk.col === c ? "cur" : (qd[c] !== undefined ? "in" : "") })) },
+        { lab: `<span>${b}</span><span class="brk">)</span>`, labCls: "divlab", bar: true, cells: D.map((v, c) => ({ v, cls: isF(-1, c) ? "focus" : "" })) }
+      ];
+      for (let r = 0; r < wr; r++) {
+        const w = work[r] || {}, here = tk && tk.t !== "q" && tk.row === r;
+        if (!Object.keys(w).length && !here) continue;
+        rows.push({ line: r % 2 === 0, cells: D.map((_, c) => {
+          const x = w[c], isCur = here && tk.col === c;
+          return { v: x ? x.v : "", cls: [isCur ? "cur" : "", x ? x.cls : "", isF(r, c) ? "focus" : ""].join(" ") };
+        }) });
+      }
+      return { W: n, rows };
+    },
+    input(d) {
+      const tk = tasks[ti];
+      if (d !== tk.v) {
+        if (tk.t === "q") {
+          if (d * b > tk.cur) return { ok: false, msg: `${b}×${d}＝${b * d} は ${tk.cur} より大きいね。もっと小さい数を たてよう。` };
+          return { ok: false, msg: `${tk.cur}−${b * d}＝${tk.cur - b * d} で、わる数の ${b} より大きくなるね。もっと大きい数を たてよう。` };
+        }
+        if (tk.t === "prod") return { ok: false, msg: `${tk.q}×${b} を もう一度 計算しよう。` };
+        return { ok: false, msg: `${tk.cur}−${tk.pr} を もう一度 計算しよう。` };
+      }
+      if (tk.t === "q") qd[tk.col] = d;
+      else { (work[tk.row] = work[tk.row] || {})[tk.col] = { v: d, cls: tk.t === "diff0" ? "zero" : "in" }; }
+      ti++;
+      let msg = tk.t === "q" && d === 0 && tasks[ti] ? "0 をたてたときは、かけ算・ひき算は しないで、つぎの数をおろそう。" : "";
+      while (tasks[ti] && tasks[ti].t === "down") {
+        const dn = tasks[ti], rw = (work[dn.row] = work[dn.row] || {});
+        Object.keys(rw).forEach(c => { if (rw[c].cls === "zero") delete rw[c]; });
+        rw[dn.col] = { v: dn.v, cls: "down" };
+        msg += `${dn.v} をおろしたよ。`;
+        ti++;
+      }
+      return { ok: true, msg, done: ti >= tasks.length };
+    },
+    hint() {
+      const tk = tasks[ti];
+      if (tk.t === "q") {
+        const head = tk.first && i0 > 0 ? `${D.slice(0, i0).join("")} の中に ${b} はないので、${tk.cur} で考えるよ。` : "";
+        if (tk.v === 0) return head + `${tk.cur} の中に ${b} は ないね。商に 0 をたてよう。`;
+        return head + `${tk.cur} の中に ${b} は いくつ？ ${b}×□ が ${tk.cur} をこえない、いちばん大きい数を見つけよう。`;
+      }
+      if (tk.t === "prod") return `たてた ${tk.q} と、わる数の ${b} をかけよう。${tk.q}×${b}＝？`;
+      return `${tk.cur}−${tk.pr} を計算しよう。`;
+    }
+  };
+  return H;
+}
+
+/* ---- 計算パネル ---- */
+function makeHs() {
+  const { a, op, b } = cx;
+  return op === "+" ? hsAdd(a, b) : op === "-" ? hsSub(a, b) : op === "*" ? hsMul(a, b) : hsDiv(a, b);
+}
+function startCalc(k) {
+  const a = tokens[k - 1].v, op = tokens[k].v, b = tokens[k + 1].v;
+  cx = { k, a, op, b, r: calc(a, op, b), canH: hissanOK(a, op, b), buf: "", hintSid: -1, hintN: 0, msg: "", msgCls: "", shake: false };
+  cx.how = (!cx.canH || isEasy(a, op, b)) ? "anzan" : "hissan";
+  if (cx.how === "hissan") { cx.hs = makeHs(); calcIntro(); }
+  setMsg("info", `${a} ${SYM[op]} ${b} を計算しよう。`);
+  renderCalc();
+}
+function calcIntro() {
+  cx.msg = cx.op === "*" && cx.hs.swapped ? `けたの多い ${cx.hs.top} を上にして計算するよ（×は 入れかえても 答えは同じ）。` : "";
+  cx.msgCls = cx.msg ? "info" : "";
+}
+function gridHTML(g) {
+  let h = `<div class="hs" style="grid-template-columns: auto repeat(${g.W}, var(--cw))">`;
+  g.rows.forEach(r => {
+    const rc = (r.memo ? " m" : "") + (r.line ? " ln" : "");
+    h += `<div class="hl${rc}${r.labCls ? " " + r.labCls : ""}">${r.lab || ""}</div>`;
+    r.cells.forEach(c => {
+      let cls = (c.cls || "") + (r.bar ? " bar" : "");
+      if (cx.shake && /\bcur\b/.test(cls)) cls += " ng";
+      const v = c.v === undefined || c.v === null ? "" : c.v;
+      h += `<div class="hc${rc} ${cls}"${c.top !== undefined ? ` data-top="${c.top}"` : ""}>${v}</div>`;
+    });
+  });
+  return h + "</div>";
+}
+function renderCalc() {
+  const box = $("calc");
+  if (!cx) { box.style.display = "none"; box.innerHTML = ""; return; }
+  box.style.display = "";
+  const { a, op, b } = cx;
+  let h = `<div class="ctop"><span class="ctitle">${a} ${SYM[op]} ${b} ＝ ？</span>`;
+  if (cx.canH && !calcLock) h += `<button class="cbtn" data-act="switch">${cx.how === "hissan" ? "あんざんで答える" : "筆算でとく"}</button>`;
+  h += `</div>`;
+  if (cx.how === "hissan") {
+    if (op === "/") {
+      const ph = cx.hs.phase();
+      h += `<div class="phase">${["たてる", "かける", "ひく", "おろす"].map((s, i) => `<span class="${i === ph ? "cur" : ""}">${s}</span>`).join("→")}</div>`;
+    }
+    h += gridHTML(cx.hs.grid());
+  } else {
+    h += `<div class="anz"><span>${a} ${SYM[op]} ${b} ＝</span><span class="box">${cx.buf}</span></div>`;
+  }
+  h += `<div id="cmsg" class="${cx.msgCls}">${cx.msg}</div>`;
+  if (!calcLock) {
+    h += `<div class="ckeys">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(d => `<button data-d="${d}">${d}</button>`).join("")}` +
+      (cx.how === "anzan" ? `<button class="wide" data-act="back">けす</button><span></span><button class="wide okb" data-act="ok">こたえる</button>` : "") + `</div>`;
+    h += `<div class="cfoot"><button class="cbtn" data-act="hint">計算のヒント</button>`;
+    if (cx.how === "hissan" && cx.hs.teineiUsed) h += `<label class="teinei"><input type="checkbox" id="teinei"${teinei ? " checked" : ""}>${op === "+" ? "くり上がり" : "くり下がり"}も 自分で書く</label>`;
+    h += `</div>`;
+  }
+  box.innerHTML = h;
+  cx.shake = false;
+}
+function calcResult(res) {
+  if (!res) return;
+  if (!res.ok) { calcMiss++; totalCalcMiss++; cx.msg = res.msg; cx.msgCls = "bad"; cx.shake = true; }
+  else { cx.msg = res.msg || ""; cx.msgCls = res.msg ? "info" : ""; }
+  if (res.ok && res.done) { calcDone(); return; }
+  renderCalc();
+}
+function calcInput(d) {
+  if (!cx || calcLock) return;
+  if (cx.how === "anzan") { if (cx.buf.length < 6) cx.buf = (cx.buf === "0" ? "" : cx.buf) + d; renderCalc(); return; }
+  calcResult(cx.hs.input(d));
+}
+function calcAct(act) {
+  if (!cx || calcLock) return;
+  if (act === "hint") return calcHint();
+  if (act === "switch") {
+    cx.how = cx.how === "hissan" ? "anzan" : "hissan"; cx.buf = "";
+    if (cx.how === "hissan") { cx.hs = makeHs(); calcIntro(); } else { cx.msg = ""; cx.msgCls = ""; }
+  }
+  if (act === "back") cx.buf = cx.buf.slice(0, -1);
+  if (act === "ok") {
+    if (cx.buf === "") return;
+    if (Number(cx.buf) === cx.r) { calcDone(); return; }
+    calcMiss++; totalCalcMiss++; cx.buf = "";
+    cx.msg = "ちがうよ。" + (cx.canH ? "「筆算でとく」で たしかめてみよう。" : "もう一度 計算してみよう。"); cx.msgCls = "bad";
+  }
+  renderCalc();
+}
+function calcHint() {
+  if (!cx || calcLock) return;
+  if (cx.how === "anzan") {
+    const { a, op, b } = cx;
+    cx.msg = op === "*" ? `${a} のだん（または ${b} のだん）の九九を 思い出そう。`
+      : op === "/" ? `${b} のだんの九九で、答えが ${a} になるのは？`
+      : "「筆算でとく」をおすと、位ごとに計算できるよ。";
+    cx.msgCls = "info"; renderCalc(); return;
+  }
+  const H = cx.hs, sid = H.sid(), tk = H.task();
+  if (cx.hintSid === sid) cx.hintN++; else { cx.hintSid = sid; cx.hintN = 1; }
+  let m = H.hint();
+  if (cx.hintN >= 2 && tk.v !== undefined) m += `　→ ここには「${tk.v}」が 入るよ。`;
+  cx.msg = m; cx.msgCls = "info";
+  renderCalc();
+}
+function calcDone() {
+  const { k, a, op, b, r } = cx, seq = calcSeq;
+  calcLock = true;
+  cx.msg = `できた！ ${a} ${SYM[op]} ${b} ＝ ${r}`; cx.msgCls = "ok";
+  if (cx.how === "anzan") cx.buf = String(r);
+  renderCalc();
+  setTimeout(() => {
+    if (seq !== calcSeq) return;
+    cx = null; calcLock = false; renderCalc();
+    const step = applyStep(tokens, k);
+    setMsg("ok", `${a} ${SYM[op]} ${b} ＝ ${r}`);
+    stepNo++;
+    setTimeout(() => { if (seq === calcSeq) commitStep(step); }, 450);
+  }, 1100);
+}
+$("calc").addEventListener("click", e => {
+  const el = e.target.closest("[data-d],[data-top],[data-act]");
+  if (!el || !cx || calcLock) return;
+  if (el.dataset.d !== undefined) calcInput(Number(el.dataset.d));
+  else if (el.dataset.top !== undefined) { if (cx.how === "hissan" && cx.hs.tapTop) calcResult(cx.hs.tapTop(Number(el.dataset.top))); }
+  else calcAct(el.dataset.act);
+});
+$("calc").addEventListener("change", e => {
+  if (e.target.id !== "teinei" || !cx) return;
+  teinei = e.target.checked; save("junjo_teinei", teinei);
+  if (cx.how === "hissan") { cx.hs = makeHs(); cx.msg = "はじめから 書きなおそう。"; cx.msgCls = "info"; }
+  renderCalc();
+});
+document.addEventListener("keydown", e => {
+  if (!cx || calcLock || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  if (/^[0-9]$/.test(e.key)) { calcInput(Number(e.key)); e.preventDefault(); }
+  else if (cx.how === "anzan" && e.key === "Backspace") { calcAct("back"); e.preventDefault(); }
+  else if (cx.how === "anzan" && e.key === "Enter") { calcAct("ok"); e.preventDefault(); }
+});
 
 /* ================= くふうモード（交換・結合・分配） ================= */
 const KPER = 10;
