@@ -39,8 +39,8 @@
   .modes button:not(:first-child) { border-left: none; }
   .modes button.cur { background: #2a9d55; color: #fff; }
   @media (max-width: 560px) {
-    .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .modes button, .modes button:first-child, .modes button:last-child { font-size: 15px; padding: 8px 6px; white-space: nowrap; border-radius: 10px; border-left: 3px solid #2a9d55; }
+    .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .modes button, .modes button:first-child, .modes button:last-child { font-size: 14px; padding: 8px 2px; white-space: nowrap; border-radius: 10px; border-left: 3px solid #2a9d55; }
   }
   #lvdesc { margin: 10px 0 0; font-size: 17px; color: #444; }
   #lvdesc .tag { display: inline-block; background: #fff2cc; border-radius: 8px; padding: 2px 10px; margin: 2px 4px 2px 0; }
@@ -73,16 +73,9 @@
   #expr .op.hint { animation: glow 1s infinite; border-color: #f08c00; }
   #expr .op.ng { background: #ffd6d6; border-color: #e03131; color: #b03030; animation: shake .4s; }
 
-  #expr .pic { display: inline-flex; flex-direction: column; align-items: center; padding: 4px; border-radius: 12px; margin: 0 2px; }
-  #expr .pic .lab { font-size: 16px; color: #555; margin-top: 2px; }
-  #expr .pic.fresh .lab { color: #d6336c; }
-  #expr .pic.big .lab { font-size: 22px; color: #d6336c; }
-  #expr .pic.hl { background: #ffe066; }
   #expr .inum { color: #2f5d8a; }
   .grp { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; justify-content: center; max-width: 380px; }
   .box { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; border: 2px dashed #adb5bd; border-radius: 10px; padding: 3px; }
-  #msg .oops { margin-top: 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 18px; }
-  #msg .oops small { font-size: 15px; color: #888; }
   #msg, #kmsg { min-height: 52px; text-align: center; font-size: 20px; border-radius: 12px; padding: 12px; }
   #msg.ok, #kmsg.ok     { background: #e6f7ec; color: #1f7a43; }
   #msg.bad, #kmsg.bad   { background: #ffeaea; color: #b03030; }
@@ -293,10 +286,6 @@ const LEVELS = [
   { id: 2, name: "レベル2", tags: ["＋ − × ÷", "（ ）が1組", "記号は2つ"], ops: "+-*/", n: 2, paren: 1,   needMD: true,  needAS: false, boring: 0, meaningful: 0.5 },
   { id: 3, name: "レベル3", tags: ["＋ − × ÷", "（ ）なし",   "記号は2つ"], ops: "+-*/", n: 2, paren: 0,   needMD: true,  needAS: true,  boring: 0.15 },
   { id: 4, name: "レベル4", tags: ["＋ − × ÷", "（ ）あり・なし", "記号は3つ"], ops: "+-*/", n: 3, paren: 0.5, needMD: true,  needAS: false, boring: 0.15 },
-  { id: 5, name: "イラスト1", mode: "ill", kind: "build", tags: ["＋ と （ ）", "（ ）の中を先に作る"] },
-  { id: 6, name: "イラスト2", mode: "ill", kind: "set",   tags: ["＋ と ×", "×を先に"] },
-  { id: 7, name: "イラスト3", mode: "ill", kind: "set",   tags: ["＋ と × と （ ）", "（ ）の中 → × の順"] },
-  { id: 8, name: "イラスト4", mode: "ill", kind: "set",   tags: ["÷ で ピザを分ける", "×÷は左から順に", "（ ）・×÷を先に"] },
   { id: 9,  name: "くふうA", mode: "kufu", kind: "A", tags: ["いれかえる", "＋や×は 入れかえても答えは同じ", "キリのいい数を左に"] },
   { id: 10, name: "くふうB", mode: "kufu", kind: "B", tags: ["（ ）をつけかえる", "＋だけ・×だけなら どこから計算しても同じ"] },
   { id: 11, name: "くふうC", mode: "kufu", kind: "C", tags: ["わける・まとめる", "（■＋●）×▲ ＝ ■×▲＋●×▲"] },
@@ -322,8 +311,7 @@ let busy = false, done = false, finished = false, solved = [];
 let mode = "num", stepNo = 0;
 let cx = null, calcMiss = 0, totalCalcMiss = 0, calcSeq = 0, calcLock = false;
 let teinei = load("junjo_teinei", true); // くり上がり・くり下がりも自分で書く
-const curL = () => LEVELS[lv - 1];
-const isIll = () => lv > 0 && curL().mode === "ill";
+const curL = () => LEVELS.find(L => L.id === lv);
 const isCalc = () => mode === "calc";
 
 /* ================= 式の読み取り ================= */
@@ -414,7 +402,7 @@ function calc(a, op, b) {
   if (op === "/") return (b !== 0 && a % b === 0) ? a / b : null;
 }
 function applyStep(t, k) {
-  const a = t[k - 1].v, b = t[k + 1].v, r = typeof a === "object" ? combine(a, t[k].v, b) : calc(a, t[k].v, b);
+  const a = t[k - 1].v, b = t[k + 1].v, r = calc(a, t[k].v, b);
   const plain = x => { const c = Object.assign({}, x); delete c.fresh; return c; };
   const nt = stripLoneParens(t.slice(0, k - 1).map(plain).concat([{ t: "num", v: r, fresh: true }], t.slice(k + 2).map(plain)));
   return { tokens: nt, a, b, r };
@@ -504,295 +492,15 @@ function generate(L, forceParen) {
   return null;
 }
 
-/* ================= イラストモード ================= */
-// 組み立て（イラスト1）：同じテーマの部品は同じわくの中に重ねてかく。z が大きいほど上。
-const THEMES = {
-  curry: { vb: [120, 90], layers: {
-    plate:   { z: 0, svg: '<ellipse cx="60" cy="60" rx="54" ry="24" fill="#fff" stroke="#b8c4d0" stroke-width="3"/><ellipse cx="60" cy="58" rx="40" ry="16" fill="none" stroke="#e4eaf0" stroke-width="2"/>' },
-    rice:    { z: 1, svg: '<path d="M20 60 Q22 36 48 34 Q70 33 72 52 Q72 66 50 70 Q28 72 20 60Z" fill="#fffdf4" stroke="#d8cfb4" stroke-width="2"/><g fill="#efe8d2"><ellipse cx="34" cy="50" rx="3" ry="1.6"/><ellipse cx="46" cy="44" rx="3" ry="1.6"/><ellipse cx="56" cy="54" rx="3" ry="1.6"/><ellipse cx="40" cy="60" rx="3" ry="1.6"/></g>' },
-    curry:   { z: 2, svg: '<path d="M52 46 Q74 34 96 46 Q106 58 94 68 Q74 78 56 70 Q46 62 52 46Z" fill="#b8641f" stroke="#86460f" stroke-width="2"/><rect x="66" y="48" width="8" height="8" rx="2" fill="#f08c00"/><rect x="82" y="56" width="9" height="8" rx="2" fill="#f2d16b"/><rect x="72" y="62" width="7" height="7" rx="2" fill="#f08c00"/>' },
-    fukujin: { z: 3, svg: '<g fill="#d6336c" stroke="#a61e4d" stroke-width="1"><rect x="28" y="40" width="9" height="5" rx="2" transform="rotate(-20 32 42)"/><rect x="34" y="37" width="9" height="5" rx="2" transform="rotate(15 38 40)"/><rect x="30" y="45" width="9" height="5" rx="2" transform="rotate(10 34 47)"/><rect x="38" y="43" width="8" height="5" rx="2" transform="rotate(-10 42 45)"/></g>' }
-  }},
-  car: { vb: [120, 90], layers: {
-    body: { z: 1, svg: '<path d="M8 66 L10 50 Q12 42 24 40 L36 38 L46 22 Q50 18 58 18 L82 18 Q90 18 94 24 L104 38 Q114 40 114 52 L114 66 Z" fill="#e8463c" stroke="#a52a24" stroke-width="2"/><path d="M50 24 Q52 22 56 22 L66 22 L66 37 L42 37 Z" fill="#bfe3f5" stroke="#a52a24" stroke-width="1.5"/><path d="M70 22 L82 22 Q87 22 90 27 L97 37 L70 37 Z" fill="#bfe3f5" stroke="#a52a24" stroke-width="1.5"/><rect x="46" y="40" width="24" height="22" rx="2" fill="#4a1512"/>' },
-    door: { z: 2, svg: '<rect x="45" y="39" width="26" height="24" rx="3" fill="#ff6b5e" stroke="#a52a24" stroke-width="2"/><rect x="60" y="47" width="7" height="3" rx="1.5" fill="#5c1d18"/>' },
-    tire: { z: 3, svg: '<circle cx="30" cy="68" r="12" fill="#2b2b2b"/><circle cx="30" cy="68" r="5" fill="#c9ced4"/><circle cx="92" cy="68" r="12" fill="#2b2b2b"/><circle cx="92" cy="68" r="5" fill="#c9ced4"/>' }
-  }},
-  cake: { vb: [120, 100], layers: {
-    sponge: { z: 1, svg: '<rect x="24" y="48" width="72" height="40" rx="4" fill="#f5cf86" stroke="#c9963f" stroke-width="2"/>' },
-    cream:  { z: 2, svg: '<rect x="25" y="64" width="70" height="6" fill="#fffaf2"/><path d="M20 50 Q20 40 30 40 H90 Q100 40 100 50 Q94 54 88 50 Q82 56 76 50 Q70 56 64 50 Q58 56 52 50 Q46 56 40 50 Q34 56 28 50 Q24 54 20 50Z" fill="#fffaf2" stroke="#e3d9c8" stroke-width="2"/>' },
-    berry:  { z: 3, svg: '<path d="M60 44 Q46 34 50 22 Q54 16 60 18 Q66 16 70 22 Q74 34 60 44Z" fill="#e03131" stroke="#a51111" stroke-width="1.5"/><path d="M52 20 L56 13 L60 18 L64 13 L68 20Z" fill="#2f9e44"/><g fill="#ffe8a3"><circle cx="56" cy="26" r="1.2"/><circle cx="64" cy="27" r="1.2"/><circle cx="60" cy="33" r="1.2"/></g>' }
-  }},
-  onigiri: { vb: [120, 100], layers: {
-    gohan: { z: 1, svg: '<path d="M60 10 Q67 10 72 18 L102 70 Q108 86 92 88 L28 88 Q12 86 18 70 L48 18 Q53 10 60 10Z" fill="#fffdf4" stroke="#d8cfb4" stroke-width="2.5"/>' },
-    ume:   { z: 2, svg: '<circle cx="60" cy="48" r="10" fill="#c2255c" stroke="#8c1440" stroke-width="1.5"/><circle cx="56" cy="44" r="2.5" fill="#f783ac"/>' },
-    nori:  { z: 3, svg: '<rect x="40" y="62" width="40" height="28" rx="3" fill="#1e3a2a" stroke="#0f2318" stroke-width="1.5"/>' }
-  }},
-  hotdog: { vb: [120, 90], layers: {
-    pan:     { z: 1, svg: '<path d="M8 46 Q60 30 112 46 Q116 62 100 70 Q60 82 20 70 Q4 62 8 46Z" fill="#e0a252" stroke="#a96f25" stroke-width="2"/><path d="M14 48 Q60 38 106 48" fill="none" stroke="#c98a3a" stroke-width="3"/>' },
-    sausage: { z: 2, svg: '<rect x="6" y="36" width="108" height="18" rx="9" fill="#c2452d" stroke="#8a2a1a" stroke-width="2"/>' },
-    ketchup: { z: 3, svg: '<polyline points="16,42 26,48 36,40 46,48 56,40 66,48 76,40 86,48 96,40 104,46" fill="none" stroke="#f03e3e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' }
-  }},
-  snow: { vb: [100, 110], layers: {
-    big:   { z: 1, svg: '<circle cx="50" cy="80" r="26" fill="#fff" stroke="#9fb3c8" stroke-width="2.5"/><circle cx="50" cy="72" r="2.5" fill="#495057"/><circle cx="50" cy="84" r="2.5" fill="#495057"/>' },
-    small: { z: 2, svg: '<circle cx="50" cy="40" r="17" fill="#fff" stroke="#9fb3c8" stroke-width="2.5"/><circle cx="44" cy="37" r="2.2" fill="#212529"/><circle cx="56" cy="37" r="2.2" fill="#212529"/><path d="M50 41 L62 44 L50 46Z" fill="#f08c00"/>' },
-    hat:   { z: 3, svg: '<rect x="37" y="8" width="26" height="16" rx="2" fill="#364fc7"/><rect x="31" y="22" width="38" height="5" rx="2.5" fill="#364fc7"/>' }
-  }},
-  tree: { vb: [100, 110], layers: {
-    ki:     { z: 1, svg: '<rect x="44" y="86" width="12" height="18" fill="#8d5524"/><path d="M50 18 L80 56 H66 L88 88 H12 L34 56 H20Z" fill="#2f9e44" stroke="#1b6e2c" stroke-width="2"/>' },
-    kazari: { z: 2, svg: '<path d="M30 70 Q50 64 72 72" fill="none" stroke="#fab005" stroke-width="2"/><circle cx="42" cy="50" r="4" fill="#e03131"/><circle cx="58" cy="62" r="4" fill="#fab005"/><circle cx="36" cy="78" r="4" fill="#4dabf7"/><circle cx="66" cy="80" r="4" fill="#e03131"/><circle cx="54" cy="40" r="3.5" fill="#4dabf7"/>' },
-    star:   { z: 3, svg: '<polygon points="50,4 54,14 65,14 56,21 59,32 50,25 41,32 44,21 35,14 46,14" fill="#ffd43b" stroke="#e8a400" stroke-width="1.5"/>' }
-  }},
-  yacht: { vb: [120, 100], layers: {
-    fune: { z: 1, svg: '<path d="M0 92 Q10 86 20 92 T40 92 T60 92 T80 92 T100 92 T120 92 V100 H0Z" fill="#74c0fc"/><path d="M14 70 H106 L94 88 H26Z" fill="#f8f9fa" stroke="#495057" stroke-width="2"/><rect x="15" y="70" width="90" height="5" fill="#1c7ed6"/>' },
-    mast: { z: 2, svg: '<rect x="57" y="12" width="5" height="58" fill="#8d5524"/>' },
-    ho:   { z: 3, svg: '<path d="M63 14 L63 64 L100 64Z" fill="#fff" stroke="#adb5bd" stroke-width="2"/><path d="M56 22 L56 64 L28 64Z" fill="#ffe3e3" stroke="#adb5bd" stroke-width="2"/>' }
-  }}
-};
-// 部品の名前 → テーマとかさねる絵。solo は1つだけのときの絵
-const BITEMS = {
-  "ふくじんづけ": { theme: "curry", layers: ["fukujin"], solo: '<ellipse cx="60" cy="62" rx="30" ry="12" fill="#fff" stroke="#b8c4d0" stroke-width="3"/><g transform="translate(24 12)">' + THEMES.curry.layers.fukujin.svg + '</g>' },
-  "ライス": { theme: "curry", layers: ["plate", "rice"] },
-  "カレー": { theme: "curry", layers: ["curry"], solo: '<path d="M22 34 H98 V66 Q98 82 82 82 H38 Q22 82 22 66Z" fill="#8f9aa6" stroke="#5c6670" stroke-width="2"/><ellipse cx="60" cy="34" rx="38" ry="9" fill="#b8641f" stroke="#5c6670" stroke-width="2"/><rect x="10" y="40" width="14" height="6" rx="3" fill="#5c6670"/><rect x="96" y="40" width="14" height="6" rx="3" fill="#5c6670"/>' },
-  "車体": { theme: "car", layers: ["body"] },
-  "ドア": { theme: "car", layers: ["door"] },
-  "タイヤ": { theme: "car", layers: ["tire"] },
-  "スポンジ": { theme: "cake", layers: ["sponge"] },
-  "クリーム": { theme: "cake", layers: ["cream"] },
-  "いちご": { theme: "cake", layers: ["berry"] },
-  "ごはん": { theme: "onigiri", layers: ["gohan"] },
-  "うめぼし": { theme: "onigiri", layers: ["ume"] },
-  "のり": { theme: "onigiri", layers: ["nori"] },
-  "パン": { theme: "hotdog", layers: ["pan"] },
-  "ソーセージ": { theme: "hotdog", layers: ["sausage"] },
-  "ケチャップ": { theme: "hotdog", layers: ["ketchup"] },
-  "大きい雪玉": { theme: "snow", layers: ["big"] },
-  "小さい雪玉": { theme: "snow", layers: ["small"] },
-  "ぼうし": { theme: "snow", layers: ["hat"] },
-  "木": { theme: "tree", layers: ["ki"] },
-  "かざり": { theme: "tree", layers: ["kazari"] },
-  "星": { theme: "tree", layers: ["star"] },
-  "ふね": { theme: "yacht", layers: ["fune"] },
-  "マスト": { theme: "yacht", layers: ["mast"] },
-  "ほ": { theme: "yacht", layers: ["ho"] }
-};
-// イラスト1：x＋（a＋b）。names は1回目・2回目にできるものの名前
-const BUILD_PROBLEMS = [
-  { x: "ふくじんづけ", a: "ライス", b: "カレー", names: ["カレーライス", "ふくじんづけのせカレーライス"], oops: "カレーがかかっていないよ！" },
-  { x: "タイヤ", a: "車体", b: "ドア", names: ["ドアのついた車体", "車"], oops: "ドアがなくて、あながあいているよ！" },
-  { x: "いちご", a: "スポンジ", b: "クリーム", names: ["クリームのスポンジ", "ショートケーキ"], oops: "クリームがぬってないよ！" },
-  { x: "のり", a: "ごはん", b: "うめぼし", names: ["うめぼしごはん", "おにぎり"], oops: "うめぼしを入れわすれた！" },
-  { x: "ケチャップ", a: "パン", b: "ソーセージ", names: ["ソーセージパン", "ホットドッグ"], oops: "ソーセージがないよ！" },
-  { x: "ぼうし", a: "大きい雪玉", b: "小さい雪玉", names: ["雪だるま", "ぼうしの雪だるま"], oops: "頭がないのに、ぼうし？" },
-  { x: "星", a: "木", b: "かざり", names: ["かざった木", "クリスマスツリー"], oops: "かざりがないよ。さびしいね。" },
-  { x: "ほ", a: "ふね", b: "マスト", names: ["マストのついたふね", "ヨット"], oops: "ほが、ういているよ！" }
-];
-
-// イラスト2・3：ならべるもの
-const SITEMS = {
-  "お茶": { unit: "本", svg: '<rect x="22" y="5" width="16" height="7" rx="2" fill="#2b8a3e"/><path d="M18 16 Q18 12 22 12 H38 Q42 12 42 16 V52 Q42 56 38 56 H22 Q18 56 18 52Z" fill="#d3f9d8" stroke="#2b8a3e" stroke-width="2"/><rect x="18" y="26" width="24" height="16" fill="#2b8a3e"/><text x="30" y="38" font-size="10" fill="#fff" text-anchor="middle" font-weight="bold">お茶</text>' },
-  "おにぎり": { unit: "こ", svg: '<path d="M30 6 Q34 6 37 11 L54 42 Q57 52 48 53 H12 Q3 52 6 42 L23 11 Q26 6 30 6Z" fill="#fffdf4" stroke="#bdb59c" stroke-width="2"/><rect x="20" y="36" width="20" height="18" rx="2" fill="#1e3a2a"/>' },
-  "ジュース": { unit: "はい", svg: '<path d="M34 16 L40 2" stroke="#e64980" stroke-width="3" stroke-linecap="round"/><path d="M16 16 H44 L40 56 H20Z" fill="#ffa94d" stroke="#d9480f" stroke-width="2"/><path d="M16 16 H44 L43 24 H17Z" fill="#fff4e6"/>' },
-  "ドーナツ": { unit: "こ", svg: '<circle cx="30" cy="32" r="22" fill="#c9853a"/><path d="M10 28 Q14 12 30 10 Q46 12 50 28 Q46 36 40 30 Q34 38 28 31 Q20 38 16 30 Q12 34 10 28Z" fill="#f783ac"/><circle cx="30" cy="32" r="8" fill="#fff"/>' },
-  "からあげ": { unit: "こ", svg: '<g stroke="#8a4b12" stroke-width="1.5"><circle cx="22" cy="38" r="13" fill="#d9822b"/><circle cx="39" cy="36" r="12" fill="#e8923a"/><circle cx="30" cy="22" r="11" fill="#f0a24a"/></g>' },
-  "りんご": { unit: "こ", svg: '<path d="M30 18 Q44 8 52 22 Q58 40 44 54 Q36 58 30 54 Q24 58 16 54 Q2 40 8 22 Q16 8 30 18Z" fill="#e03131" stroke="#a51111" stroke-width="1.5"/><path d="M30 18 Q30 10 34 6" stroke="#5c3d1e" stroke-width="2.5" fill="none"/><path d="M34 10 Q44 4 46 12 Q38 14 34 10Z" fill="#2f9e44"/>' },
-  "バナナ": { unit: "本", svg: '<path d="M8 20 Q14 50 50 48 Q56 46 54 42 Q24 40 16 16 Q12 12 8 20Z" fill="#ffd43b" stroke="#e8a400" stroke-width="2"/><path d="M52 44 L57 42" stroke="#5c3d1e" stroke-width="3"/>' },
-  "ケーキ": { unit: "こ", svg: '<path d="M8 30 L52 22 V50 L8 54Z" fill="#f5cf86" stroke="#c9963f" stroke-width="2"/><path d="M8 38 L52 32 V36 L8 42Z" fill="#fffaf2"/><path d="M8 30 L34 10 L52 22Z" fill="#fffaf2" stroke="#e3d9c8" stroke-width="1.5"/><circle cx="33" cy="13" r="5" fill="#e03131"/>' },
-  "いちご": { unit: "こ", svg: '<path d="M30 54 Q10 40 14 22 Q18 14 30 16 Q42 14 46 22 Q50 40 30 54Z" fill="#e03131" stroke="#a51111" stroke-width="1.5"/><path d="M18 18 L24 8 L30 15 L36 8 L42 18Z" fill="#2f9e44"/><g fill="#ffe8a3"><circle cx="24" cy="28" r="1.6"/><circle cx="36" cy="28" r="1.6"/><circle cx="30" cy="38" r="1.6"/><circle cx="24" cy="42" r="1.4"/><circle cx="36" cy="42" r="1.4"/></g>' },
-  "ハンバーガー": { unit: "こ", svg: '<path d="M8 28 Q8 8 30 8 Q52 8 52 28Z" fill="#e0a252" stroke="#a96f25" stroke-width="1.5"/><rect x="6" y="28" width="48" height="5" rx="2" fill="#69db7c"/><rect x="7" y="33" width="46" height="9" rx="4" fill="#7b3f1d"/><path d="M8 42 H52 Q52 52 42 52 H18 Q8 52 8 42Z" fill="#e0a252" stroke="#a96f25" stroke-width="1.5"/>' },
-  "ポテト": { unit: "こ", svg: '<g fill="#ffd43b" stroke="#e8a400" stroke-width="1"><rect x="18" y="6" width="5" height="26"/><rect x="25" y="4" width="5" height="28"/><rect x="32" y="7" width="5" height="25"/><rect x="38" y="9" width="5" height="23"/></g><path d="M14 24 H46 L42 56 H18Z" fill="#e03131" stroke="#a51111" stroke-width="1.5"/>' }
-};
-SITEMS["ピザ"] = { unit: "まい", round: true, svg: '<circle cx="30" cy="31" r="28" fill="#e0a252" stroke="#a96f25" stroke-width="1.5"/><circle cx="30" cy="31" r="23" fill="#ffd54f"/><g fill="#d6336c"><circle cx="22" cy="20" r="4"/><circle cx="40" cy="22" r="4"/><circle cx="18" cy="36" r="4"/><circle cx="34" cy="42" r="4"/><circle cx="43" cy="34" r="3.5"/><circle cx="28" cy="30" r="3.5"/></g><g fill="none" stroke="#2f9e44" stroke-width="2"><path d="M30 14 q3 2 0 4"/><path d="M14 27 q3 2 0 4"/><path d="M44 45 q3 2 0 4"/><path d="M25 46 q3 2 0 4"/></g>' };
-const SET4_PROBLEMS = ["ジュース+ピザ/4", "ピザ/4*3", "お茶+ピザ/4*2", "ピザ/(2*2)", "(ピザ+ジュース)/2", "ピザ/8*3+ジュース"];
-const SET2_PROBLEMS = ["お茶+おにぎり*3", "ジュース+ドーナツ*4", "ケーキ+いちご*3", "りんご*2+バナナ*3", "ジュース*2+ドーナツ*2", "いちご+ケーキ*2"];
-const SET3_PROBLEMS = ["(ジュース+ドーナツ)*3", "(おにぎり+からあげ)*2", "(ハンバーガー+ポテト)*2+ジュース", "お茶+(おにぎり+からあげ)*2", "(りんご+バナナ)*4", "(ケーキ+いちご)*2+お茶"];
-
-/* ---- 式を読む ---- */
-function parseIll(prob, kind) {
-  const src = kind === "build" ? prob.e : prob;
-  const dict = kind === "build" ? BITEMS : SITEMS;
-  const out = [];
-  const re = /\d+|[+\-*/()]|[^+\-*/()\d]+/g;
-  let m;
-  while ((m = re.exec(src))) {
-    const s = m[0];
-    if (/^\d+$/.test(s)) out.push({ t: "num", v: { num: Number(s), label: s } });
-    else if ("+-*/".includes(s)) out.push({ t: "op", v: s });
-    else if (s === "(" || s === ")") out.push({ t: s });
-    else {
-      const d = dict[s];
-      if (!d) throw new Error("unknown item " + s);
-      out.push({ t: "num", v: kind === "build"
-        ? { theme: d.theme, layers: d.layers.slice(), solo: d.solo, orig: true, label: s }
-        : { groups: [{ item: s, n: 1 }], orig: true, label: s } });
-    }
-  }
-  return out;
-}
-
-/* ---- 組み合わせる ---- */
-// ならべるものは groups：{ item, n, div } または { set, n }。div があるときは「div 等分した1つ分」が n こ
-const gcd = (a, b) => b ? gcd(b, a % b) : a;
-function qtyText(item, n, d) {
-  const u = SITEMS[item].unit; d = d || 1;  // 約分はしない（4年生向け）
-  return n % d === 0 ? `${n / d}${u}` : `${d}分の${n}${u}`;
-}
-function setLabel(gs) {
-  return gs.map(g => g.item
-    ? (g.div ? `${g.item}${qtyText(g.item, g.n, g.div)}` : (g.n === 1 ? g.item : `${g.item}${g.n}${SITEMS[g.item].unit}`))
-    : `${setLabel(g.set)}のセット${g.n}つ`).join("と");
-}
-function mergeGroups(gs) {
-  const out = [];
-  gs.forEach(g => {
-    const m = g.item && out.find(o => o.item === g.item && (o.div || 1) === (g.div || 1));
-    if (m) m.n += g.n; else out.push(Object.assign({}, g));
-  });
-  return out;
-}
-function divGroups(gs, k) {
-  return gs.map(g => g.item
-    ? Object.assign({}, g, { div: (g.div || 1) * k })
-    : { set: divGroups(g.set, k), n: g.n });
-}
-const mk = gs => ({ groups: gs, label: setLabel(gs) });
-function combine(a, op, b) {
-  if (a.theme || b.theme) {
-    if (op !== "+" || !a.theme || !b.theme) return null;
-    const ls = a.layers.concat(b.layers.filter(x => !a.layers.includes(x)));
-    return { theme: a.theme, layers: ls, label: "" };
-  }
-  if (a.num !== undefined && b.num !== undefined) {
-    const r = calc(a.num, op, b.num);
-    return (r === null || r <= 0) ? null : { num: r, label: String(r) };
-  }
-  if (op === "+") return (a.groups && b.groups) ? mk(mergeGroups(a.groups.concat(b.groups))) : null;
-  if (op === "*") {
-    const k = a.num !== undefined ? a.num : b.num, g = a.groups || b.groups;
-    if (k === undefined || !g) return null;
-    return mk((g.length === 1 && g[0].item) ? [Object.assign({}, g[0], { n: g[0].n * k })] : [{ set: g, n: k }]);
-  }
-  if (op === "/") {
-    if (!a.groups || b.num === undefined) return null;
-    return mk(divGroups(a.groups, b.num));
-  }
-  return null;
-}
-// 全部計算する。how: "normal"（きまりどおり）/ "ltr"（×÷も左から）。first：最初に計算する記号の場所
-function evalAll(t, how, first) {
-  t = t.slice();
-  while (t.length > 1) {
-    let k;
-    if (first !== undefined) { k = first; first = undefined; }
-    else if (how === "ltr") {
-      const R = regions(t), [s, e] = R.list[0];
-      for (let i = s; i < e; i++) if (t[i].t === "op") { k = i; break; }
-    } else k = validOps(t)[0];
-    if (k === undefined || t[k - 1].t !== "num" || t[k + 1].t !== "num") return null;
-    const r = combine(t[k - 1].v, t[k].v, t[k + 1].v);
-    if (!r) return null;
-    t = stripLoneParens(t.slice(0, k - 1).concat([{ t: "num", v: r }], t.slice(k + 2)));
-  }
-  return t[0].v;
-}
-// もの別の量を分数 [分子, 分母] で
-function countItems(gs, mult, out) {
-  out = out || {};
-  gs.forEach(g => {
-    if (g.set) { countItems(g.set, g.n * mult, out); return; }
-    const [n0, d0] = out[g.item] || [0, 1], n1 = g.n * mult, d1 = g.div || 1;
-    out[g.item] = d0 === d1 ? [n0 + n1, d0] : (n0 === 0 ? [n1, d1] : [n0 * d1 + n1 * d0, d0 * d1]);
-  });
-  return out;
-}
-
-/* ---- 絵をかく ---- */
-let clipSeq = 0;
-function svgItem(k, s) { return `<svg viewBox="0 0 60 60" width="${s}" height="${s}">${SITEMS[k].svg}</svg>`; }
-// d 等分した p こ分。ピザは扇形、ほかは下から p/d の高さ
-function svgFrac(k, p, d, s) {
-  const id = "cp" + (++clipSeq), body = SITEMS[k].svg;
-  let clip, lines = "";
-  if (SITEMS[k].round) {
-    const cx = 30, cy = 31, r = 29, a0 = -Math.PI / 2, a1 = a0 + 2 * Math.PI * p / d;
-    const pt = a => `${(cx + r * Math.cos(a)).toFixed(2)} ${(cy + r * Math.sin(a)).toFixed(2)}`;
-    clip = p >= d ? `<circle cx="${cx}" cy="${cy}" r="${r}"/>`
-      : `<path d="M${cx} ${cy} L${pt(a0)} A${r} ${r} 0 ${p / d > 0.5 ? 1 : 0} 1 ${pt(a1)}Z"/>`;
-    for (let i = 0; i < d && d > 1 && d <= 12; i++) lines += `<line x1="${cx}" y1="${cy}" x2="${pt(a0 + 2 * Math.PI * i / d).replace(" ", '" y2="')}" stroke="#fff" stroke-width="1.5"/>`;
-  } else {
-    const h = 58 * p / d;
-    clip = `<rect x="0" y="${(60 - h).toFixed(2)}" width="60" height="${h.toFixed(2)}"/>`;
-    for (let i = 1; i < d; i++) lines += `<line x1="4" x2="56" y1="${(60 - 58 * i / d).toFixed(2)}" y2="${(60 - 58 * i / d).toFixed(2)}" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 2"/>`;
-  }
-  return `<svg viewBox="0 0 60 60" width="${s}" height="${s}"><defs><clipPath id="${id}">${clip}</clipPath></defs>` +
-    `<g opacity=".18">${body}</g><g clip-path="url(#${id})">${body}</g>${lines}</svg>`;
-}
-function itemHTML(g, s) {
-  if (!g.div || g.div === 1) return svgItem(g.item, s).repeat(g.n);
-  let h = "";
-  for (let left = g.n; left > 0; left -= g.div) h += svgFrac(g.item, Math.min(left, g.div), g.div, s);
-  return h;
-}
-function grpHTML(gs, s) {
-  return gs.map(g => g.item ? itemHTML(g, s)
-    : `<div class="box">${grpHTML(g.set, s * 0.85)}</div>`.repeat(g.n)).join("");
-}
-function iconCount(gs) { return gs.reduce((a, g) => a + (g.item ? Math.ceil(g.n / (g.div || 1)) : g.n * iconCount(g.set)), 0); }
-function picHTML(v, S, noFit) {
-  if (v.theme) {
-    const th = THEMES[v.theme], [w, h] = th.vb;
-    const inner = (v.solo && v.orig) ? v.solo
-      : v.layers.map(id => th.layers[id]).sort((p, q) => p.z - q.z).map(x => x.svg).join("");
-    const fit = v.orig && !noFit;
-    return `<svg ${fit ? 'class="fit" ' : ""}viewBox="0 0 ${w} ${h}" width="${S}" height="${fit ? S : Math.round(S * h / w)}">${inner}</svg>`;
-  }
-  const n = iconCount(v.groups);
-  const s = n === 1 ? S * 0.8 : Math.max(30, Math.round(S * (n > 6 ? 0.36 : 0.48)));
-  return `<div class="grp">${grpHTML(v.groups, s)}</div>`;
-}
-function fitSvgs(root) {
-  root.querySelectorAll("svg.fit").forEach(el => {
-    try { const b = el.getBBox(); if (b.width > 0) el.setAttribute("viewBox", `${b.x - 4} ${b.y - 4} ${b.width + 8} ${b.height + 8}`); } catch (e) {}
-  });
-}
-
-// まちがえた順番で計算したらどうなるか（絵と、ひとこと）
-function wrongPreview(t, k, rule, prob, kind) {
-  if (kind === "build") {
-    let i = k - 1, j = k + 1;
-    while (i >= 0 && t[i].t !== "num") i--;
-    while (j < t.length && t[j].t !== "num") j++;
-    if (i < 0 || j >= t.length) return null;
-    const r = combine(t[i].v, "+", t[j].v);
-    return r ? { pic: r, text: prob.oops } : null;
-  }
-  let w = null;
-  const nums = t[k - 1].t === "num" && t[k + 1].t === "num";
-  if (rule === 1) w = nums ? evalAll(t, "normal", k) : null;
-  if (rule === 1 && !w) w = evalAll(t.filter(x => x.t !== "(" && x.t !== ")"), "normal");
-  else if (rule === 2) w = evalAll(t, "ltr");
-  else if (rule === 3 && nums) w = evalAll(t, "normal", k);
-  const c = evalAll(t, "normal");
-  if (!w || !c || !w.groups || !c.groups) return null;
-  const cw = countItems(w.groups, 1), cc = countItems(c.groups, 1);
-  const same = (x, y) => x && y && x[0] * y[1] === y[0] * x[1];
-  const name = Object.keys(cc).find(x => !same(cw[x], cc[x]));
-  if (!name) return null;
-  const [wn, wd] = cw[name] || [0, 1], [cn, cd] = cc[name];
-  const q = qtyText(name, wn, wd);
-  const text = wn * cd > cn * wd ? `${name}が ${q} になっちゃった！` : `${name}が ${q} しかないよ！`;
-  return { pic: w, text };
-}
-
 /* ================= 画面 ================= */
 const $ = id => document.getElementById(id);
 
 function renderLevels() {
   const mb = $("modes"); mb.innerHTML = "";
-  [["num", "数字モード"], ["calc", "計算モード"], ["ill", "イラストモード"], ["kufu", "くふうモード"]].forEach(([m, txt]) => {
+  [["num", "数字モード"], ["calc", "計算モード"], ["kufu", "くふうモード"]].forEach(([m, txt]) => {
     const b = document.createElement("button");
     b.textContent = txt; if (mode === m) b.className = "cur";
-    b.onclick = () => { if (mode === m) return; mode = m; lv = { num: 1, calc: 13, ill: 5, kufu: 9 }[m]; newSet(); };
+    b.onclick = () => { if (mode === m) return; mode = m; lv = { num: 1, calc: 13, kufu: 9 }[m]; newSet(); };
     mb.appendChild(b);
   });
   const box = $("levels"); box.innerHTML = "";
@@ -814,7 +522,7 @@ function renderLevels() {
   if (lv === 0) {
     $("lvdesc").innerHTML = custom.length ? `先生が追加した問題（${custom.length}問）` : "まだ問題がありません。下の「先生用：問題を追加する」から追加できます。";
   } else {
-    const L = LEVELS[lv - 1];
+    const L = curL();
     $("lvdesc").innerHTML = L.tags.map(s => `<span class="tag">${s}</span>`).join("") +
       (best[lv] !== undefined ? `　<span class="small">これまでのいちばん：まちがい ${best[lv]} 回</span>` : "");
   }
@@ -826,16 +534,8 @@ function newSet() {
   finished = false; totalMiss = 0; totalCalcMiss = 0; qi = 0;
   const per = (lv > 0 && curL().per) || PER;
   if (lv === 0) set = custom.slice();
-  else if (curL().mode === "ill") {
-    const L = curL();
-    const list = L.kind === "build"
-      ? BUILD_PROBLEMS.map(p => Object.assign({}, p, { e: Math.random() < 0.7 ? `${p.x}+(${p.a}+${p.b})` : `(${p.a}+${p.b})+${p.x}` }))
-      : ({ 6: SET2_PROBLEMS, 7: SET3_PROBLEMS, 8: SET4_PROBLEMS })[L.id].slice();
-    for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
-    set = list.slice(0, PER);
-  }
   else {
-    const L = LEVELS[lv - 1], seen = new Set(); set = [];
+    const L = curL(), seen = new Set(); set = [];
     if (L.mixParen) {
       // （ ）ありとなしを半分ずつ作って、順番をまぜる
       for (const withP of [true, false]) {
@@ -867,7 +567,7 @@ function startQ() {
     $("btns").innerHTML = ""; renderLog(); return;
   }
   stepNo = 0;
-  tokens = isIll() ? parseIll(set[qi], curL().kind) : stripLoneParens(tokenize(set[qi]));
+  tokens = stripLoneParens(tokenize(set[qi]));
   lines = [toStr(tokens)];
   setMsg("", "");
   render();
@@ -882,7 +582,7 @@ function render() {
   $("guide").style.display = finished ? "none" : "";
   $("guide").innerHTML = isCalc()
     ? 'はじめに計算するところの 記号 <span class="key">＋</span><span class="key">−</span><span class="key">×</span><span class="key">÷</span> をタップして、<b>自分で計算</b>しよう。'
-    : 'はじめに計算する（作る）ところの 記号 <span class="key">＋</span><span class="key">−</span><span class="key">×</span><span class="key">÷</span> をタップしよう。';
+    : 'はじめに計算するところの 記号 <span class="key">＋</span><span class="key">−</span><span class="key">×</span><span class="key">÷</span> をタップしよう。';
 
   const ex = $("expr"); ex.innerHTML = "";
   if (finished) { renderResult(); renderLog(); return; }
@@ -895,20 +595,13 @@ function render() {
       if (done) el.disabled = true;
     } else {
       el = document.createElement("span");
-      if (x.t === "num" && typeof x.v === "object" && x.v.num === undefined) {
-        el = document.createElement("div");
-        const big = tokens.length === 1;
-        el.className = "pic" + (x.fresh ? " fresh" : "") + (big ? " big" : "");
-        el.innerHTML = picHTML(x.v, big ? 190 : (window.innerWidth < 600 ? 62 : 84), big) + `<div class="lab">${x.v.label}</div>`;
-      }
-      else if (x.t === "num" && typeof x.v === "object") { el.textContent = x.v.label; el.className = "inum"; }
+      if (x.t === "num" && typeof x.v === "object") { el.textContent = x.v.label; el.className = "inum"; }
       else if (x.t === "num") { el.textContent = x.v; if (x.fresh) el.className = "fresh"; }
       else { el.textContent = x.t === "(" ? "（" : "）"; el.className = "par"; }
     }
     el.dataset.k = i;
     ex.appendChild(el);
   });
-  fitSvgs(ex);
   renderButtons();
   renderLog();
 }
@@ -938,24 +631,14 @@ function tap(k) {
     mistakes++; totalMiss++;
     const e = opEl(k); void e.offsetWidth; e.classList.add("ng");
     setMsg("bad", res.msg);
-    if (isIll()) {
-      const pv = wrongPreview(tokens, k, res.rule, set[qi], curL().kind);
-      if (pv) {
-        const d = document.createElement("div"); d.className = "oops";
-        d.innerHTML = `<small>この順番で計算すると…</small>${picHTML(pv.pic, 110, true)}<b>${pv.text}</b>`;
-        $("msg").appendChild(d);
-      }
-    }
     return;
   }
   busy = true;
   [k - 1, k, k + 1].forEach(i => opEl(i).classList.add("hl"));
   if (isCalc()) { startCalc(k); return; } // 計算モード：自分で計算する
   const step = applyStep(tokens, k);
-  const lab = v => typeof v === "object" ? v.label : v;
-  if (isIll() && curL().kind === "build") step.r.label = set[qi].names[stepNo] || "";
   stepNo++;
-  setMsg("ok", `${lab(step.a)} ${SYM[tokens[k].v]} ${lab(step.b)} ＝ ${lab(step.r)}`);
+  setMsg("ok", `${step.a} ${SYM[tokens[k].v]} ${step.b} ＝ ${step.r}`);
   setTimeout(() => commitStep(step), 650);
 }
 function commitStep(step) {
@@ -964,7 +647,7 @@ function commitStep(step) {
   busy = false;
   if (tokens.length === 1) {
     done = true; solved[qi] = true;
-    setMsg("done", (isIll() ? "できあがり！" : `答えは ${tokens[0].v}！`) + (mistakes === 0 && calcMiss === 0 ? " ノーミス！" : ""));
+    setMsg("done", `答えは ${tokens[0].v}！` + (mistakes === 0 && calcMiss === 0 ? " ノーミス！" : ""));
   }
   render();
 }
@@ -998,7 +681,7 @@ function next() {
 function renderResult() {
   const solvedN = solved.filter(Boolean).length;
   const all = solvedN === set.length;
-  const name = lv === 0 ? "先生の問題" : LEVELS[lv - 1].name;
+  const name = lv === 0 ? "先生の問題" : curL().name;
   $("expr").innerHTML = `<div class="result">
     <div class="big">${all ? name + " クリア！" : name + " おつかれさま"}</div>
     <p>${set.length}問中 ${solvedN}問 とけました</p>
