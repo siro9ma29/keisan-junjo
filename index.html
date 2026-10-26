@@ -825,9 +825,8 @@ function renderButtons() {
   const mk = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; b.appendChild(e); return e; };
   if (!done) mk("hintb", "ヒント", () => cx ? calcHint() : hint());
   mk("reset", "やり直し", () => startQ());
-  const last = qi === set.length - 1;
-  if (adv && !done) return; // 冒険では とばせない
-  mk("next" + (done ? " big" : ""), last ? (done ? "けっかを見る ▶" : "おわる ▶") : "つぎの問題 ▶", next);
+  if (!done) return; // とばすことはできない（とけたら「つぎの問題」が出る）
+  mk("next big", qi === set.length - 1 ? "けっかを見る ▶" : "つぎの問題 ▶", next);
 }
 
 function renderLog() {
@@ -896,7 +895,7 @@ function hint() {
 function next() {
   if (busy && !cx) return;
   if (calcLock) return;
-  if (adv && !done) return;
+  if (!done) return;
   if (qi < set.length - 1) { qi++; startQ(); }
   else finishSet();
 }
@@ -1046,7 +1045,7 @@ function calcOK(t) {
 // 九九ですぐ出せる計算は、はじめは「あんざん」で答える
 const isEasy = (a, op, b) => op === "*" ? (a < 10 && b < 10) : op === "/" ? (b < 10 && a / b < 10) : false;
 
-/* ---- たし算 ---- */
+/* ---- たし算（10をこえたら、くり上がりの1を先に書いてから、その位の答えを書く） ---- */
 function hsAdd(a, b) {
   const A = digs(a), B = digs(b), S = digs(a + b), W = S.length;
   const cin = [0];
@@ -1054,15 +1053,15 @@ function hsAdd(a, b) {
   const colSum = p => (atP(A, p) || 0) + (atP(B, p) || 0) + cin[p];
   const tasks = [];
   for (let p = 0; p < W; p++) {
-    if (teinei && cin[p]) tasks.push({ t: "carry", p, v: 1 });
-    tasks.push({ t: "ans", p, v: atP(S, p) });
+    if (teinei && cin[p + 1]) tasks.push({ t: "carry", p: p + 1, col: p, v: 1 }); // くり上がりを先に
+    tasks.push({ t: "ans", p, col: p, v: atP(S, p) });
   }
   const ans = {}, carry = {};
   let ti = 0;
   const H = {
     task: () => tasks[ti], sid: () => ti, teineiUsed: true,
     grid() {
-      const tk = tasks[ti], fp = tk ? tk.p : -1;
+      const tk = tasks[ti], fp = tk ? tk.col : -1;
       const f = p => p === fp ? "focus" : "";
       return { W, rows: [
         { memo: true, cells: rowOf(W, p => ({ v: carry[p] ? "1" : "", cls: tk && tk.t === "carry" && tk.p === p ? "cur" : "" })) },
@@ -1074,29 +1073,31 @@ function hsAdd(a, b) {
     input(d) {
       const tk = tasks[ti];
       if (d !== tk.v) {
-        if (tk.t === "carry") return { ok: false, msg: "くり上がりは 1 だよ。小さく 1 を書こう。" };
+        if (tk.t === "carry") {
+          const s = colSum(tk.col);
+          if (d === s % 10) return { ok: false, msg: `${s} は 10 をこえたね。先に くり上がりの 1 を、${pn(tk.p)}の上に 小さく書こう。` };
+          return { ok: false, msg: "くり上がりは 1 だよ。小さく 1 を書こう。" };
+        }
         if (cin[tk.p] && d === (tk.v + 9) % 10) return { ok: false, msg: `${pn(tk.p - 1)}から くり上がった 1 を、たしわすれていないかな？` };
         return { ok: false, msg: `${pn(tk.p)}を もう一度 計算してみよう。` };
       }
       let msg = "";
-      if (tk.t === "carry") carry[tk.p] = 1;
+      if (tk.t === "carry") { carry[tk.p] = 1; msg = `つぎに、${pn(tk.col)}の 答えを書こう。`; }
       else {
         ans[tk.p] = d;
-        if (cin[tk.p + 1]) {
-          if (teinei) msg = `10 をこえたね。${pn(tk.p + 1)}の上に、くり上がりの 1 を書こう。`;
-          else { carry[tk.p + 1] = 1; msg = `10 をこえたので、${pn(tk.p + 1)}に 1 くり上げたよ。`; }
-        }
+        if (cin[tk.p + 1] && !teinei) { carry[tk.p + 1] = 1; msg = `10 をこえたので、${pn(tk.p + 1)}に 1 くり上げたよ。`; }
       }
       ti++;
       return { ok: true, msg, done: ti >= tasks.length };
     },
     hint() {
-      const tk = tasks[ti], p = tk.p;
-      if (tk.t === "carry") return `${pn(p - 1)}は ${colSum(p - 1)} で、10 をこえたね。${pn(p)}の上に 小さく 1 を書こう。`;
+      const tk = tasks[ti], p = tk.col;
       const xs = [atP(A, p), atP(B, p)].filter(x => x !== null), s = colSum(p);
+      const shiki = `${pn(p)}：${xs.join("＋")}${cin[p] ? "＋1（くり上がり）" : ""}＝${s}。`;
+      if (tk.t === "carry") return shiki + `10 をこえたので、先に くり上がりの 1 を ${pn(tk.p)}の上に 小さく書こう。`;
       if (!xs.length) return `くり上がりの 1 を、そのまま ${pn(p)}に書こう。`;
       if (xs.length === 1 && !cin[p]) return `${pn(p)}は たす数がないので、${s} をそのまま書こう。`;
-      return `${pn(p)}：${xs.join("＋")}${cin[p] ? "＋1（くり上がり）" : ""}＝${s}。` + (s >= 10 ? `答えには ${s % 10} を書くよ。` : `${s} を書こう。`);
+      return shiki + (s >= 10 ? `答えには ${s % 10} を書くよ。` : `${s} を書こう。`);
     }
   };
   return H;
@@ -1176,19 +1177,26 @@ function hsSub(a, b) {
   return H;
 }
 
-/* ---- かけ算 ---- */
+/* ---- かけ算（1つのかけ算ごとに「くり上がり → その位の答え」と書いてから、つぎの位へ） ---- */
 function hsMul(a, b) {
   const L = mulLayout(a, b), T = digs(L.top), M = digs(L.bot), two = M.length === 2;
   const m1 = M[M.length - 1], m10 = two ? M[0] : 0, F = L.top * L.bot, FD = digs(F);
   const W = Math.max(T.length, M.length, FD.length);
   const tasks = [];
+  // k: "memo"＝くり上がりを上に小さく書く／"dig"＝その位の答え／"lead"＝さいごのかけ算の十の位（答えの行に書く）
   function rowTasks(t, mul, shift) {
-    const ds = digs(L.top * mul);
     let cin = 0;
-    for (let q = 0; q < ds.length; q++) {
-      const td = atP(T, q), pr = td === null ? cin : td * mul + cin;
-      tasks.push({ t, p: q + shift, tp: q, v: atP(ds, q), td, mul, cin, pr });
-      cin = td === null ? 0 : Math.floor(pr / 10);
+    for (let q = 0; q < T.length; q++) {
+      const td = atP(T, q), pr = td * mul + cin, last = q === T.length - 1, tens = Math.floor(pr / 10);
+      const base = { t, tp: q, td, mul, cin, pr };
+      const dig = { ...base, k: "dig", p: q + shift, v: pr % 10 };
+      if (last && pr >= 10) {
+        const lead = { ...base, k: "lead", p: q + 1 + shift, v: tens };
+        if (teinei) tasks.push({ ...lead, first: q === 0 }, dig); else tasks.push({ ...dig, first: q === 0 }, lead);
+      } else if (pr >= 10 && teinei) {
+        tasks.push({ ...base, k: "memo", p: q + shift, mp: q + 1, v: tens, first: q === 0 }, dig);
+      } else tasks.push({ ...dig, first: q === 0 });
+      cin = tens;
     }
   }
   rowTasks("p1", m1, 0);
@@ -1198,43 +1206,61 @@ function hsMul(a, b) {
     let cin = 0;
     for (let q = 0; q < FD.length; q++) {
       const x = atP(A1, q), y = atP(A2, q - 1), s = (x || 0) + (y || 0) + cin;
-      tasks.push({ t: "sum", p: q, v: atP(FD, q), x, y, cin, s });
+      if (teinei && s >= 10) tasks.push({ t: "sum", k: "memo", p: q, mp: q + 1, v: 1, x, y, cin, s });
+      tasks.push({ t: "sum", k: "dig", p: q, v: atP(FD, q), x, y, cin, s });
       cin = s >= 10 ? 1 : 0;
     }
   }
   const store = { p1: {}, p2: {}, sum: {} };
-  let memo = {}, ti = 0;
+  let memo = {}, smemo = {}, ti = 0;
   const H = {
-    task: () => tasks[ti], sid: () => ti, swapped: L.sw, top: L.top, bot: L.bot,
+    task: () => tasks[ti], sid: () => ti, swapped: L.sw, top: L.top, bot: L.bot, teineiUsed: true,
     grid() {
       const tk = tasks[ti];
-      const tdP = tk && tk.t !== "sum" && tk.td !== null ? tk.tp : -1;
+      const tdP = tk && tk.t !== "sum" ? tk.tp : -1;
       const mP = tk ? (tk.t === "p1" ? 0 : tk.t === "p2" ? 1 : -1) : -1;
       const sumP = tk && tk.t === "sum" ? tk.p : -1;
+      const isMemo = tk && tk.k === "memo";
       const cell = name => q => {
-        const v = store[name][q], isCur = tk && tk.t === name && tk.p === q;
-        return { v, cls: isCur ? "cur" : (name !== "sum" && q === sumP ? "focus" : (v !== undefined ? "in" : "")) };
+        const v = store[name][q], isCur = tk && tk.t === name && !isMemo && tk.p === q;
+        const foc = (name !== "sum" && q === sumP) || (isMemo && tk.t === name && q === tk.p);
+        return { v, cls: isCur ? "cur" : foc ? "focus" : (v !== undefined ? "in" : "") };
       };
       const rows = [
-        { memo: true, cells: rowOf(W, q => ({ v: memo[q] })) },
+        { memo: true, cells: rowOf(W, q => ({ v: memo[q], cls: isMemo && tk.t !== "sum" && tk.mp === q ? "cur" : "" })) },
         { cells: rowOf(W, q => ({ v: atP(T, q), cls: q === tdP ? "focus" : "" })) },
         { lab: "×", line: true, cells: rowOf(W, q => ({ v: atP(M, q), cls: q === mP ? "focus" : "" })) },
         { cells: rowOf(W, cell("p1")) }
       ];
-      if (two) rows.push({ line: true, cells: rowOf(W, cell("p2")) }, { cells: rowOf(W, cell("sum")) });
+      if (two) rows.push(
+        { line: true, cells: rowOf(W, cell("p2")) },
+        { memo: true, cells: rowOf(W, q => ({ v: smemo[q], cls: isMemo && tk.t === "sum" && tk.mp === q ? "cur" : "" })) },
+        { cells: rowOf(W, cell("sum")) });
       return { W, rows };
     },
     input(d) {
       const tk = tasks[ti];
       if (d !== tk.v) {
-        if (tk.t !== "sum" && tk.td !== null && tk.cin && d === (tk.td * tk.mul) % 10) return { ok: false, msg: `くり上がりの ${tk.cin} を たしわすれていないかな？` };
+        if (tk.k === "memo") {
+          if (tk.t === "sum") return { ok: false, msg: d === tk.s % 10 ? `${tk.s} は 10 をこえたね。先に くり上がりの 1 を 小さく書こう。` : "くり上がりは 1 だよ。小さく 1 を書こう。" };
+          if (d === tk.pr % 10) return { ok: false, msg: `${tk.pr} の 十の位の ${tk.v} を 先に、上に 小さく書こう（くり上がり）。` };
+          return { ok: false, msg: `${tk.td}×${tk.mul}${tk.cin ? `＋${tk.cin}` : ""} を もう一度 計算しよう。` };
+        }
+        if (tk.k === "lead" && teinei && d === tk.pr % 10) return { ok: false, msg: `${tk.pr} は 十の位の ${tk.v} から 書こう。` };
+        if (tk.t !== "sum" && tk.k === "dig" && tk.cin && d === (tk.td * tk.mul) % 10) return { ok: false, msg: `くり上がりの ${tk.cin} を たしわすれていないかな？` };
         if (tk.t === "sum" && tk.cin && d === (tk.v + 9) % 10) return { ok: false, msg: "くり上がりの 1 を たしわすれていないかな？" };
         return { ok: false, msg: "もう一度 計算してみよう。" };
       }
-      store[tk.t][tk.p] = d;
-      if (tk.t !== "sum" && tk.td !== null && tk.pr >= 10) memo[tk.tp + 1] = Math.floor(tk.pr / 10);
+      if (tk.k === "memo") (tk.t === "sum" ? smemo : memo)[tk.mp] = d;
+      else {
+        store[tk.t][tk.p] = d;
+        if (!teinei) { // くり上がりは自動で書く
+          if (tk.t !== "sum" && tk.k === "dig" && tk.pr >= 10) memo[tk.tp + 1] = Math.floor(tk.pr / 10);
+          if (tk.t === "sum" && tk.s >= 10) smemo[tk.p + 1] = 1;
+        }
+      }
       ti++;
-      let msg = "";
+      let msg = tk.k === "memo" ? "つぎに、その位の 答えを書こう。" : "";
       const nx = tasks[ti];
       if (nx && nx.t !== tk.t) {
         memo = {};
@@ -1246,14 +1272,17 @@ function hsMul(a, b) {
       const tk = tasks[ti];
       if (tk.t === "sum") {
         const xs = [tk.x, tk.y].filter(x => x !== null);
+        const shiki = `${pn(tk.p)}：${xs.join("＋")}${tk.cin ? "＋1（くり上がり）" : ""}＝${tk.s}。`;
+        if (tk.k === "memo") return shiki + `10 をこえたので、先に くり上がりの 1 を ${pn(tk.p + 1)}に 小さく書こう。`;
         if (xs.length === 1 && !tk.cin) return `${pn(tk.p)}は ${xs[0]} をそのまま書こう。`;
         if (!xs.length) return `くり上がりの 1 を そのまま書こう。`;
-        return `${pn(tk.p)}：${xs.join("＋")}${tk.cin ? "＋1（くり上がり）" : ""}＝${tk.s}。` + (tk.s >= 10 ? `答えには ${tk.s % 10} を書くよ。` : "");
+        return shiki + (tk.s >= 10 ? `答えには ${tk.s % 10} を書くよ。` : "");
       }
-      const head = tk.t === "p2" && tk.tp === 0 ? `十の位の ${m10} をかけるので、答えは ${pn(1)}から書くよ。` : "";
-      if (tk.td === null) return head + `くり上がりの ${tk.cin} を そのまま書こう。`;
-      return head + `${tk.td}×${tk.mul}＝${tk.td * tk.mul}` + (tk.cin ? `、くり上がりの ${tk.cin} をたして ${tk.pr}` : "") +
-        `。` + (tk.pr >= 10 ? `${tk.pr % 10} を書いて、${Math.floor(tk.pr / 10)} は くり上がり。` : "");
+      const head = tk.t === "p2" && tk.first ? `十の位の ${m10} をかけるので、答えは ${pn(1)}から書くよ。` : "";
+      const shiki = `${tk.td}×${tk.mul}＝${tk.td * tk.mul}` + (tk.cin ? `、くり上がりの ${tk.cin} をたして ${tk.pr}` : "") + "。";
+      if (tk.k === "memo") return head + shiki + `先に 十の位の ${tk.v} を 上に 小さく書いて（くり上がり）、つぎに ${tk.pr % 10} を書くよ。`;
+      if (tk.k === "lead") return teinei ? head + shiki + `さいごの かけ算なので、${tk.pr} を そのまま書こう（${tk.v} から）。` : `くり上がりの ${tk.v} を そのまま書こう。`;
+      return head + shiki + (tk.pr >= 10 ? (teinei ? `${tk.pr % 10} を書こう。` : `${tk.pr % 10} を書いて、${Math.floor(tk.pr / 10)} は くり上がり。`) : "");
     }
   };
   return H;
@@ -1393,7 +1422,7 @@ function renderCalc() {
     h += `<div class="ckeys">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(d => `<button data-d="${d}">${d}</button>`).join("")}` +
       (cx.how === "anzan" ? `<button class="wide" data-act="back">けす</button><span></span><button class="wide okb" data-act="ok">こたえる</button>` : "") + `</div>`;
     h += `<div class="cfoot"><button class="cbtn" data-act="hint">計算のヒント</button>`;
-    if (cx.how === "hissan" && cx.hs.teineiUsed) h += `<label class="teinei"><input type="checkbox" id="teinei"${teinei ? " checked" : ""}>${op === "+" ? "くり上がり" : "くり下がり"}も 自分で書く</label>`;
+    if (cx.how === "hissan" && cx.hs.teineiUsed) h += `<label class="teinei"><input type="checkbox" id="teinei"${teinei ? " checked" : ""}>${op === "-" ? "くり下がり" : "くり上がり"}も 自分で書く</label>`;
     h += `</div>`;
   }
   box.innerHTML = h;
