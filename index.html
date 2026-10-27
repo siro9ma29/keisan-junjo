@@ -518,14 +518,6 @@
     <svg class="bank" viewBox="0 0 900 34" preserveAspectRatio="none" aria-hidden="true"><path d="M0 34 L0 22 Q60 12 130 18 T260 16 L276 16 L276 8 L300 2 L324 8 L324 16 Q380 20 450 14 L458 14 L458 6 L462 6 L462 14 Q520 10 600 18 L612 18 L612 9 L636 3 L660 9 L660 18 Q740 22 800 14 T900 18 L900 34Z" fill="#0b0e24"/></svg>
   </header>
 
-  <div class="card" id="ruleCard">
-    <div class="rules">
-      <span><b>①</b> （ ）の中を先に</span>
-      <span><b>②</b> ×・÷ を ＋・− より先に</span>
-      <span><b>③</b> あとは 左から順に</span>
-    </div>
-  </div>
-
   <div class="card" id="selCard">
     <div class="modes" id="modes"></div>
     <div id="lvArea">
@@ -545,6 +537,14 @@
     <div id="msg"></div>
     <div id="calc" style="display:none"></div>
     <div class="btns" id="btns"></div>
+  </div>
+
+  <div class="card" id="ruleCard">
+    <div class="rules">
+      <span><b>①</b> （ ）の中を先に</span>
+      <span><b>②</b> ×・÷ を ＋・− より先に</span>
+      <span><b>③</b> あとは 左から順に</span>
+    </div>
   </div>
 
   <div class="card" id="logCard">
@@ -601,6 +601,8 @@ let best = load("junjo_best", {});
 let lv = 1, set = [], qi = 0, tokens = [], lines = [], mistakes = 0, totalMiss = 0;
 let busy = false, done = false, finished = false, solved = [];
 let mode = "num", stepNo = 0;
+let view = "menu"; // "menu"：メニュー画面 ／ "play"：問題画面
+let playSeq = 0;   // メニューにもどったら ふえる（のこっている演出を止める）
 let cx = null, calcMiss = 0, totalCalcMiss = 0, calcSeq = 0, calcLock = false;
 let teinei = load("junjo_teinei", true); // くり上がり・くり下がりも自分で書く
 const curL = () => LEVELS.find(L => L.id === lv);
@@ -871,28 +873,44 @@ $("lvArea").addEventListener("click", e => {
   const c = e.target.closest("[data-cl]");
   if (c) { craftLv = Number(c.dataset.cl); craftNewSet(); return; }
   const b = e.target.closest("[data-lv]"); if (!b) return;
-  lv = Number(b.dataset.lv); newSet();
+  lv = Number(b.dataset.lv);
+  if (lv === 0 && !custom.length) { renderLevels(); return; } // 先生の問題がまだないときは 説明だけ
+  newSet();
 });
+// メニューの モードをきりかえる（問題は はじめない）
 function setMode(m) {
   if (adv && !finished && !confirm("花火大会を とちゅうで やめますか？")) return;
-  if (m === mode && !adv) return;
+  if (m === mode && !adv && view === "menu") return;
   if (adv) leaveAdv();
-  craftSeq++; // 工房の ためしうちとちゅうの演出を止める
+  stopPlay();
   mode = m;
-  if (m === "adv") { renderLevels(); window.scrollTo(0, 0); return; }
-  if (m === "craft") { craftLv = 1; craftNewSet(); return; }
-  lv = { num: 1, calc: 13 }[m];
-  newSet();
+  if (m === "num" || m === "calc") {
+    const L = curL();
+    if (lv !== 0 && (!L || L.mode !== m)) lv = { num: 1, calc: 13 }[m];
+  }
+  goMenu();
 }
+// 問題画面の とちゅうの処理や演出を止める
+function stopPlay() {
+  playSeq++; craftSeq++;
+  cx = null; calcSeq++; calcLock = false; busy = false; renderCalc();
+}
+function goMenu() {
+  view = "menu";
+  renderLevels();
+  window.scrollTo(0, 0);
+}
+// メニュー画面と問題画面を わけて表示する
 function setView() {
-  const inAdv = mode === "adv", playing = !inAdv || !!adv;
-  $("selCard").style.display = adv ? "none" : "";
-  $("ruleCard").style.display = adv && adv.boss ? "none" : "";
+  const play = view === "play", inAdv = mode === "adv";
+  document.querySelector(".hero").style.display = play ? "none" : "";
+  $("selCard").style.display = play ? "none" : "";
   $("lvArea").style.display = inAdv ? "none" : "";
-  $("advArea").style.display = inAdv && !adv ? "" : "none";
-  $("playCard").style.display = playing ? "" : "none";
-  $("logCard").style.display = playing ? "" : "none";
-  $("teacherCard").style.display = inAdv ? "none" : "";
+  $("advArea").style.display = inAdv ? "" : "none";
+  $("teacherCard").style.display = !play && !inAdv ? "" : "none";
+  $("ruleCard").style.display = play && !(adv && adv.boss) ? "" : "none";
+  $("playCard").style.display = play ? "" : "none";
+  $("logCard").style.display = play ? "" : "none";
   document.body.classList.toggle("battle", !!(adv && adv.boss));
 }
 
@@ -914,8 +932,10 @@ function newSet() {
   if (lv === 0) set = custom.slice();
   else { const L = curL(); set = buildSet(() => L, L.per || PER); }
   solved = set.map(() => false); perf = set.map(() => false);
+  view = "play";
   renderLevels();
   startQ();
+  window.scrollTo(0, 0);
 }
 
 function startQ() {
@@ -1013,7 +1033,8 @@ function tap(k) {
   const step = applyStep(tokens, k);
   stepNo++;
   setMsg("ok", `${step.a} ${SYM[tokens[k].v]} ${step.b} ＝ ${step.r}`);
-  setTimeout(() => commitStep(step), Math.max(650, dur + 300));
+  const ps = playSeq;
+  setTimeout(() => { if (ps === playSeq) commitStep(step); }, Math.max(650, dur + 300));
 }
 function commitStep(step) {
   tokens = step.tokens;
@@ -1104,6 +1125,7 @@ function renderResult() {
   const nx = lv > 0 && LEVELS.find(L => L.id === lv + 1 && L.mode === curL().mode);
   if (nx) mk("next" + (r.cleared ? " big" : ""), nx.name + " へ ▶", () => { lv = nx.id; newSet(); window.scrollTo(0, 0); });
   if (advOpen()) mk("adv", "花火大会へ 🎆", () => setMode("adv"));
+  mk("reset", "メニューへ", () => { stopPlay(); goMenu(); });
 }
 
 function showUnlock() {
@@ -1826,7 +1848,7 @@ function lockHTML() {
     <div class="lk-cols">${col("num")}${col("calc")}</div></div>`;
 }
 $("advArea").addEventListener("click", e => {
-  if (e.target.closest("[data-shop]")) { setMode("craft"); window.scrollTo(0, 0); return; }
+  if (e.target.closest("[data-shop]")) { setMode("craft"); return; }
   const b = e.target.closest("button[data-i]"); if (!b || b.disabled) return;
   openStart(Number(b.dataset.i), Number(b.dataset.s));
 });
@@ -1862,6 +1884,7 @@ function startAdv(i, s) {
   } else set = buildSet(() => Lof(I.lv), n);
   resetCounters();
   solved = set.map(() => false); perf = set.map(() => false);
+  view = "play";
   renderLevels();
   startQ();
   window.scrollTo(0, 0);
@@ -1871,11 +1894,17 @@ function leaveAdv() {
   renderCalc(); $("hud").innerHTML = "";
   document.body.classList.remove("battle", "flash");
 }
-function backToMap() { leaveAdv(); mode = "adv"; renderLevels(); window.scrollTo(0, 0); }
+function backToMap() { leaveAdv(); stopPlay(); mode = "adv"; goMenu(); }
 
 function renderHud() {
   const hud = $("hud");
-  if (!adv) { if (mode !== "craft") hud.innerHTML = ""; return; }
+  if (!adv) {
+    if (mode === "craft") return;
+    const L = lv > 0 ? curL() : null, c = MODE_COLOR[mode] || MODE_COLOR.num;
+    hud.innerHTML = `<div class="shud" style="--c:${c}"><button class="mback" data-hud="menu">◀ メニュー</button>
+      <div class="st"><b>${L ? L.name : "先生の問題"}</b><span>${mode === "calc" ? "✏️ 計算モード" : "🔣 記号モード"}${L ? "　" + L.short : ""}</span></div></div>`;
+    return;
+  }
   const I = ISLANDS[adv.i];
   if (!adv.boss) {
     const doneN = solved.filter(Boolean).length, slots = adv.n + 1;
@@ -1900,7 +1929,11 @@ function renderHud() {
 }
 $("hud").addEventListener("click", e => {
   const b = e.target.closest("[data-hud]"); if (!b) return;
-  if (b.dataset.hud === "shopback") { setMode("adv"); return; }
+  if (b.dataset.hud === "menu") {
+    if (!finished && solved.some(Boolean) && !confirm("メニューに もどりますか？（とちゅうの問題は やりなおしになるよ）")) return;
+    stopPlay(); goMenu(); return;
+  }
+  if (b.dataset.hud === "shopback") { stopPlay(); goMenu(); return; }
   if (b.dataset.hud === "tama") {
     if (!adv || advData.tama <= 0 || adv.hearts >= HEARTS) return;
     advData.tama--; saveAdv();
@@ -2203,8 +2236,10 @@ function craftNewSet() {
   craftSeq++;
   const set = craftBuild(curC());
   cf = { set, qi: 0, miss: 0, hints: 0, solved: set.map(() => false), perf: set.map(() => false), finished: false, res: null };
+  view = "play";
   renderLevels();
   craftStartQ();
+  window.scrollTo(0, 0);
 }
 function craftStartQ() {
   craftSeq++;
@@ -2214,7 +2249,7 @@ function craftStartQ() {
 }
 
 function craftRender() {
-  $("hud").innerHTML = `<div class="shud" style="--c:#b5179e"><button class="mback" data-hud="shopback">◀ 花火大会へ</button>
+  $("hud").innerHTML = `<div class="shud" style="--c:#b5179e"><button class="mback" data-hud="shopback">◀ メニュー</button>
     <div class="st"><b>🏭 花火工房</b><span>注文の数に なるように（ ）を つけよう</span></div>
     <span class="tama">特製玉 ${tamaHTML()}</span></div>`;
   $("combo").textContent = "";
@@ -2382,6 +2417,7 @@ function craftRenderResult() {
   const nx = CRAFT.find(x => x.id === craftLv + 1);
   if (nx) mk("next" + (r.st >= 2 ? " big" : ""), nx.name + " へ ▶", () => { craftLv = nx.id; craftNewSet(); window.scrollTo(0, 0); });
   mk("adv", "花火大会へ 🎆", () => setMode("adv"));
+  mk("reset", "工房メニューへ", () => { stopPlay(); goMenu(); });
 }
 
 /* ================= 先生用：問題の追加 ================= */
@@ -2424,14 +2460,14 @@ $("addBtn").onclick = () => {
   m.style.color = "#1f7a43"; m.textContent = `追加しました（答え ${v.ans}）。「先生の問題」で出題されます。`;
   $("addInput").value = "";
   renderCustomList();
-  if (lv === 0) newSet(); else renderLevels();
+  renderLevels();
 };
 $("clearCustom").onclick = () => {
   if (!custom.length) return;
   if (!confirm("追加した問題をすべて消しますか？")) return;
   custom = []; save("junjo_custom", custom); renderCustomList();
   $("addMsg").textContent = "";
-  if (lv === 0) newSet(); else renderLevels();
+  renderLevels();
 };
 $("advFree").onchange = e => { advFree = e.target.checked; save("junjo_advfree", advFree); renderLevels(); };
 $("resetStars").onclick = () => {
@@ -2446,7 +2482,7 @@ $("resetAdv").onclick = () => {
 
 renderCustomList();
 $("advFree").checked = advFree;
-newSet();
+renderLevels();
 // メニューの夜空：花火の絵と、ひらいたときの1発
 document.querySelector(".hbursts").innerHTML = burstSVG("kiku", "#ff8cc6") + burstSVG("botan", "#8fd3ff");
 setTimeout(() => { const r = document.querySelector(".hero").getBoundingClientRect(); firework(r.left + r.width * .62, r.top + r.height * .38, 1.1); }, 500);
