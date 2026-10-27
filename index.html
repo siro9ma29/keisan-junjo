@@ -359,6 +359,58 @@
   .btn.nopar { background: #5c7cfa; }
   .btn.craft { background: #b5179e; }
 
+
+  /* ---- メニュー：夏祭りの夜 ---- */
+  .hero { position: relative; overflow: hidden; display: block; padding: 74px 16px 30px; border-radius: 22px; margin-bottom: 14px;
+    background: radial-gradient(1.5px 1.5px at 8% 40%, #fff 99%, transparent), radial-gradient(1px 1px at 24% 33%, #fff 99%, transparent),
+      radial-gradient(1.5px 1.5px at 44% 44%, #fff 99%, transparent), radial-gradient(1px 1px at 79% 36%, #fff 99%, transparent),
+      radial-gradient(1px 1px at 93% 46%, #fff 99%, transparent), radial-gradient(1.5px 1.5px at 60% 30%, #fff 99%, transparent),
+      linear-gradient(#11163d, #262c6b 62%, #4a3a7e); box-shadow: 0 5px 0 #0b0e24; color: #fff; }
+  .hero .hrow { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; }
+  .hero h1 { margin: 0; font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "BIZ UDPMincho", serif; font-weight: 800;
+    font-size: clamp(26px, 6vw, 40px); letter-spacing: .08em; text-shadow: 0 0 18px rgba(255,190,90,.45), 0 2px 0 #0b0e24; }
+  .hero h1 small { font-family: "Hiragino Maru Gothic ProN", "BIZ UDPGothic", sans-serif; font-weight: bold; font-size: 13px; letter-spacing: .1em; color: #ffd8a8; opacity: 1; margin-bottom: 2px; }
+  .garland { position: absolute; left: 0; right: 0; top: 0; height: 60px; display: flex; justify-content: space-between; padding: 0 3%; }
+  .garland::before { content: ""; position: absolute; left: -2%; right: -2%; top: -26px; height: 40px; border-bottom: 2px solid #0b0e24; border-radius: 0 0 50% 50%; }
+  .chochin { position: relative; display: block; width: 22px; height: 28px; margin-top: calc(var(--d) + 12px); border-radius: 48% / 40%;
+    background: repeating-linear-gradient(transparent 0 5px, rgba(110,20,10,.28) 5px 6px), radial-gradient(ellipse at 50% 45%, #fff3cf 0 15%, #ffa94d 45%, #e2452b 82%);
+    box-shadow: 0 0 14px 3px rgba(255,140,60,.5); }
+  .chochin::before, .chochin::after { content: ""; position: absolute; left: 5px; right: 5px; height: 4px; background: #1c1712; border-radius: 2px; }
+  .chochin::before { top: -3px; } .chochin::after { bottom: -3px; }
+  .chochin b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 800 12px "Hiragino Mincho ProN", "Yu Mincho", serif; color: #7a1a10; }
+  @media (max-width: 560px) { .chochin:nth-child(even) { display: none; } }
+  .hbursts { position: absolute; right: 30%; top: 30px; display: flex; gap: 0; opacity: .45; pointer-events: none; }
+  .hbursts svg { width: 92px; height: 92px; } .hbursts svg + svg { width: 60px; height: 60px; margin-top: 46px; }
+  @media (max-width: 560px) { .hero { padding-top: 66px; } .hbursts { right: 2%; top: 34px; } .hbursts svg { width: 70px; height: 70px; } .hbursts svg + svg { display: none; } }
+  .hero .bank { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 22px; }
+  .hero .chip { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.3); }
+  .hero .chip.star { background: #fff; color: var(--goldd); border-color: #fff; }
+  .hero .chip.rank { background: var(--gold); color: #5b3d00; border-color: var(--gold); }
+
+  #ruleCard { background: #fff4dc; box-shadow: 0 4px 0 #f0dcb4; }
+  .rules span { background: #fff; border-left: 6px solid #e2452b; border-radius: 6px 12px 12px 6px; }
+  .rules b { color: #e2452b; }
+
+  /* モードえらび＝屋台 */
+  .modes { gap: 14px; margin-top: 4px; }
+  .mode { padding-top: 30px; background: #fffaf0; border-radius: 6px 6px 16px 16px; overflow: visible; }
+  .mode::before { content: ""; position: absolute; left: -7px; right: -7px; top: -6px; height: 22px; border-radius: 6px 6px 2px 2px;
+    background: repeating-linear-gradient(90deg, var(--c) 0 14px, #fff 14px 28px); box-shadow: 0 2px 0 rgba(0,0,0,.12); }
+  .mode::after { content: ""; position: absolute; left: -7px; right: -7px; top: 15px; height: 8px;
+    background: radial-gradient(circle at 7px 0, var(--c) 6.5px, transparent 7px) 0 0 / 14px 8px repeat-x; }
+  .mode .cnt { z-index: 2; top: -14px; }
+  .mode.on { background: #fff3d6; color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, transparent), 0 8px 18px color-mix(in srgb, var(--c) 35%, transparent); }
+  .mode.on .ms { color: var(--sub); }
+  .mode[data-m="adv"] { color: #ffd43b; border-color: #2a2f6e;
+    background: radial-gradient(1px 1px at 20% 30%, #fff 99%, transparent), radial-gradient(1px 1px at 75% 22%, #fff 99%, transparent), radial-gradient(1.5px 1.5px at 60% 55%, #fff 99%, transparent), linear-gradient(#141936, #2c3570); }
+  .mode[data-m="adv"] .ms { color: #c9cff5; }
+  .mode[data-m="adv"].on { box-shadow: 0 0 0 3px rgba(255,212,59,.45), 0 8px 18px rgba(138,92,240,.45); }
+  .mode[data-m="adv"].locked { filter: none; opacity: 1; color: #b8b4c8; }
+  .mode[data-m="adv"].locked::before { background: repeating-linear-gradient(90deg, #6b6880 0 14px, #d9d6e3 14px 28px); }
+  .mode[data-m="adv"].locked::after { background: radial-gradient(circle at 7px 0, #6b6880 6.5px, transparent 7px) 0 0 / 14px 8px repeat-x; }
+  .lvc { border-color: #eadbc0; background: #fffdf7; box-shadow: 0 4px 0 #eadbc0; }
+  .lvc.cur { background: color-mix(in srgb, var(--mc) 7%, #fffdf7); }
+
   /* ---- 導火線 ---- */
   #expr .fz { position: absolute; pointer-events: none; padding: 0; border-radius: 0; }
   #expr svg.fuse { left: 0; top: 0; width: 100%; overflow: visible; z-index: 0; }
@@ -453,12 +505,17 @@
 <body>
 <div class="wrap">
   <header class="hero">
-    <h1><small>（ ）・×÷・左から</small>計算の順じょ マスター</h1>
-    <div class="chips">
-      <span class="chip star" id="starChip"></span>
-      <span class="chip rank" id="rankChip"></span>
-      <button class="chip snd" id="sndBtn" aria-label="音のオン・オフ"></button>
+    <div class="garland" aria-hidden="true"><i class="chochin" style="--d:0px"></i><i class="chochin" style="--d:8px"></i><i class="chochin" style="--d:14px"><b>祭</b></i><i class="chochin" style="--d:18px"></i><i class="chochin" style="--d:21px"></i><i class="chochin" style="--d:22px"><b>祭</b></i><i class="chochin" style="--d:21px"></i><i class="chochin" style="--d:18px"></i><i class="chochin" style="--d:14px"><b>祭</b></i><i class="chochin" style="--d:8px"></i><i class="chochin" style="--d:0px"></i></div>
+    <div class="hbursts" aria-hidden="true"></div>
+    <div class="hrow">
+      <h1><small>（ ）・×÷・左から</small>計算の順じょ マスター</h1>
+      <div class="chips">
+        <span class="chip star" id="starChip"></span>
+        <span class="chip rank" id="rankChip"></span>
+        <button class="chip snd" id="sndBtn" aria-label="音のオン・オフ"></button>
+      </div>
     </div>
+    <svg class="bank" viewBox="0 0 900 34" preserveAspectRatio="none" aria-hidden="true"><path d="M0 34 L0 22 Q60 12 130 18 T260 16 L276 16 L276 8 L300 2 L324 8 L324 16 Q380 20 450 14 L458 14 L458 6 L462 6 L462 14 Q520 10 600 18 L612 18 L612 9 L636 3 L660 9 L660 18 Q740 22 800 14 T900 18 L900 34Z" fill="#0b0e24"/></svg>
   </header>
 
   <div class="card" id="ruleCard">
@@ -2390,6 +2447,9 @@ $("resetAdv").onclick = () => {
 renderCustomList();
 $("advFree").checked = advFree;
 newSet();
+// メニューの夜空：花火の絵と、ひらいたときの1発
+document.querySelector(".hbursts").innerHTML = burstSVG("kiku", "#ff8cc6") + burstSVG("botan", "#8fd3ff");
+setTimeout(() => { const r = document.querySelector(".hero").getBoundingClientRect(); firework(r.left + r.width * .62, r.top + r.height * .38, 1.1); }, 500);
 </script>
 </body>
 </html>
