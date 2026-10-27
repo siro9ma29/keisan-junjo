@@ -340,9 +340,7 @@
   @keyframes spark { 0% { transform: translate(0,0) scale(1.2); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; } }
   @keyframes rise { 0% { transform: translateY(var(--h)); opacity: 1; } 100% { transform: translateY(0); opacity: .2; } }
 
-  /* ---- 花火職人モード ---- */
-  .modes { grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 640px) { .modes { grid-template-columns: repeat(2, 1fr); } }
+  /* ---- 花火工房 ---- */
   .levels.craft { grid-template-columns: repeat(3, 1fr); }
   @media (max-width: 640px) { .levels.craft { grid-template-columns: repeat(3, 1fr); } .levels.craft .lt { font-size: 12px; } }
   .target { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 2px 0 4px; }
@@ -359,6 +357,47 @@
   .btn.fire:disabled { opacity: .45; }
   .btn.nopar { background: #5c7cfa; }
   .btn.craft { background: #b5179e; }
+
+  /* ---- 花火大会：工房・アルバム・本番の夜空 ---- */
+  .goal.shop .gi { font-size: 44px; line-height: 58px; text-align: center; }
+  .goal .gt .tama, .shud .tama { display: block; margin-top: 2px; font-size: 13px; color: #b5179e; font-weight: bold; }
+  .tama span { color: #e9d5ef; font-size: 15px; } .tama span.on { color: #ff5fa2; text-shadow: 0 0 4px #ffb3d1; }
+  .goal .gt b.tw { display: inline; font-size: inherit; color: #b5179e; }
+  .night { background: radial-gradient(circle at 50% 40%, #2c3570, #141936); border-radius: 16px; }
+  .goal .gi.night { padding: 2px; }
+  .ovart.night { border-radius: 50%; }
+  .rart.night { border-radius: 50%; padding: 6px; }
+  .rart.night.small { width: 80px; height: 80px; }
+  .node svg { width: 100%; height: 100%; }
+  .node.done:not(.boss) { padding: 5px; }
+  .node.boss { background: #1b2150; }
+  .node.boss:disabled { background: #e9e5f2; }
+  .album { background: #141936; border-radius: 20px; padding: 10px 12px 12px; margin: 4px 0 10px; color: #fff; }
+  .album .ahead { font-weight: bold; font-size: 17px; margin-bottom: 8px; }
+  .album .ahead b { color: var(--gold); margin-left: 6px; }
+  .agrid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+  @media (max-width: 640px) { .agrid { grid-template-columns: repeat(4, 1fr); } }
+  .ak { background: #1f2654; border-radius: 12px; padding: 4px 2px 3px; text-align: center; }
+  .ak.fin { box-shadow: inset 0 0 0 2px #f5c542; }
+  .ak svg { width: 100%; height: auto; aspect-ratio: 1; }
+  .ak span { display: block; font-size: 11px; color: #c9cff5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .shud .tama { margin: 0; }
+  .sky { overflow: hidden; border-radius: 12px; margin: 8px 0 0;
+    background: radial-gradient(1.5px 1.5px at 12% 22%, #fff 99%, transparent), radial-gradient(1px 1px at 33% 12%, #fff 99%, transparent),
+      radial-gradient(1.5px 1.5px at 58% 30%, #fff 99%, transparent), radial-gradient(1px 1px at 76% 16%, #fff 99%, transparent),
+      radial-gradient(1px 1px at 90% 40%, #fff 99%, transparent), radial-gradient(1px 1px at 45% 45%, #fff 99%, transparent),
+      linear-gradient(#0e1235, #232b66 70%, #34306a); }
+  .sky .moon { position: absolute; right: 22px; top: 12px; width: 26px; height: 26px; border-radius: 50%; box-shadow: -7px 4px 0 0 #fff3bf; }
+  .sky .crowd { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; }
+  .sky .crowd svg { width: 100%; height: 100%; }
+  .sky .crowd.cheer .pp { animation: jump .45s 2; }
+  .sky .dmg { color: #ffd43b; text-shadow: 0 2px 0 #1b2150, 0 0 10px rgba(255,212,59,.6); }
+  .sky .dmg.star { color: #ff8cc6; font-size: 34px; }
+  @keyframes jump { 50% { transform: translateY(-6px); } }
+  .hearts span { display: inline-block; }
+  .hearts .lost { filter: grayscale(1); opacity: .3; }
+  .sky .dmg { left: 0; right: 0; top: 28%; text-align: center; }
+  .tamab { background: #b5179e; color: #fff; border: 2px solid #ff8cc6; border-radius: 999px; font-size: 14px; font-weight: bold; padding: 3px 10px; cursor: pointer; animation: pulse 1.2s infinite; }
 
   /* ---- ポップアップ ---- */
   .ov { position: fixed; inset: 0; background: rgba(30,25,45,.55); display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
@@ -390,7 +429,7 @@
   @keyframes down { 0%{transform:none;opacity:1;filter:brightness(2)} 30%{transform:rotate(-12deg)} 100%{transform:translateY(30px) scale(.15) rotate(200deg);opacity:0} }
   @keyframes dmg { 0%{opacity:0;transform:translateY(14px) scale(.6)} 20%{opacity:1;transform:translateY(0) scale(1.15)} 100%{opacity:0;transform:translateY(-26px)} }
   @keyframes heartOut { 0%{transform:scale(1.6);color:#fff} 100%{transform:scale(1)} }
-  @keyframes flashB { 0%{background:#7a1e2c} 100%{} }
+  @keyframes flashB { 0%{background:#3a3550} 100%{} }
   @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; } }
 </style>
@@ -452,9 +491,9 @@
       <div id="customList"></div>
       <p class="small">使える記号：＋ − × ÷ （ ）。わり切れない÷や、とちゅうや答えがマイナスになる式は追加できません。追加した問題は「先生の問題」で出題され、この端末のブラウザに保存されます。</p>
       <div class="tools">
-        <label><input type="checkbox" id="advFree">冒険モードを すぐに使えるようにする</label>
+        <label><input type="checkbox" id="advFree">花火大会を すぐに使えるようにする</label>
         <button class="sub" id="resetStars">★の記録を消す</button>
-        <button class="sub" id="resetAdv">冒険を はじめからにする</button>
+        <button class="sub" id="resetAdv">花火大会を はじめからにする</button>
       </div>
     </details>
   </div>
@@ -492,7 +531,7 @@ let mode = "num", stepNo = 0;
 let cx = null, calcMiss = 0, totalCalcMiss = 0, calcSeq = 0, calcLock = false;
 let teinei = load("junjo_teinei", true); // くり上がり・くり下がりも自分で書く
 const curL = () => LEVELS.find(L => L.id === lv);
-const isCalc = () => mode === "calc" || mode === "adv"; // 冒険も自分で計算する
+const isCalc = () => mode === "calc" || mode === "adv"; // 花火大会も自分で計算する
 
 /* ================= 式の読み取り ================= */
 function normalize(s) {
@@ -702,9 +741,9 @@ const restCount = () => LEVELS.filter(L => !isCleared(L)).length;
 const advOpen = () => advFree || restCount() === 0;
 const totalStars = () => LEVELS.reduce((s, L) => s + (stars[L.id] || 0), 0);
 function rankName() {
-  if (typeof advAllClear === "function" && advAllClear()) return "👑 でんせつの ゆうしゃ";
+  if (typeof advAllClear === "function" && advAllClear()) return "👑 花火大名人";
   const t = totalStars();
-  return t >= 24 ? "🏆 じゅんじょマスター" : t >= 18 ? "🥇 ゴールド" : t >= 12 ? "🥈 シルバー" : t >= 6 ? "🥉 ブロンズ" : "🔰 みならい";
+  return t >= 24 ? "🏆 じゅんじょマスター" : t >= 18 ? "🏮 名人" : t >= 12 ? "🎆 花火師" : t >= 6 ? "🎇 一人前" : "🔰 見習い";
 }
 const starHTML = (n, max = 3) => [...Array(max)].map((_, i) => `<span class="${i < n ? "s-on" : "s-off"}">★</span>`).join("");
 
@@ -726,10 +765,9 @@ function renderLevels() {
   const MODES = [
     { m: "num",  ic: "🔣", t: "記号モード", s: "順じょを えらぶ", c: `${cnt("num")}/4` },
     { m: "calc", ic: "✏️", t: "計算モード", s: "自分で 計算する", c: `${cnt("calc")}/4` },
-    { m: "adv",  ic: open ? "🗺️" : "🔒", t: "冒険モード", s: open ? "島を めぐる" : `あと ${rest}レベル`, c: "" },
-    { m: "craft", ic: "🎆", t: "花火職人", s: "（ ）を つける", c: "", sc: `★ ${craftTotal()}/${CRAFT.length * 3}` }
+    { m: "adv",  ic: open ? "🎆" : "🏮", t: "花火大会", s: open ? "会場を めぐる" : `あと ${rest}レベル`, c: "" }
   ];
-  $("modes").innerHTML = MODES.map(x => `<button class="mode${mode === x.m ? " on" : ""}${x.m === "adv" && !open ? " locked" : ""}" style="--c:${MODE_COLOR[x.m]}" data-m="${x.m}">` +
+  $("modes").innerHTML = MODES.map(x => `<button class="mode${mode === x.m || (x.m === "adv" && mode === "craft") ? " on" : ""}${x.m === "adv" && !open ? " locked" : ""}" style="--c:${MODE_COLOR[x.m]}" data-m="${x.m}">` +
     `${x.c ? `<span class="cnt">CLEAR ${x.c}</span>` : x.sc ? `<span class="cnt">${x.sc}</span>` : ""}<span class="mi">${x.ic}</span><span class="mt">${x.t}</span><span class="ms">${x.s}</span></button>`).join("");
   setView();
   if (mode === "adv") { renderAdv(); return; }
@@ -763,10 +801,10 @@ $("lvArea").addEventListener("click", e => {
   lv = Number(b.dataset.lv); newSet();
 });
 function setMode(m) {
-  if (adv && !finished && !confirm("冒険を とちゅうで やめますか？")) return;
+  if (adv && !finished && !confirm("花火大会を とちゅうで やめますか？")) return;
   if (m === mode && !adv) return;
   if (adv) leaveAdv();
-  craftSeq++; // 花火職人の うちあげとちゅうの演出を止める
+  craftSeq++; // 工房の ためしうちとちゅうの演出を止める
   mode = m;
   if (m === "adv") { renderLevels(); window.scrollTo(0, 0); return; }
   if (m === "craft") { craftLv = 1; craftNewSet(); return; }
@@ -872,7 +910,7 @@ function renderLog() {
 
 function opEl(k) { return $("expr").querySelector(`[data-k="${k}"]`); }
 
-// まちがえたとき（冒険のボス戦では ハートがへる）。ゲームオーバーなら true
+// まちがえたとき（花火大会の本番では 火種がへる）。火種がなくなったら true
 function onMiss(kind) {
   sfx("ng");
   return adv ? advMiss(kind) : false;
@@ -912,7 +950,7 @@ function commitStep(step) {
     if (adv) advQDone(p);
   }
   render();
-  if (done) launchAt($("expr"), perf[qi] ? 1.6 : 1.1);
+  if (done) { if (adv && adv.boss) skyShow(perf[qi], adv.hp === 0); else launchAt($("expr"), perf[qi] ? 1.6 : 1.1); }
 }
 
 function hint() {
@@ -975,7 +1013,7 @@ function renderResult() {
   }
   if (lv > 0 && !advFree) {
     const n = LEVELS.length - restCount();
-    h += `<div class="unlockbar">${advOpen() ? "🗺️ 冒険モード かいほうずみ！" : `🔒 冒険モード かいほうまで あと ${restCount()}レベル`}<div class="ub"><i style="width:${n / LEVELS.length * 100}%"></i></div></div>`;
+    h += `<div class="unlockbar">${advOpen() ? "🎆 花火大会に 出られるよ！" : `🏮 花火大会まで あと ${restCount()}レベル`}<div class="ub"><i style="width:${n / LEVELS.length * 100}%"></i></div></div>`;
   }
   $("expr").innerHTML = h + `</div>`;
   const perfect = r.all && totalMiss === 0 && totalCalcMiss === 0 && hintO + hintC === 0;
@@ -985,13 +1023,13 @@ function renderResult() {
   mk("again", lv === 0 ? "もう一度" : "ちがう問題でもう一度", newSet);
   const nx = lv > 0 && LEVELS.find(L => L.id === lv + 1 && L.mode === curL().mode);
   if (nx) mk("next" + (r.cleared ? " big" : ""), nx.name + " へ ▶", () => { lv = nx.id; newSet(); window.scrollTo(0, 0); });
-  if (advOpen()) mk("adv", "冒険モードへ 🗺️", () => setMode("adv"));
+  if (advOpen()) mk("adv", "花火大会へ 🎆", () => setMode("adv"));
 }
 
 function showUnlock() {
-  openOv(`<div class="ovart">🗺️</div><h2>冒険モード かいほう！</h2>
-    <p>記号モードと計算モードを ぜんぶ クリアしたね！<br>4つの島を めぐって、<b>まおうの城</b>を めざそう！</p>
-    <div class="btns"><button class="btn adv" data-ov="go">冒険へ ▶</button><button class="btn reset" data-ov="close">あとで</button></div>`,
+  openOv(`<div class="ovart">🎆</div><h2>花火大会に 出られるよ！</h2>
+    <p>記号モードと計算モードの 修行を ぜんぶ おえたね！<br>4つの会場で 花火を うちあげて、<b>夜空の 大花火大会</b>を めざそう！</p>
+    <div class="btns"><button class="btn adv" data-ov="go">花火大会へ ▶</button><button class="btn reset" data-ov="close">あとで</button></div>`,
     { go: () => setMode("adv") });
   sfx("fanfare"); confetti(80);
 }
@@ -1547,93 +1585,135 @@ document.addEventListener("keydown", e => {
   else if (cx.how === "anzan" && e.key === "Enter") { calcAct("ok"); e.preventDefault(); }
 });
 
-/* ================= 冒険モード ================= */
-// 4つの島 × （ステージ3つ＋ボス）。問題はすべて「順じょをえらんで、自分で計算」する
-const STEPS = 4;   // 1つの島のマス数（さいごの1マスがボス）
-const HEARTS = 5;  // ボス戦のハート
+/* ================= 花火大会めぐり（冒険モード） ================= */
+// 4つの会場 × （花火玉づくり3つ＋本番の打ち上げ）。問題はすべて「順じょをえらんで、自分で計算」する
+const STEPS = 4;    // 1つの会場のマス数（さいごの1マスが本番）
+const HEARTS = 5;   // 本番の火種
+const TAMA_MAX = 3; // 工房でつくれる特製玉の最大数
 const ISLANDS = [
-  { name: "たしひきの 草原",  sub: "＋ −・（ ）",           boss: "プルリン",       type: "slime", color: "#2bb673", lv: 13, n: 3, bn: 4 },
-  { name: "かっこの 森",      sub: "＋ − × ÷・（ ）",       boss: "キノコング",     type: "mush",  color: "#f08c00", lv: 14, n: 3, bn: 4 },
-  { name: "かけわり 谷",      sub: "×・÷ が さき",          boss: "コウモリン",     type: "bat",   color: "#3d8bfd", lv: 15, n: 3, bn: 4 },
-  { name: "まおうの 城",      sub: "記号 3つ",              boss: "まおう カッコン", type: "king",  color: "#8a5cf0", lv: 16, n: 2, bn: 5, final: true }
+  { name: "川べりの 夕すずみ花火", sub: "＋ −・（ ）",       icon: "🏞️", color: "#2bb673", lv: 13, n: 3, bn: 4 },
+  { name: "森の 神社まつり",       sub: "＋ − × ÷・（ ）",   icon: "⛩️", color: "#f08c00", lv: 14, n: 3, bn: 4 },
+  { name: "港の 花火大会",         sub: "×・÷ が さき",      icon: "⚓", color: "#3d8bfd", lv: 15, n: 3, bn: 4 },
+  { name: "夜空の 大花火大会",     sub: "記号 3つ",          icon: "🌌", color: "#8a5cf0", lv: 16, n: 2, bn: 5, final: true }
 ];
+// 夜空アルバム：花火玉づくりで1つずつ、本番のフィナーレで1つ もらえる花火
+const KINDS = [
+  ["botan", "ぼたん"], ["kiku", "きく"], ["yanagi", "やなぎ"],
+  ["yashi", "やし"], ["senrin", "せんりん"], ["hachi", "はち"],
+  ["heart", "ハート"], ["niko", "にこにこ"], ["kamuro", "かむろ"],
+  ["ring", "どせい"], ["star", "おほしさま"], ["himawari", "ひまわり"]
+];
+const FINALES = [["niagara", "ナイアガラ"], ["starmine", "スターマイン"], ["nishiki", "にしき かむろ"], ["sanshaku", "さんじゃくだま"]];
+const kindOf = (i, s) => s === STEPS - 1 ? FINALES[i] : KINDS[i * (STEPS - 1) + s];
 const ADV_TOTAL = ISLANDS.length * STEPS;
 const nodeIdx = (i, s) => i * STEPS + s;
 let advData = load("junjo_adv", { pos: 0, st: {} });
 if (!advData.st) advData.st = {};
+if (typeof advData.tama !== "number") advData.tama = 0;
 const saveAdv = () => save("junjo_adv", advData);
-let adv = null; // 冒険でプレイ中の情報
+let adv = null; // 花火大会でプレイ中の情報
 function advAllClear() { return advData.pos >= ADV_TOTAL; }
+const tamaHTML = () => [...Array(TAMA_MAX)].map((_, k) => `<span class="${k < advData.tama ? "on" : ""}">●</span>`).join("");
 
 /* ---- イラスト ---- */
+// 見習い花火師（はっぴ・はちまき）
 function heroSVG() {
   return `<svg viewBox="0 0 40 48" xmlns="http://www.w3.org/2000/svg">
   <ellipse cx="20" cy="46" rx="11" ry="2.5" fill="rgba(0,0,0,.18)"/>
-  <path d="M9 27 Q20 22 31 27 L34 44 L6 44Z" fill="#ef5350"/>
-  <rect x="11" y="25" width="18" height="18" rx="7" fill="#3d8bfd"/>
+  <path d="M8 28 Q20 22 32 28 L34 44 L6 44Z" fill="#2f4fa8"/>
+  <path d="M15 25 L20 36 L25 25" stroke="#fff" stroke-width="2.4" fill="none"/>
+  <path d="M8 40 L32 40" stroke="#fff" stroke-width="1.6" stroke-dasharray="2 2"/>
   <circle cx="20" cy="15" r="11.5" fill="#ffdcbc"/>
-  <path d="M8.5 14 Q9 2 20 2.5 Q31 2 31.5 14 Q26 8 20 9 Q13 8 8.5 14Z" fill="#5a3b26"/>
-  <rect x="8" y="9.5" width="24" height="3.5" rx="1.7" fill="#ffc53d"/>
+  <path d="M8.5 14 Q9 2 20 2.5 Q31 2 31.5 14 Q26 8 20 9 Q13 8 8.5 14Z" fill="#3b2a1e"/>
+  <rect x="8" y="9.5" width="24" height="3.5" rx="1.7" fill="#fff"/>
+  <path d="M30 10 L36 7 L35 12Z" fill="#e5484d"/>
   <circle cx="16" cy="16.5" r="1.8" fill="#2b2622"/><circle cx="24" cy="16.5" r="1.8" fill="#2b2622"/>
   <path d="M16.5 20.5 Q20 23.5 23.5 20.5" stroke="#2b2622" stroke-width="1.6" fill="none" stroke-linecap="round"/>
   </svg>`;
 }
-function monsterSVG(type, color, sil) {
-  const B = sil ? "#5b564d" : color, D = "rgba(0,0,0,.28)", INK = "#2b2622";
-  const acc = c => sil ? B : c;
-  const E = (x, y, r = 9) => sil ? "" :
-    `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff"/><circle cx="${x + 1.5}" cy="${y + 1}" r="${r * .5}" fill="${INK}"/><circle cx="${x + 3}" cy="${y - 2}" r="${r * .18}" fill="#fff"/>`;
-  const Ln = (d, w = 4) => sil ? "" : `<path d="${d}" stroke="${INK}" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
-  const fang = d => sil ? "" : `<path d="${d}" fill="#fff"/>`;
+// 花火の種類ごとの絵（sil＝まだ もっていない）
+function burstSVG(kind, color, sil) {
+  const C = sil ? "#8d8798" : color, G = sil ? "#6f6a7a" : "#ffd43b", W = sil ? "#6f6a7a" : "#fff";
+  const cx = 30, cy = 28, f = v => v.toFixed(1);
+  const at = (r, a, x = cx, y = cy) => [x + r * Math.cos(a), y + r * Math.sin(a)];
+  const around = (n, fn, off = 0) => [...Array(n)].map((_, i) => fn(off + i * 2 * Math.PI / n, i)).join("");
+  const dots = (n, r, rr, col, x, y, off) => around(n, a => { const [px, py] = at(r, a, x, y); return `<circle cx="${f(px)}" cy="${f(py)}" r="${rr}" fill="${col}"/>`; }, off);
+  const rays = (n, r0, r1, col, w, x, y, off) => around(n, a => { const [x0, y0] = at(r0, a, x, y), [x1, y1] = at(r1, a, x, y);
+    return `<line x1="${f(x0)}" y1="${f(y0)}" x2="${f(x1)}" y2="${f(y1)}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`; }, off);
+  const droop = (n, r, col, w, fall) => around(n, a => { const [x1, y1] = at(r, a);
+    return `<path d="M${cx} ${cy} Q${f(x1)} ${f(y1 - 4)} ${f(x1 + (x1 - cx) * .15)} ${f(y1 + fall)}" stroke="${col}" stroke-width="${w}" fill="none" stroke-linecap="round"/>`; });
   let s = "";
-  switch (type) {
-    case "slime":
-      s = `<path d="M16 104 Q12 58 38 38 Q60 18 82 38 Q108 58 104 104 Q93 96 82 104 Q71 96 60 104 Q49 96 38 104 Q27 96 16 104Z" fill="${B}" stroke="${D}" stroke-width="3"/>
-        ${sil ? "" : `<ellipse cx="42" cy="50" rx="9" ry="6" fill="#fff" opacity=".45"/>`}${E(47, 68)}${E(73, 68)}${Ln("M50 84 Q60 93 70 84")}`; break;
-    case "mush":
-      s = `<rect x="38" y="58" width="44" height="46" rx="14" fill="${acc("#fde7c8")}" stroke="${D}" stroke-width="3"/>
-        <path d="M8 66 Q12 16 60 14 Q108 16 112 66 Q60 78 8 66Z" fill="${B}" stroke="${D}" stroke-width="3"/>
-        ${sil ? "" : `<circle cx="36" cy="40" r="8" fill="#fff" opacity=".9"/><circle cx="66" cy="29" r="10" fill="#fff" opacity=".9"/><circle cx="90" cy="50" r="7" fill="#fff" opacity=".9"/>`}
-        ${E(51, 80, 6)}${E(69, 80, 6)}${Ln("M54 93 Q60 98 66 93", 3)}`; break;
-    case "bat":
-      s = `<path d="M44 64 L4 42 L14 64 L2 82 L22 78 L30 96 L46 80Z" fill="${B}" stroke="${D}" stroke-width="3" stroke-linejoin="round"/>
-        <path d="M76 64 L116 42 L106 64 L118 82 L98 78 L90 96 L74 80Z" fill="${B}" stroke="${D}" stroke-width="3" stroke-linejoin="round"/>
-        <path d="M40 52 L38 24 L58 42Z" fill="${B}"/><path d="M80 52 L82 24 L62 42Z" fill="${B}"/>
-        <circle cx="60" cy="68" r="28" fill="${B}" stroke="${D}" stroke-width="3"/>
-        ${E(49, 64, 8)}${E(71, 64, 8)}${Ln("M40 52 L54 58", 3.5)}${Ln("M80 52 L66 58", 3.5)}
-        ${Ln("M50 82 Q60 88 70 82", 3.5)}${fang("M53 83 L56 91 L59 84Z")}${fang("M61 84 L64 91 L67 83Z")}`; break;
-    case "king":
-      s = `<path d="M22 60 Q60 40 98 60 L114 114 L6 114Z" fill="${acc("#4a2357")}"/>
-        <path d="M32 54 Q12 32 20 10 Q30 32 46 42Z" fill="${acc("#f3e3c3")}" stroke="${D}" stroke-width="2"/>
-        <path d="M88 54 Q108 32 100 10 Q90 32 74 42Z" fill="${acc("#f3e3c3")}" stroke="${D}" stroke-width="2"/>
-        <circle cx="60" cy="72" r="34" fill="${B}" stroke="${D}" stroke-width="3"/>
-        <polygon points="40,44 43,20 52,32 60,12 68,32 77,20 80,44" fill="${acc("#ffc53d")}" stroke="${D}" stroke-width="2" stroke-linejoin="round"/>
-        ${sil ? "" : `<text x="60" y="38" text-anchor="middle" font-size="13" font-weight="bold" fill="#4a2357">( )</text>`}
-        ${E(47, 70, 8)}${E(73, 70, 8)}${Ln("M37 57 L55 64")}${Ln("M83 57 L65 64")}
-        ${Ln("M46 88 Q60 98 74 88")}${fang("M50 90 L53 98 L56 92Z")}${fang("M64 92 L67 98 L70 90Z")}`; break;
+  switch (kind) {
+    case "botan": s = dots(12, 20, 3, C) + dots(8, 11, 2.4, G); break;
+    case "kiku": s = rays(16, 6, 21, C, 2) + dots(16, 23, 1.8, W); break;
+    case "yanagi": s = droop(12, 15, G, 1.6, 16) + `<circle cx="${cx}" cy="${cy}" r="2.5" fill="${W}"/>`; break;
+    case "yashi": s = droop(6, 20, C, 3.4, 8); break;
+    case "senrin": s = [[18, 16], [42, 16], [30, 28], [18, 40], [42, 40]].map(([x, y]) => dots(7, 5, 1.6, C, x, y) + `<circle cx="${x}" cy="${y}" r="1.4" fill="${G}"/>`).join(""); break;
+    case "hachi": s = around(8, a => { const p = [0, 1, 2, 3, 4].map(k => at(5 + k * 4, a + (k % 2 ? .25 : -.25))); return `<polyline points="${p.map(q => f(q[0]) + "," + f(q[1])).join(" ")}" stroke="${k2(C, G, a)}" stroke-width="1.8" fill="none"/>`; }); break;
+    case "heart": s = [...Array(22)].map((_, i) => { const t = i / 22 * 2 * Math.PI, x = 16 * Math.sin(t) ** 3, y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+      return `<circle cx="${f(cx + x * 1.15)}" cy="${f(cy + y * 1.15 - 2)}" r="2" fill="${C}"/>`; }).join(""); break;
+    case "niko": s = dots(18, 20, 2, G) + `<circle cx="23" cy="23" r="2.6" fill="${C}"/><circle cx="37" cy="23" r="2.6" fill="${C}"/>` +
+      [...Array(7)].map((_, i) => { const a = Math.PI * (.2 + i * .1); const [x, y] = at(10, a, cx, cy + 1); return `<circle cx="${f(x)}" cy="${f(y)}" r="1.8" fill="${C}"/>`; }).join(""); break;
+    case "kamuro": s = droop(20, 19, G, 1.2, 10) + dots(20, 19, 1.4, G); break;
+    case "ring": s = dots(10, 9, 2.4, C) + [...Array(16)].map((_, i) => { const a = i / 16 * 2 * Math.PI; return `<circle cx="${f(cx + 23 * Math.cos(a))}" cy="${f(cy + 8 * Math.sin(a) - 4 * Math.cos(a))}" r="1.6" fill="${G}"/>`; }).join(""); break;
+    case "star": s = [...Array(5)].map((_, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / 5, b = a + 4 * Math.PI / 5; const [x0, y0] = at(20, a), [x1, y1] = at(20, b);
+      return [0, .25, .5, .75].map(t => `<circle cx="${f(x0 + (x1 - x0) * t)}" cy="${f(y0 + (y1 - y0) * t)}" r="2" fill="${C}"/>`).join(""); }).join(""); break;
+    case "himawari": s = dots(14, 19, 4, G) + `<circle cx="${cx}" cy="${cy}" r="11" fill="${sil ? C : "#8a5a00"}"/>` + dots(7, 6, 1.4, C); break;
+    case "niagara": s = `<line x1="6" y1="12" x2="54" y2="12" stroke="${W}" stroke-width="2"/>` +
+      [...Array(9)].map((_, i) => `<line x1="${8 + i * 5.5}" y1="14" x2="${8 + i * 5.5}" y2="${42 + (i % 3) * 5}" stroke="${i % 2 ? G : C}" stroke-width="1.6" stroke-dasharray="3 2"/>`).join(""); break;
+    case "starmine": s = dots(9, 8, 1.8, C, 17, 20) + dots(9, 8, 1.8, G, 43, 18) + dots(10, 10, 2, sil ? C : "#4dabf7", 30, 38) + dots(7, 6, 1.6, sil ? C : "#69db7c", 44, 42, .3); break;
+    case "nishiki": s = droop(18, 20, G, 1.2, 9) + dots(10, 9, 2.4, C); break;
+    case "sanshaku": s = dots(22, 25, 1.8, sil ? C : "#ff6b6b") + dots(16, 18, 2.1, G) + dots(12, 11, 2.3, C) + `<circle cx="${cx}" cy="${cy}" r="3" fill="${W}"/>`; break;
   }
-  if (sil) s += `<text x="60" y="80" text-anchor="middle" font-size="44" font-weight="bold" fill="#fff">？</text>`;
-  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${s}</svg>`;
+  if (sil) s += `<text x="30" y="36" text-anchor="middle" font-size="22" font-weight="bold" fill="#fff">？</text>`;
+  return `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">${s}</svg>`;
+}
+function k2(a, b, ang) { return Math.round(ang * 4) % 2 ? a : b; }
+// 本番の観客
+function crowdSVG() {
+  let s = "";
+  for (let i = 0; i < 14; i++) {
+    const x = 10 + i * 22 + (i % 2) * 4, h = i % 3 === 0 ? 4 : 0;
+    s += `<g class="pp" style="animation-delay:${(i % 4) * .08}s"><circle cx="${x}" cy="${18 - h}" r="7" fill="#0b0e24"/><path d="M${x - 11} 44 Q${x - 10} ${27 - h} ${x} ${26 - h} Q${x + 10} ${27 - h} ${x + 11} 44Z" fill="#0b0e24"/></g>`;
+  }
+  return `<svg viewBox="0 0 320 44" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">${s}</svg>`;
 }
 
 /* ---- マップ ---- */
+function shopCardHTML() {
+  return `<div class="goal shop" style="--c:#b5179e"><div class="gi">🏭</div>
+    <div class="gt"><b>花火工房</b><span>注文の花火を つくると、本番で 火種を 1つ もどせる<b class="tw">特製玉</b>が もらえる</span>
+    <span class="tama">特製玉 ${tamaHTML()}　｜　工房の★ ${craftTotal()}/${CRAFT.length * 3}</span></div>
+    <button class="gobtn" data-shop="1">工房へ ▶</button></div>`;
+}
+function albumHTML() {
+  const got = (i, s) => advData.pos > nodeIdx(i, s);
+  let n = 0, cells = "";
+  ISLANDS.forEach((I, i) => {
+    for (let s = 0; s < STEPS; s++) {
+      const [k, name] = kindOf(i, s), g = got(i, s); if (g) n++;
+      cells += `<div class="ak${s === STEPS - 1 ? " fin" : ""}" title="${g ? name : "？？？"}">${burstSVG(k, I.color, !g)}<span>${g ? name : "？？？"}</span></div>`;
+    }
+  });
+  return `<div class="album"><div class="ahead">📷 夜空アルバム <b>${n} / ${ADV_TOTAL}</b></div><div class="agrid">${cells}</div></div>`;
+}
 function renderAdv() {
   const box = $("advArea");
-  if (!advOpen()) { box.innerHTML = lockHTML(); return; }
+  let h = shopCardHTML();
+  if (!advOpen()) { box.innerHTML = h + lockHTML(); return; }
   const pos = advData.pos, all = advAllClear(), curI = Math.min(ISLANDS.length - 1, Math.floor(pos / STEPS));
-  let h = "";
   if (all) {
     h += `<div class="goal" style="--c:#ffc53d"><div class="gi">${heroSVG()}</div>
-      <div class="gt"><b>ぜんぶの島を クリア！</b><span>すきなマスを えらんで、また あそべるよ</span></div></div>`;
+      <div class="gt"><b>ぜんぶの 花火大会を 大成功！</b><span>すきなマスを えらんで、また あそべるよ</span></div></div>`;
   } else {
-    const s = pos % STEPS, I = ISLANDS[curI], boss = s === STEPS - 1;
-    h += `<div class="goal" style="--c:${I.color}"><div class="gi">${boss ? monsterSVG(I.type, I.color) : heroSVG()}</div>
-      <div class="gt"><b>${boss ? `ボス：${I.boss}` : `ステージ ${curI + 1}-${s + 1}`}</b><span>${I.name}（${I.sub}）</span></div>
-      <button class="gobtn" data-i="${curI}" data-s="${s}">${boss ? "たたかう" : "すすむ"} ▶</button></div>`;
+    const s = pos % STEPS, I = ISLANDS[curI], boss = s === STEPS - 1, [k, name] = kindOf(curI, s);
+    h += `<div class="goal" style="--c:${I.color}"><div class="gi night">${burstSVG(k, I.color)}</div>
+      <div class="gt"><b>${boss ? `本番：${I.name}` : `花火玉づくり ${curI + 1}-${s + 1}`}</b><span>${boss ? "フィナーレは「" + name + "」" : "つくる花火玉：「" + name + "」"}（${I.sub}）</span></div>
+      <button class="gobtn" data-i="${curI}" data-s="${s}">${boss ? "うちあげ" : "つくる"} ▶</button></div>`;
   }
   let m = "";
   if (advData.moved !== undefined) {
-    m = all ? "ぜんぶの島を クリア！ おめでとう！" : advData.moved % STEPS === STEPS - 1 ? `あたらしい島「${ISLANDS[curI].name}」が あらわれた！` : "コマが 1マス すすんだ！";
+    m = all ? "ぜんぶの 花火大会を 大成功！ おめでとう！" : advData.moved % STEPS === STEPS - 1 ? `つぎの会場「${ISLANDS[curI].name}」へ すすめるよ！` : "コマが 1マス すすんだ！";
   }
   h += `<div class="mapmsg">${m ? `<span class="newrec">${m}</span>` : ""}</div>`;
   const piecePos = all ? ADV_TOTAL - 1 : pos;
@@ -1641,18 +1721,19 @@ function renderAdv() {
     const locked = !all && i > curI, cleared = pos > nodeIdx(i, STEPS - 1);
     const prog = Math.min(STEPS, Math.max(0, pos - nodeIdx(i, 0)));
     h += `<div class="island${locked ? " locked" : ""}" style="--c:${I.color}" id="isl${i}">
-      <div class="ihead"><span>${i + 1}. ${locked ? "？？？" : I.name}${locked ? "" : `<small>${I.sub}</small>`}</span><span class="ist">${cleared ? "クリア！" : locked ? "" : prog + " / " + STEPS}</span></div><div class="path">`;
+      <div class="ihead"><span>${I.icon} ${locked ? "？？？" : I.name}${locked ? "" : `<small>${I.sub}</small>`}</span><span class="ist">${cleared ? "大成功！" : locked ? "" : prog + " / " + STEPS}</span></div><div class="path">`;
     for (let s = 0; s < STEPS; s++) {
-      const k = nodeIdx(i, s), boss = s === STEPS - 1, st = advData.st[`${i}-${s}`] || 0;
+      const k = nodeIdx(i, s), boss = s === STEPS - 1, st = advData.st[`${i}-${s}`] || 0, [kd] = kindOf(i, s);
       const cls = "node" + (boss ? " boss" : "") + (k < pos ? " done" : "") + (k === pos && !all ? " cur" : "") + (advData.moved === k ? " pop" : "");
-      const inner = boss ? monsterSVG(I.type, I.color, locked) : (k < pos ? "★" : s + 1);
+      const inner = boss ? burstSVG(kd, I.color, locked || k > pos) : (k < pos ? burstSVG(kd, "#fff") : s + 1);
       const sts = !boss && k < pos ? `<span class="nst">${starHTML(st)}</span>` : "";
       const piece = k === piecePos ? `<div class="piece${advData.moved !== undefined ? " hop" : ""}">${heroSVG()}</div>` : "";
-      h += `<button class="${cls}" data-i="${i}" data-s="${s}" ${k > pos ? "disabled" : ""} aria-label="${boss ? "ボス" : "ステージ " + (i + 1) + "-" + (s + 1)}">${inner}${sts}${piece}</button>`;
+      h += `<button class="${cls}" data-i="${i}" data-s="${s}" ${k > pos ? "disabled" : ""} aria-label="${boss ? "本番" : "花火玉づくり " + (i + 1) + "-" + (s + 1)}">${inner}${sts}${piece}</button>`;
     }
     h += `</div></div>`;
   });
-  h += `<p class="mapfoot">ステージは ぜんぶ とけば すすめるよ。ボス戦は ハート ${HEARTS}つ。まちがえると へるよ。</p>`;
+  h += albumHTML();
+  h += `<p class="mapfoot">花火玉づくりは ぜんぶ とけば すすめるよ。本番は 火種 ${HEARTS}つ。まちがえると 不発になって へるよ。</p>`;
   box.innerHTML = h;
   if (advData.moved !== undefined) { delete advData.moved; saveAdv(); }
   setTimeout(() => { const el = $("isl" + curI); if (el && curI > 0 && mode === "adv" && !adv) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 60);
@@ -1660,23 +1741,25 @@ function renderAdv() {
 function lockHTML() {
   const col = m => `<div class="lk-col" style="--c:${MODE_COLOR[m]}"><h4>${m === "num" ? "🔣 記号モード（★★★で クリア）" : "✏️ 計算モード（★★いじょうで クリア）"}</h4>` +
     LEVELS.filter(L => L.mode === m).map(L => `<div class="lk-row"><span>${L.name}</span><span class="ls">${starHTML(stars[L.id] || 0)}</span><span class="${isCleared(L) ? "ok" : ""}">${isCleared(L) ? "✔ クリア" : "まだ"}</span></div>`).join("") + `</div>`;
-  return `<div class="lock"><div class="lk-ic">🔒</div><h3>冒険モードは まだ ふういんされている…</h3>
-    <p>記号モードと計算モードの <b>8つのレベル</b>を ぜんぶ クリアすると、かいほうされるよ！（あと ${restCount()}レベル）</p>
+  return `<div class="lock"><div class="lk-ic">🏮</div><h3>花火大会は まだ はじまっていない…</h3>
+    <p>記号モードと計算モードの <b>8つのレベル</b>で 修行を おえると、花火大会に 出られるよ！（あと ${restCount()}レベル）<br>工房は いつでも 使えるよ。</p>
     <div class="lk-cols">${col("num")}${col("calc")}</div></div>`;
 }
 $("advArea").addEventListener("click", e => {
+  if (e.target.closest("[data-shop]")) { setMode("craft"); window.scrollTo(0, 0); return; }
   const b = e.target.closest("button[data-i]"); if (!b || b.disabled) return;
   openStart(Number(b.dataset.i), Number(b.dataset.s));
 });
 function openStart(i, s) {
-  const I = ISLANDS[i], boss = s === STEPS - 1, k = nodeIdx(i, s);
-  openOv(`<div class="ovart">${boss ? monsterSVG(I.type, I.color) : heroSVG()}</div>
-    <h2 style="color:${I.color}">${boss ? `ボス：${I.boss}` : `ステージ ${i + 1}-${s + 1}`}</h2>
-    <div class="ovsub">${I.name}　｜　${boss ? (I.final ? "ぜんぶの島の 問題が まざるよ" : i > 0 ? "まえの島の 問題も まざるよ" : I.sub) : I.sub}</div>
-    <p>${boss ? `${I.bn}問 といて、${I.boss}を たおそう！<br>ハートは ${HEARTS}つ。まちがえると ボスの こうげきで へるよ。<br>ノーミスで とくと <b>かいしんの いちげき！</b>`
-            : `${I.n}問。順じょを えらんで、自分で 計算しよう。<br>ぜんぶ とけたら コマが すすむよ。`}
+  const I = ISLANDS[i], boss = s === STEPS - 1, k = nodeIdx(i, s), [kd, name] = kindOf(i, s);
+  openOv(`<div class="ovart night">${burstSVG(kd, I.color)}</div>
+    <h2 style="color:${I.color}">${boss ? `本番：${I.name}` : `花火玉づくり ${i + 1}-${s + 1}`}</h2>
+    <div class="ovsub">${I.name}　｜　${boss ? (I.final ? "ぜんぶの会場の 問題が まざるよ" : i > 0 ? "まえの会場の 問題も まざるよ" : I.sub) : I.sub}</div>
+    <p>${boss ? `${I.bn}問 といて 花火を うちあげ、会場を もりあげよう！<br>火種は ${HEARTS}つ。まちがえると 不発になって へるよ。<br>ノーミスで とくと <b>スターマイン！</b>` +
+              (advData.tama ? `<br>特製玉 ${advData.tama}こ（火種を 1つ もどせる）` : "")
+            : `${I.n}問 といて、花火玉「${name}」を つくろう！<br>順じょを えらんで、自分で 計算しよう。`}
     ${k < advData.pos ? `<br><span class="done">（クリアずみ。もう一度 あそべるよ）</span>` : ""}</p>
-    <div class="btns"><button class="btn adv" data-ov="go">${boss ? "たたかう！" : "スタート！"}</button><button class="btn reset" data-ov="close">やめる</button></div>`,
+    <div class="btns"><button class="btn adv" data-ov="go">${boss ? "うちあげる！" : "つくる！"}</button><button class="btn reset" data-ov="close">やめる</button></div>`,
     { go: () => startAdv(i, s) });
 }
 
@@ -1685,15 +1768,15 @@ function startAdv(i, s) {
   const I = ISLANDS[i], boss = s === STEPS - 1;
   const n = boss ? I.bn : I.n;
   adv = { i, s, boss, hearts: HEARTS, n, hp: n, lost: false, anim: "", dmg: "", heartJust: -1, moved: false, st: 0,
-          msg: boss ? `<span class="gold">${I.boss}</span> が あらわれた！` : "" };
+          msg: boss ? `<span class="gold">${I.name}</span>、まもなく 開始！` : "" };
   lv = I.lv;
   const Lof = id => LEVELS.find(x => x.id === id);
   if (boss && I.final) {
-    // ラスボス：島1〜3の問題のあとに、記号3つの問題
+    // さいごの会場：会場1〜3の問題のあとに、記号3つの問題
     const ids = [13, 14, 15, 16, 16];
     set = []; ids.forEach(id => set.push(...buildSet(() => Lof(id), 1)));
   } else if (boss && i > 0) {
-    // ボス：その島の問題を中心に、まえの島の問題を1問まぜる
+    // 本番：その会場の問題を中心に、まえの会場の問題を1問まぜる
     set = buildSet(() => Lof(I.lv), n - 1).concat(buildSet(() => Lof(ISLANDS[rnd(0, i - 1)].lv), 1));
     for (let k = set.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [set[k], set[j]] = [set[j], set[k]]; }
   } else set = buildSet(() => Lof(I.lv), n);
@@ -1712,43 +1795,61 @@ function backToMap() { leaveAdv(); mode = "adv"; renderLevels(); window.scrollTo
 
 function renderHud() {
   const hud = $("hud");
-  if (!adv) { hud.innerHTML = ""; return; }
+  if (!adv) { if (mode !== "craft") hud.innerHTML = ""; return; }
   const I = ISLANDS[adv.i];
   if (!adv.boss) {
     const doneN = solved.filter(Boolean).length, slots = adv.n + 1;
     const left = `calc(${(doneN / (slots - 1)) * 100}% - ${doneN / (slots - 1) * 28}px)`;
     hud.innerHTML = `<div class="shud" style="--c:${I.color}"><button class="mback" data-hud="map">◀ マップ</button>
-      <div class="st"><b>ステージ ${adv.i + 1}-${adv.s + 1}</b><span>${I.name}（${I.sub}）</span></div>
-      <div class="track">${set.map((_, k) => `<i class="${solved[k] ? "ok" : ""}">${solved[k] ? (perf[k] ? "★" : "✓") : k + 1}</i>`).join("")}<i class="goal">🚩</i>
+      <div class="st"><b>花火玉づくり ${adv.i + 1}-${adv.s + 1}</b><span>「${kindOf(adv.i, adv.s)[1]}」　${I.name}（${I.sub}）</span></div>
+      <div class="track">${set.map((_, k) => `<i class="${solved[k] ? "ok" : ""}">${solved[k] ? (perf[k] ? "★" : "✓") : k + 1}</i>`).join("")}<i class="goal">🎆</i>
       <div class="tkhero" style="left:${left}">${heroSVG()}</div></div></div>`;
     return;
   }
-  const hpPct = adv.hp / adv.n * 100, hpCol = hpPct > 50 ? "#4cd97b" : hpPct > 25 ? "#ffc53d" : "#ff5c5c";
-  const hearts = [...Array(HEARTS)].map((_, k) => `<span class="${k < adv.hearts ? "" : "lost"}${k === adv.heartJust ? " just" : ""}">${k < adv.hearts ? "♥" : "♡"}</span>`).join("");
-  const anim = adv.hp === 0 ? "down" : adv.anim;
-  hud.innerHTML = `<div class="bhud"><div class="bh-top"><button class="mback" data-hud="map">◀ にげる</button>
-      <span class="bh-isl">${I.name}</span><span class="hearts" aria-label="ハート ${adv.hearts}">${hearts}</span></div>
-    <div class="bh-name"><b>${I.boss}</b><div class="hp"><i style="width:${hpPct}%;background:${hpCol}"></i></div><span class="hpn">HP ${adv.hp}/${adv.n}</span></div>
-    <div class="bh-mid"><div class="shadow"></div><div class="monster ${anim}">${monsterSVG(I.type, I.color)}</div>
-      <div class="dmg ${adv.dmg ? "show" : ""} ${adv.dmg === "かいしん！" ? "crit" : ""}">${adv.dmg}</div></div>
-    <div class="msgwin">${adv.msg || "▶ 問題を といて こうげきだ！"}</div></div>`;
+  const pct = (adv.n - adv.hp) / adv.n * 100;
+  const fires = [...Array(HEARTS)].map((_, k) => `<span class="${k < adv.hearts ? "" : "lost"}${k === adv.heartJust ? " just" : ""}">🔥</span>`).join("");
+  const canTama = advData.tama > 0 && adv.hearts < HEARTS && !adv.lost && !finished;
+  hud.innerHTML = `<div class="bhud"><div class="bh-top"><button class="mback" data-hud="map">◀ やめる</button>
+      <span class="bh-isl">${I.icon} ${I.name}</span>${canTama ? `<button class="tamab" data-hud="tama">✨特製玉 ×${advData.tama}</button>` : ""}<span class="hearts" aria-label="火種 ${adv.hearts}">${fires}</span></div>
+    <div class="bh-name"><b>歓声ゲージ</b><div class="hp"><i style="width:${pct}%;background:linear-gradient(90deg,#ffd43b,#ff5fa2)"></i></div><span class="hpn">あと ${adv.hp}発</span></div>
+    <div class="bh-mid sky" id="sky"><div class="moon"></div>
+      <div class="dmg ${adv.dmg ? "show" : ""} ${adv.dmg === "スターマイン！" ? "star" : ""}">${adv.dmg}</div>
+      <div class="crowd ${adv.anim}">${crowdSVG()}</div></div>
+    <div class="msgwin">${adv.msg || "▶ 問題を といて 花火を うちあげよう！"}</div></div>`;
   adv.anim = ""; adv.dmg = ""; adv.heartJust = -1;
 }
 $("hud").addEventListener("click", e => {
   const b = e.target.closest("[data-hud]"); if (!b) return;
-  if (!finished && !confirm(adv && adv.boss ? "にげますか？（はじめから やりなおしになるよ）" : "マップに もどりますか？（このステージは やりなおしになるよ）")) return;
+  if (b.dataset.hud === "shopback") { setMode("adv"); return; }
+  if (b.dataset.hud === "tama") {
+    if (!adv || advData.tama <= 0 || adv.hearts >= HEARTS) return;
+    advData.tama--; saveAdv();
+    adv.hearts++; adv.msg = `<span class="gold">✨ 特製玉で 火種が 1つ もどった！</span>`;
+    sfx("solved"); renderHud(); return;
+  }
+  if (!finished && !confirm(adv && adv.boss ? "本番を やめますか？（はじめから やりなおしになるよ）" : "マップに もどりますか？（この花火玉づくりは やりなおしになるよ）")) return;
   backToMap();
 });
+function skyEl() { return document.getElementById("sky"); }
+// 本番で1問とけたとき：夜空に花火（ノーミスならスターマイン）
+function skyShow(p, finale) {
+  const sky = skyEl(); if (!sky) return;
+  const r = sky.getBoundingClientRect(), n = finale ? 5 : p ? 3 : 1;
+  for (let k = 0; k < n; k++) setTimeout(() => {
+    const x = r.left + r.width * (n === 1 ? .5 : .15 + .7 * k / (n - 1)) + (Math.random() - .5) * 20, y = r.top + r.height * (.3 + Math.random() * .15);
+    firework(x, y, finale ? 1.3 : p ? 1 : .9); sfx("boom");
+  }, k * 220);
+}
 
-// まちがえたとき。ボス戦ではハートがへる。ゲームオーバーなら true
+// まちがえたとき。本番では火種がへる（不発）。火種がなくなったら true
 function advMiss(kind) {
   if (!adv || !adv.boss || adv.lost) return false;
-  const I = ISLANDS[adv.i];
-  adv.hearts--; adv.heartJust = adv.hearts; adv.anim = "atk";
-  adv.msg = `<span class="red">${I.boss}の こうげき！</span> ${kind === "order" ? "計算の順じょを たしかめよう。" : "計算を まちがえた…"}`;
+  adv.hearts--; adv.heartJust = adv.hearts;
+  adv.msg = `<span class="red">ぷすっ… 不発！</span> 火種が 1つ へった。${kind === "order" ? "計算の順じょを たしかめよう。" : "計算を たしかめよう。"}`;
   document.body.classList.remove("flash"); void document.body.offsetWidth; document.body.classList.add("flash");
-  sfx("hit");
   renderHud();
+  const sky = skyEl();
+  if (sky) { const c = centerOf(sky); firework(c.x, c.y, .45, ["#6c7091", "#4a4e6e"]); }
   if (adv.hearts <= 0) { advLose(); return true; }
   return false;
 }
@@ -1763,12 +1864,10 @@ function advLose() {
 }
 function advQDone(p) {
   if (!adv.boss) return;
-  const I = ISLANDS[adv.i];
   adv.hp = Math.max(0, adv.hp - 1);
-  adv.anim = p ? "crit" : "hit"; adv.dmg = p ? "かいしん！" : "ヒット！";
-  adv.msg = adv.hp === 0 ? `<span class="gold">${I.boss}を たおした！</span>`
-    : p ? `<span class="gold">かいしんの いちげき！</span> ${I.boss}に 大ダメージ！` : `${I.boss}に こうげき！ あと ${adv.hp}問！`;
-  setTimeout(() => sfx("hit"), 120);
+  adv.anim = "cheer"; adv.dmg = p ? "スターマイン！" : "たまや〜！";
+  adv.msg = adv.hp === 0 ? `<span class="gold">フィナーレ！ 会場が 大もりあがり！</span>`
+    : p ? `<span class="gold">スターマイン！</span> 大きな 歓声が あがった！ あと ${adv.hp}発！` : `ドーン！ 歓声が あがった！ あと ${adv.hp}発！`;
 }
 function advFinish() {
   const k = nodeIdx(adv.i, adv.s);
@@ -1787,28 +1886,30 @@ function advFinish() {
   renderTop();
 }
 function renderAdvResult() {
-  const I = ISLANDS[adv.i], b = $("btns");
+  const I = ISLANDS[adv.i], b = $("btns"), [kd, name] = kindOf(adv.i, adv.s);
   const mk = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; b.appendChild(e); };
   let h = `<div class="result">`;
   b.innerHTML = "";
   if (adv.lost) {
-    h += `<div class="rart">${monsterSVG(I.type, I.color)}</div><div class="big">まけてしまった…</div>
-      <p>ハートが なくなった。あと ${adv.hp}問 だったよ！<br>計算の順じょと 筆算を たしかめて、もう一度 ちょうせんしよう。</p>`;
+    h += `<div class="rart night beaten">${burstSVG(kd, I.color, true)}</div><div class="big">火種が なくなった…</div>
+      <p>あと ${adv.hp}発 だったよ！<br>計算の順じょと 筆算を たしかめて、もう一度 ちょうせんしよう。${advData.tama < TAMA_MAX ? "<br>工房で 特製玉を つくっておくと 安心だよ。" : ""}</p>`;
     setMsg("bad", "あきらめないで！");
-    mk("adv", "もう一度 たたかう", () => startAdv(adv.i, adv.s));
+    mk("adv", "もう一度 うちあげる", () => startAdv(adv.i, adv.s));
+    if (advData.tama < TAMA_MAX) mk("craft", "工房へ 🏭", () => { setMode("craft"); window.scrollTo(0, 0); });
     mk("reset", "マップへ もどる", backToMap);
   } else if (adv.boss) {
     const fin = I.final;
-    h += `<div class="rart beaten">${monsterSVG(I.type, I.color)}</div><div class="big">${I.boss}を たおした！</div>`;
-    h += `<div class="stats"><span>のこりハート <b class="hrt">${"♥".repeat(adv.hearts)}</b></span><span${totalMiss + totalCalcMiss === 0 ? ' class="z"' : ""}>まちがい ${totalMiss + totalCalcMiss}</span></div>`;
-    h += fin ? `<p><span class="newrec">👑 ぜんぶの島を クリア！ きみは でんせつの ゆうしゃだ！</span></p>`
-             : adv.moved ? `<p>つぎの島「${ISLANDS[adv.i + 1].name}」へ すすめるよ！</p>` : "";
-    setMsg("done", fin ? "おめでとう！" : "ボス クリア！");
+    h += `<div class="rart night">${burstSVG(kd, I.color)}</div><div class="big">${I.name} 大成功！</div>`;
+    h += `<div class="stats"><span>のこりの火種 <b>${"🔥".repeat(adv.hearts)}</b></span><span${totalMiss + totalCalcMiss === 0 ? ' class="z"' : ""}>まちがい ${totalMiss + totalCalcMiss}</span></div>`;
+    if (adv.moved) h += `<p>夜空アルバムに「${name}」が くわわった！</p>`;
+    h += fin ? `<p><span class="newrec">👑 ぜんぶの 花火大会を 大成功させた！ きみは 花火大名人だ！</span></p>`
+             : adv.moved ? `<p>つぎの会場「${ISLANDS[adv.i + 1].name}」へ すすめるよ！</p>` : "";
+    setMsg("done", fin ? "おめでとう！" : "本番 大成功！");
     mk("next big", "マップへ ▶", backToMap);
   } else {
-    h += `<div class="rstars">${starHTML(adv.st)}</div><div class="big">ステージ ${adv.i + 1}-${adv.s + 1} クリア！</div>`;
+    h += `<div class="rstars">${starHTML(adv.st)}</div><div class="rart night small">${burstSVG(kd, I.color)}</div><div class="big">花火玉「${name}」が できた！</div>`;
     h += `<div class="stats"><span${totalMiss === 0 ? ' class="z"' : ""}>順じょのまちがい ${totalMiss}</span><span${totalCalcMiss === 0 ? ' class="z"' : ""}>計算のまちがい ${totalCalcMiss}</span><span${hintO + hintC === 0 ? ' class="z"' : ""}>ヒント ${hintO + hintC}</span></div>`;
-    if (adv.moved) h += `<p>コマが 1マス すすむよ！</p>`;
+    if (adv.moved) h += `<p>夜空アルバムに くわわったよ。コマが 1マス すすむよ！</p>`;
     else if (adv.st > adv.prevSt) h += `<p><span class="newrec">さいこう記録 こうしん！</span></p>`;
     setMsg(adv.st === 3 ? "done" : "", adv.st === 3 ? "パーフェクト！" : "");
     mk("next big", "マップへ ▶", backToMap);
@@ -1852,7 +1953,7 @@ function launchAt(el, size, cols, onBurst) {
   setTimeout(() => { r.remove(); firework(c.x, y, size, cols); sfx("boom"); if (onBurst) onBurst(); }, 480);
 }
 
-/* ================= 花火職人モード（（ ）をつけて、目標の数をつくる） ================= */
+/* ================= 花火工房（（ ）をつけて、注文の数をつくる）＝ 花火大会の中にある ================= */
 const CRAFT_PER = 5;
 const CRAFT = [
   { id: 1, name: "レベル1", short: "＋ − ×・数3つ", ops: "+-*",  n: 2, none: 0,   tags: ["＋ − ×", "数は3つ", "（ ）が ひつよう"] },
@@ -1929,7 +2030,7 @@ function renderCraftLevels() {
   const C = curC();
   $("lvdesc").innerHTML = C.tags.map(s => `<span class="tag">${s}</span>`).join("") +
     `<div class="crit"><b>★の めやす</b>（${CRAFT_PER}問）<ul>` +
-    ["ぜんぶ うちあげる", "まちがい・ヒント 合わせて 2回まで", "ノーミス（ヒントなし）"]
+    ["ぜんぶ つくる", "まちがい・ヒント 合わせて 2回まで（特製玉 ゲット）", "ノーミス（ヒントなし）"]
       .map((t, i) => `<li class="${i < (craftStars[C.id] || 0) ? "got" : ""}"><span class="s">${"★".repeat(i + 1)}</span>${t}</li>`).join("") +
     `</ul></div>`;
 }
@@ -1950,7 +2051,9 @@ function craftStartQ() {
 }
 
 function craftRender() {
-  $("hud").innerHTML = "";
+  $("hud").innerHTML = `<div class="shud" style="--c:#b5179e"><button class="mback" data-hud="shopback">◀ 花火大会へ</button>
+    <div class="st"><b>🏭 花火工房</b><span>注文の数に なるように（ ）を つけよう</span></div>
+    <span class="tama">特製玉 ${tamaHTML()}</span></div>`;
   $("combo").textContent = "";
   $("prog").innerHTML = cf.set.map((_, i) => `<i class="${cf.solved[i] ? (cf.perf[i] ? "perf" : "ok") : ""}${i === cf.qi && !cf.finished ? " now" : ""}"></i>`).join("");
   if (cf.finished) {
@@ -1960,8 +2063,8 @@ function craftRender() {
   const q = cf.set[cf.qi];
   $("qno").textContent = `${cf.qi + 1} 問目 ／ ${cf.set.length} 問`;
   $("guide").style.display = "";
-  $("guide").innerHTML = `<div class="target"><span class="tl">🎆 目標の花火</span><span class="tv">${q.target}</span></div>` +
-    `数を2つタップして（ ）をつけ、<b>${q.target}</b> になる花火を うちあげよう。`;
+  $("guide").innerHTML = `<div class="target"><span class="tl">📜 注文の花火</span><span class="tv">${q.target}</span></div>` +
+    `「<b>${q.target}</b> の花火を おねがい！」 数を2つタップして（ ）をつけ、ためしうちしよう。`;
 
   const ex = $("expr"); ex.innerHTML = "";
   const add = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; e.textContent = txt; ex.appendChild(e); return e; };
@@ -1977,8 +2080,8 @@ function craftRender() {
   const bx = $("btns"); bx.innerHTML = "";
   const mk = (cls, txt, fn, dis) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; e.disabled = !!dis; bx.appendChild(e); return e; };
   if (!cf.done) {
-    mk("fire", "🎆 うちあげ！", () => craftLaunch(cf.pair), !cf.pair || cf.busy);
-    mk("nopar", "（ ）なしで うちあげ", () => craftLaunch(null), cf.busy);
+    mk("fire", "🎆 ためしうち！", () => craftLaunch(cf.pair), !cf.pair || cf.busy);
+    mk("nopar", "（ ）なしで ためしうち", () => craftLaunch(null), cf.busy);
     if (cf.pair) mk("reset", "（ ）を はずす", () => { if (cf.busy) return; cf.pair = null; cf.pick = null; setMsg("", ""); craftRender(); });
     mk("hintb", "ヒント", craftHint, cf.busy);
   } else {
@@ -2026,7 +2129,7 @@ function craftLaunch(span) {
     lines.push(toStr(t));
   }
   cf.lines = [lines[0]];
-  setMsg("info", "🎆 うちあげ…");
+  setMsg("info", "🎆 ためしうち…");
   craftRender();
   let i = 1;
   const stepT = setInterval(() => {
@@ -2087,8 +2190,11 @@ function craftNext() {
   cf.finished = true;
   const o = cf.miss + cf.hints, st = o === 0 ? 3 : o <= 2 ? 2 : 1, prev = craftStars[craftLv] || 0;
   if (st > prev) { craftStars[craftLv] = st; save("junjo_craft", craftStars); }
-  cf.res = { st, prev };
-  setMsg(st === 3 ? "done" : "", st === 3 ? "パーフェクト！ 花火大会 大せいこう！" : "");
+  // ★★いじょうで 特製玉を1つ（本番で 火種を1つ もどせる）
+  const tama = st >= 2 && advData.tama < TAMA_MAX;
+  if (tama) { advData.tama++; saveAdv(); }
+  cf.res = { st, prev, tama };
+  setMsg(st === 3 ? "done" : "", st === 3 ? "パーフェクト！ 注文 かんぺき！" : "");
   renderLevels();
   craftRender();
   if (st === 3) { sfx("fanfare"); confetti(50); }
@@ -2097,15 +2203,19 @@ function craftNext() {
 function craftRenderResult() {
   const r = cf.res, C = curC();
   let h = `<div class="result"><div class="rstars">${starHTML(r.st)}</div>`;
-  h += `<div class="big">花火職人 ${C.name} ${r.st === 3 ? "かんぺき！" : "おつかれさま"}</div>`;
-  h += `<div class="stats"><span>${cf.set.length}発 うちあげ</span><span${cf.miss === 0 ? ' class="z"' : ""}>まちがい ${cf.miss}</span><span${cf.hints === 0 ? ' class="z"' : ""}>ヒント ${cf.hints}</span></div>`;
+  h += `<div class="big">工房 ${C.name} 注文 ${r.st === 3 ? "かんぺき！" : "おつかれさま"}</div>`;
+  h += `<div class="stats"><span>注文 ${cf.set.length}こ</span><span${cf.miss === 0 ? ' class="z"' : ""}>まちがい ${cf.miss}</span><span${cf.hints === 0 ? ' class="z"' : ""}>ヒント ${cf.hints}</span></div>`;
   if (r.st > r.prev && r.prev > 0) h += `<p><span class="newrec">さいこう記録 こうしん！</span></p>`;
+  h += r.tama ? `<p><span class="newrec">✨ 特製玉を 1つ つくった！（${advData.tama}/${TAMA_MAX}）</span><br>本番で まちがえたとき、火種を 1つ もどせるよ。</p>`
+    : r.st >= 2 ? `<p>特製玉は もう ${TAMA_MAX}こ もっているよ。本番で つかおう！</p>`
+    : `<p>★★いじょうで 注文を こなすと、特製玉が もらえるよ。</p>`;
   $("expr").innerHTML = h + "</div>";
   const b = $("btns"); b.innerHTML = "";
   const mk = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; b.appendChild(e); };
-  mk("again", "ちがう問題で もう一度", craftNewSet);
+  mk("again", "ちがう注文で もう一度", craftNewSet);
   const nx = CRAFT.find(x => x.id === craftLv + 1);
   if (nx) mk("next" + (r.st >= 2 ? " big" : ""), nx.name + " へ ▶", () => { craftLv = nx.id; craftNewSet(); window.scrollTo(0, 0); });
+  mk("adv", "花火大会へ 🎆", () => setMode("adv"));
 }
 
 /* ================= 先生用：問題の追加 ================= */
@@ -2164,8 +2274,8 @@ $("resetStars").onclick = () => {
   craftStars = {}; save("junjo_craft", craftStars); renderLevels();
 };
 $("resetAdv").onclick = () => {
-  if (!confirm("冒険の進みぐあいを はじめに もどしますか？")) return;
-  advData = { pos: 0, st: {} }; saveAdv(); renderLevels();
+  if (!confirm("花火大会の進みぐあい（特製玉もふくむ）を はじめに もどしますか？")) return;
+  advData = { pos: 0, st: {}, tama: 0 }; saveAdv(); renderLevels();
 };
 
 renderCustomList();
