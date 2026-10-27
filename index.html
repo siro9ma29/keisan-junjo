@@ -332,6 +332,34 @@
   body.flash .bhud { animation: flashB .45s; }
   @media (max-width: 600px) { .msgwin { font-size: 15px; padding: 6px 10px; } .bh-mid { height: 100px; } .monster { width: 90px; height: 90px; } .shadow { width: 150px; margin-left: -75px; } .dmg, .dmg.crit { left: 0; right: 0; top: -4px; text-align: center; font-size: 28px; } }
 
+  /* ---- 花火 ---- */
+  #fx b.spark { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; box-shadow: 0 0 6px currentColor;
+    animation: spark var(--t, .9s) ease-out forwards; }
+  #fx b.rocket { position: absolute; width: 5px; height: 16px; margin-left: -2px; border-radius: 3px;
+    background: linear-gradient(#fff, #ffc53d 40%, rgba(255,140,0,0)); animation: rise var(--t, .5s) ease-out forwards; }
+  @keyframes spark { 0% { transform: translate(0,0) scale(1.2); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; } }
+  @keyframes rise { 0% { transform: translateY(var(--h)); opacity: 1; } 100% { transform: translateY(0); opacity: .2; } }
+
+  /* ---- 花火職人モード ---- */
+  .modes { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 640px) { .modes { grid-template-columns: repeat(2, 1fr); } }
+  .levels.craft { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 640px) { .levels.craft { grid-template-columns: repeat(3, 1fr); } .levels.craft .lt { font-size: 12px; } }
+  .target { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 2px 0 4px; }
+  .target .tl { font-size: 16px; color: #b5179e; font-weight: bold; }
+  .target .tv { font-size: clamp(34px, 8vw, 48px); font-weight: bold; color: #fff; background: radial-gradient(circle at 50% 40%, #ff5fa2, #b5179e);
+    border-radius: 18px; padding: 0 18px; box-shadow: 0 4px 0 #7d0f6e; font-variant-numeric: tabular-nums; }
+  #expr .cn { font: inherit; font-size: 1em; font-weight: bold; color: var(--ink); background: #fff; border: 3px dashed #e3c6f0; border-radius: 14px;
+    padding: 0 8px; margin: 0 2px; cursor: pointer; line-height: 1.3; }
+  #expr .cn.pick { background: #ffe3f1; border: 3px solid #d6336c; animation: glow 1s infinite; }
+  #expr .cn.hint { border: 3px solid #f08c00; animation: glow 1s infinite; }
+  #expr .cn:disabled { cursor: default; border-color: transparent; }
+  #expr .cop { color: var(--navy); margin: 0 4px; }
+  .btn.fire { background: linear-gradient(120deg, #d6336c, #b5179e); font-size: 20px; }
+  .btn.fire:disabled { opacity: .45; }
+  .btn.nopar { background: #5c7cfa; }
+  .btn.craft { background: #b5179e; }
+
   /* ---- ポップアップ ---- */
   .ov { position: fixed; inset: 0; background: rgba(30,25,45,.55); display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
   .ov.show { display: flex; }
@@ -682,7 +710,7 @@ const starHTML = (n, max = 3) => [...Array(max)].map((_, i) => `<span class="${i
 
 /* ================= 画面 ================= */
 const $ = id => document.getElementById(id);
-const MODE_COLOR = { num: "#3d8bfd", calc: "#f08c00", adv: "#8a5cf0" };
+const MODE_COLOR = { num: "#3d8bfd", calc: "#f08c00", adv: "#8a5cf0", craft: "#b5179e" };
 let hintO = 0, hintC = 0, qHint = false, combo = 0, perf = [], resInfo = null;
 
 function renderTop() {
@@ -698,12 +726,15 @@ function renderLevels() {
   const MODES = [
     { m: "num",  ic: "🔣", t: "記号モード", s: "順じょを えらぶ", c: `${cnt("num")}/4` },
     { m: "calc", ic: "✏️", t: "計算モード", s: "自分で 計算する", c: `${cnt("calc")}/4` },
-    { m: "adv",  ic: open ? "🗺️" : "🔒", t: "冒険モード", s: open ? "島を めぐる" : `あと ${rest}レベル`, c: "" }
+    { m: "adv",  ic: open ? "🗺️" : "🔒", t: "冒険モード", s: open ? "島を めぐる" : `あと ${rest}レベル`, c: "" },
+    { m: "craft", ic: "🎆", t: "花火職人", s: "（ ）を つける", c: "", sc: `★ ${craftTotal()}/${CRAFT.length * 3}` }
   ];
   $("modes").innerHTML = MODES.map(x => `<button class="mode${mode === x.m ? " on" : ""}${x.m === "adv" && !open ? " locked" : ""}" style="--c:${MODE_COLOR[x.m]}" data-m="${x.m}">` +
-    `${x.c ? `<span class="cnt">CLEAR ${x.c}</span>` : ""}<span class="mi">${x.ic}</span><span class="mt">${x.t}</span><span class="ms">${x.s}</span></button>`).join("");
+    `${x.c ? `<span class="cnt">CLEAR ${x.c}</span>` : x.sc ? `<span class="cnt">${x.sc}</span>` : ""}<span class="mi">${x.ic}</span><span class="mt">${x.t}</span><span class="ms">${x.s}</span></button>`).join("");
   setView();
   if (mode === "adv") { renderAdv(); return; }
+  if (mode === "craft") { renderCraftLevels(); return; }
+  $("levels").classList.remove("craft");
 
   $("levels").innerHTML = LEVELS.filter(L => L.mode === mode).map(L => {
     const st = stars[L.id] || 0, cl = isCleared(L);
@@ -726,6 +757,8 @@ $("modes").addEventListener("click", e => {
   const b = e.target.closest("[data-m]"); if (b) setMode(b.dataset.m);
 });
 $("lvArea").addEventListener("click", e => {
+  const c = e.target.closest("[data-cl]");
+  if (c) { craftLv = Number(c.dataset.cl); craftNewSet(); return; }
   const b = e.target.closest("[data-lv]"); if (!b) return;
   lv = Number(b.dataset.lv); newSet();
 });
@@ -733,8 +766,10 @@ function setMode(m) {
   if (adv && !finished && !confirm("冒険を とちゅうで やめますか？")) return;
   if (m === mode && !adv) return;
   if (adv) leaveAdv();
+  craftSeq++; // 花火職人の うちあげとちゅうの演出を止める
   mode = m;
   if (m === "adv") { renderLevels(); window.scrollTo(0, 0); return; }
+  if (m === "craft") { craftLv = 1; craftNewSet(); return; }
   lv = { num: 1, calc: 13 }[m];
   newSet();
 }
@@ -856,6 +891,7 @@ function tap(k) {
   }
   sfx("ok");
   busy = true;
+  fireAt(opEl(k), 0.6);
   [k - 1, k, k + 1].forEach(i => opEl(i).classList.add("hl"));
   if (isCalc()) { startCalc(k); return; } // 計算モード：自分で計算する
   const step = applyStep(tokens, k);
@@ -876,6 +912,7 @@ function commitStep(step) {
     if (adv) advQDone(p);
   }
   render();
+  if (done) launchAt($("expr"), perf[qi] ? 1.6 : 1.1);
 }
 
 function hint() {
@@ -1005,7 +1042,8 @@ function sfx(k) {
     perfect: () => tone([660, 880, 1320], "triangle", .2, .08),
     fanfare: () => tone([523, 659, 784, 1047], "triangle", .22, .12),
     hit:     () => tone([180, 120], "sawtooth", .12, .06),
-    lose:    () => tone([392, 330, 262, 196], "triangle", .18, .18)
+    lose:    () => tone([392, 330, 262, 196], "triangle", .18, .18),
+    boom:    () => tone([1200, 600, 300], "sine", .1, .04)
   }[k] || (() => {}))();
 }
 $("sndBtn").onclick = () => { sound = !sound; save("junjo_sound", sound); renderTop(); if (sound) sfx("ok"); };
@@ -1779,6 +1817,297 @@ function renderAdvResult() {
   $("expr").innerHTML = h + `</div>`;
 }
 
+/* ================= 花火（演出） ================= */
+const FIRE_COLS = [["#ff5fa2", "#ffd43b", "#fff"], ["#4dabf7", "#b197fc", "#fff"], ["#69db7c", "#ffd43b", "#fff"], ["#ff922b", "#ff6b6b", "#fff3bf"]];
+function firework(x, y, size, cols) {
+  const fx = $("fx"), n = Math.round(16 * size), dist = 70 * size;
+  cols = cols || pick(FIRE_COLS);
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + Math.random() * .3, d = dist * (.75 + Math.random() * .35);
+    const s = document.createElement("b");
+    s.className = "spark";
+    s.style.left = x + "px"; s.style.top = y + "px";
+    s.style.background = s.style.color = cols[i % cols.length];
+    s.style.setProperty("--dx", Math.cos(a) * d + "px");
+    s.style.setProperty("--dy", Math.sin(a) * d + 10 * size + "px");
+    s.style.setProperty("--t", (.8 + size * .15) + "s");
+    fx.appendChild(s);
+    setTimeout(() => s.remove(), 1400);
+  }
+}
+function centerOf(el) {
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2, h: r.height };
+}
+// 要素の上で小さくはじける（正しい記号をタップしたとき）
+function fireAt(el, size) { if (!el) return; const c = centerOf(el); firework(c.x, c.y - c.h * .2, size); }
+// 下から打ち上げてはじける（1問とけたとき）
+function launchAt(el, size, cols, onBurst) {
+  if (!el) return;
+  const c = centerOf(el), y = c.y - c.h * .35, rise = c.h * .6 + 90;
+  const r = document.createElement("b");
+  r.className = "rocket"; r.style.left = c.x + "px"; r.style.top = y + "px";
+  r.style.setProperty("--h", rise + "px");
+  $("fx").appendChild(r);
+  setTimeout(() => { r.remove(); firework(c.x, y, size, cols); sfx("boom"); if (onBurst) onBurst(); }, 480);
+}
+
+/* ================= 花火職人モード（（ ）をつけて、目標の数をつくる） ================= */
+const CRAFT_PER = 5;
+const CRAFT = [
+  { id: 1, name: "レベル1", short: "＋ − ×・数3つ", ops: "+-*",  n: 2, none: 0,   tags: ["＋ − ×", "数は3つ", "（ ）が ひつよう"] },
+  { id: 2, name: "レベル2", short: "÷も・数3つ",   ops: "+-*/", n: 2, none: .2,  tags: ["＋ − × ÷", "数は3つ", "（ ）が いらない問題も"] },
+  { id: 3, name: "レベル3", short: "数4つ",        ops: "+-*/", n: 3, none: .2,  tags: ["＋ − × ÷", "数は4つ", "（ ）が いらない問題も"] }
+];
+let craftStars = load("junjo_craft", {});
+const craftTotal = () => CRAFT.reduce((s, C) => s + (craftStars[C.id] || 0), 0);
+let craftLv = 1, cf = null, craftSeq = 0;
+const curC = () => CRAFT.find(C => C.id === craftLv);
+
+function craftTokens(q, span) {
+  const t = [];
+  for (let i = 0; i <= q.n; i++) {
+    if (span && span[0] === i) t.push({ t: "(" });
+    t.push({ t: "num", v: q.nums[i] });
+    if (span && span[1] === i) t.push({ t: ")" });
+    if (i < q.n) t.push({ t: "op", v: q.ops[i], id: i });
+  }
+  return t;
+}
+function craftSpans(n) {
+  const s = [];
+  for (let a = 0; a < n; a++) for (let b = a + 1; b <= n; b++) if (!(a === 0 && b === n)) s.push([a, b]);
+  return s;
+}
+function craftValue(q, span) {
+  const tr = trace(craftTokens(q, span));
+  return tr && tr.ans <= 500 ? tr.ans : null;
+}
+function genCraft(C, wantNone) {
+  for (let k = 0; k < 20000; k++) {
+    const n = C.n, ops = [];
+    for (let i = 0; i < n; i++) ops.push(pick(C.ops.split("")));
+    if (!ops.some(isMD) || !ops.some(o => !isMD(o))) continue; // （ ）で順じょが かわる式だけ
+    const nums = [];
+    for (let i = 0; i <= n; i++) {
+      const md = (i > 0 && isMD(ops[i - 1])) || (i < n && isMD(ops[i]));
+      nums.push(md ? rnd(2, 9) : rnd(2, C.id === 1 ? 20 : 30));
+    }
+    for (let i = n - 1; i >= 0; i--) if (ops[i] === "/") nums[i] = nums[i + 1] * rnd(2, 6);
+    const q = { n, nums, ops };
+    const base = craftValue(q, null);
+    if (base === null) continue;
+    const other = [...new Set(craftSpans(n).map(s => craftValue(q, s)).filter(v => v !== null && v !== base))];
+    if (!other.length) continue;
+    q.target = wantNone ? base : pick(other);
+    q.none = q.target === base;
+    return q;
+  }
+  return null;
+}
+function craftBuild(C) {
+  const out = [], seen = new Set();
+  const noneN = C.none ? 1 : 0;
+  for (let g = 0; out.length < CRAFT_PER && g < 300; g++) {
+    const q = genCraft(C, out.length < noneN);
+    if (!q) continue;
+    const key = q.nums.join(",") + q.ops.join("");
+    if (!seen.has(key)) { seen.add(key); out.push(q); }
+  }
+  for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [out[i], out[j]] = [out[j], out[i]]; }
+  return out;
+}
+
+function renderCraftLevels() {
+  $("levels").classList.add("craft");
+  $("levels").innerHTML = CRAFT.map(C => {
+    const st = craftStars[C.id] || 0;
+    return `<button class="lvc${craftLv === C.id ? " cur" : ""}${st === 3 ? " clr" : ""}" style="--mc:${MODE_COLOR.craft}" data-cl="${C.id}">` +
+      `<span class="ln">${C.name}</span><span class="lt">${C.short}</span><span class="ls">${starHTML(st)}</span></button>`;
+  }).join("");
+  $("tbtnBox").innerHTML = "";
+  const C = curC();
+  $("lvdesc").innerHTML = C.tags.map(s => `<span class="tag">${s}</span>`).join("") +
+    `<div class="crit"><b>★の めやす</b>（${CRAFT_PER}問）<ul>` +
+    ["ぜんぶ うちあげる", "まちがい・ヒント 合わせて 2回まで", "ノーミス（ヒントなし）"]
+      .map((t, i) => `<li class="${i < (craftStars[C.id] || 0) ? "got" : ""}"><span class="s">${"★".repeat(i + 1)}</span>${t}</li>`).join("") +
+    `</ul></div>`;
+}
+
+function craftNewSet() {
+  cx = null; calcSeq++; calcLock = false; busy = false; done = false; finished = false; renderCalc();
+  craftSeq++;
+  const set = craftBuild(curC());
+  cf = { set, qi: 0, miss: 0, hints: 0, solved: set.map(() => false), perf: set.map(() => false), finished: false, res: null };
+  renderLevels();
+  craftStartQ();
+}
+function craftStartQ() {
+  craftSeq++;
+  Object.assign(cf, { pick: null, pair: null, done: false, busy: false, qMiss: 0, qHint: false, hintSpan: null, lines: [] });
+  setMsg("", "");
+  craftRender();
+}
+
+function craftRender() {
+  $("hud").innerHTML = "";
+  $("combo").textContent = "";
+  $("prog").innerHTML = cf.set.map((_, i) => `<i class="${cf.solved[i] ? (cf.perf[i] ? "perf" : "ok") : ""}${i === cf.qi && !cf.finished ? " now" : ""}"></i>`).join("");
+  if (cf.finished) {
+    $("qno").textContent = ""; $("guide").style.display = "none";
+    craftRenderResult(); craftRenderLog(); return;
+  }
+  const q = cf.set[cf.qi];
+  $("qno").textContent = `${cf.qi + 1} 問目 ／ ${cf.set.length} 問`;
+  $("guide").style.display = "";
+  $("guide").innerHTML = `<div class="target"><span class="tl">🎆 目標の花火</span><span class="tv">${q.target}</span></div>` +
+    `数を2つタップして（ ）をつけ、<b>${q.target}</b> になる花火を うちあげよう。`;
+
+  const ex = $("expr"); ex.innerHTML = "";
+  const add = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; e.textContent = txt; ex.appendChild(e); return e; };
+  for (let i = 0; i <= q.n; i++) {
+    if (cf.pair && cf.pair[0] === i) add("span", "par", "（");
+    const b = add("button", "cn" + (cf.pick === i ? " pick" : "") + (cf.hintSpan && i >= cf.hintSpan[0] && i <= cf.hintSpan[1] ? " hint" : ""), q.nums[i]);
+    b.disabled = cf.done || cf.busy;
+    b.onclick = () => craftTapNum(i);
+    if (cf.pair && cf.pair[1] === i) add("span", "par", "）");
+    if (i < q.n) add("span", "cop", SYM[q.ops[i]]);
+  }
+
+  const bx = $("btns"); bx.innerHTML = "";
+  const mk = (cls, txt, fn, dis) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; e.disabled = !!dis; bx.appendChild(e); return e; };
+  if (!cf.done) {
+    mk("fire", "🎆 うちあげ！", () => craftLaunch(cf.pair), !cf.pair || cf.busy);
+    mk("nopar", "（ ）なしで うちあげ", () => craftLaunch(null), cf.busy);
+    if (cf.pair) mk("reset", "（ ）を はずす", () => { if (cf.busy) return; cf.pair = null; cf.pick = null; setMsg("", ""); craftRender(); });
+    mk("hintb", "ヒント", craftHint, cf.busy);
+  } else {
+    mk("next big", cf.qi === cf.set.length - 1 ? "けっかを見る ▶" : "つぎの問題 ▶", craftNext);
+  }
+  craftRenderLog();
+}
+function craftRenderLog() {
+  const lg = $("log");
+  if (!cf.lines.length || cf.finished) { lg.innerHTML = '<div class="empty">うちあげると、ここに計算の順じょが残ります。</div>'; return; }
+  lg.innerHTML = cf.lines.map((s, i) => `<div class="line"><span class="eq">${i ? "＝" : ""}</span><span>${s}</span></div>`).join("");
+}
+
+function craftTapNum(i) {
+  if (cf.done || cf.busy) return;
+  const q = cf.set[cf.qi];
+  cf.hintSpan = null;
+  if (cf.pick === null) {
+    cf.pair = null; cf.pick = i;
+    setMsg("info", "（ ）で かこむ、もう1つのはしの数を タップしよう。");
+  } else if (cf.pick === i) {
+    cf.pick = null; setMsg("", "");
+  } else {
+    const a = Math.min(cf.pick, i), b = Math.max(cf.pick, i);
+    cf.pick = null;
+    if (a === 0 && b === q.n) setMsg("info", "式ぜんぶを（ ）で かこんでも、順じょは かわらないよ。べつの場所を えらぼう。");
+    else { cf.pair = [a, b]; setMsg("", ""); }
+  }
+  craftRender();
+}
+
+function craftLaunch(span) {
+  if (cf.done || cf.busy) return;
+  const q = cf.set[cf.qi], seq = craftSeq;
+  cf.busy = true; cf.pick = null; cf.hintSpan = null;
+  let t = stripLoneParens(craftTokens(q, span));
+  const lines = [toStr(t)];
+  let broke = null;
+  while (t.length > 1) {
+    const k = validOps(t)[0];
+    const r = calc(t[k - 1].v, t[k].v, t[k + 1].v);
+    if (r === null) { broke = "わり切れない ÷"; break; }
+    if (r < 0) { broke = "マイナス"; break; }
+    t = applyStep(t, k).tokens;
+    lines.push(toStr(t));
+  }
+  cf.lines = [lines[0]];
+  setMsg("info", "🎆 うちあげ…");
+  craftRender();
+  let i = 1;
+  const stepT = setInterval(() => {
+    if (seq !== craftSeq) { clearInterval(stepT); return; }
+    if (i < lines.length) {
+      cf.lines.push(lines[i++]); craftRenderLog();
+      fireAt($("log").lastElementChild, .45);
+      sfx("ok");
+      return;
+    }
+    clearInterval(stepT);
+    craftJudge(span, broke ? null : t[0].v, broke);
+  }, 600);
+}
+function craftJudge(span, val, broke) {
+  const q = cf.set[cf.qi];
+  if (val === q.target) {
+    cf.done = true; cf.busy = false;
+    cf.solved[cf.qi] = true;
+    cf.perf[cf.qi] = cf.qMiss === 0 && !cf.qHint;
+    const base = craftValue(q, null);
+    let m = `ドーン！ ${q.target} の花火が あがった！`;
+    if (!span) m = `そのとおり！（ ）が なくても ${q.target} になるね。`;
+    else if (base === q.target) m = `せいこう！でも この（ ）は なくても 同じ答えに なるよ。`;
+    setMsg("done", m + (cf.perf[cf.qi] ? " ノーミス！" : ""));
+    craftRender();
+    sfx(cf.perf[cf.qi] ? "perfect" : "solved");
+    launchAt($("expr"), cf.perf[cf.qi] ? 1.8 : 1.3);
+    setTimeout(() => launchAt($("expr"), 1, null), 300);
+    return;
+  }
+  cf.busy = false; cf.miss++; cf.qMiss++;
+  sfx("ng");
+  const where = span ? "（ ）の場所を かえてみよう。" : "（ ）を つけてみよう。";
+  setMsg("bad", broke
+    ? `とちゅうで ${broke} になって、花火が あがらなかった…。${where}`
+    : `${val} の花火に なっちゃった。目標は ${q.target}。${where}`);
+  craftRender();
+  const c = centerOf($("expr"));
+  firework(c.x, c.y - 20, .5, ["#adb5bd", "#868e96"]);
+}
+function craftHint() {
+  if (cf.done || cf.busy) return;
+  const q = cf.set[cf.qi];
+  cf.hints++; cf.qHint = true; cf.pick = null;
+  if (q.none) {
+    cf.hintSpan = null;
+    setMsg("info", "ヒント：（ ）を つけないで、きまりどおりに計算すると いくつになるかな？");
+  } else {
+    cf.hintSpan = craftSpans(q.n).find(s => craftValue(q, s) === q.target);
+    setMsg("info", "ヒント：光っている数を（ ）で かこんでみよう。");
+  }
+  craftRender();
+}
+function craftNext() {
+  if (!cf.done) return;
+  if (cf.qi < cf.set.length - 1) { cf.qi++; craftStartQ(); return; }
+  cf.finished = true;
+  const o = cf.miss + cf.hints, st = o === 0 ? 3 : o <= 2 ? 2 : 1, prev = craftStars[craftLv] || 0;
+  if (st > prev) { craftStars[craftLv] = st; save("junjo_craft", craftStars); }
+  cf.res = { st, prev };
+  setMsg(st === 3 ? "done" : "", st === 3 ? "パーフェクト！ 花火大会 大せいこう！" : "");
+  renderLevels();
+  craftRender();
+  if (st === 3) { sfx("fanfare"); confetti(50); }
+  [0, 350, 700].forEach((d, i) => setTimeout(() => launchAt($("expr"), 1.4 - i * .2, FIRE_COLS[i]), d));
+}
+function craftRenderResult() {
+  const r = cf.res, C = curC();
+  let h = `<div class="result"><div class="rstars">${starHTML(r.st)}</div>`;
+  h += `<div class="big">花火職人 ${C.name} ${r.st === 3 ? "かんぺき！" : "おつかれさま"}</div>`;
+  h += `<div class="stats"><span>${cf.set.length}発 うちあげ</span><span${cf.miss === 0 ? ' class="z"' : ""}>まちがい ${cf.miss}</span><span${cf.hints === 0 ? ' class="z"' : ""}>ヒント ${cf.hints}</span></div>`;
+  if (r.st > r.prev && r.prev > 0) h += `<p><span class="newrec">さいこう記録 こうしん！</span></p>`;
+  $("expr").innerHTML = h + "</div>";
+  const b = $("btns"); b.innerHTML = "";
+  const mk = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; b.appendChild(e); };
+  mk("again", "ちがう問題で もう一度", craftNewSet);
+  const nx = CRAFT.find(x => x.id === craftLv + 1);
+  if (nx) mk("next" + (r.st >= 2 ? " big" : ""), nx.name + " へ ▶", () => { craftLv = nx.id; craftNewSet(); window.scrollTo(0, 0); });
+}
+
 /* ================= 先生用：問題の追加 ================= */
 function validate(str) {
   const t = tokenize(str);
@@ -1831,7 +2160,8 @@ $("clearCustom").onclick = () => {
 $("advFree").onchange = e => { advFree = e.target.checked; save("junjo_advfree", advFree); renderLevels(); };
 $("resetStars").onclick = () => {
   if (!confirm("この端末の ★の記録を すべて消しますか？")) return;
-  stars = {}; best = {}; save("junjo_stars", stars); save("junjo_best", best); renderLevels();
+  stars = {}; best = {}; save("junjo_stars", stars); save("junjo_best", best);
+  craftStars = {}; save("junjo_craft", craftStars); renderLevels();
 };
 $("resetAdv").onclick = () => {
   if (!confirm("冒険の進みぐあいを はじめに もどしますか？")) return;
