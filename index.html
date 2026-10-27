@@ -107,6 +107,7 @@
   .key { display: inline-block; background: #eef5ff; border-radius: 6px; padding: 0 6px; margin: 0 2px; font-weight: bold; }
 
   #expr {
+    position: relative;
     display: flex; justify-content: center; align-items: center; flex-wrap: wrap;
     min-height: 110px; padding: 12px 0;
     font-size: clamp(30px, 7vw, 56px); font-weight: bold; font-variant-numeric: tabular-nums;
@@ -357,6 +358,21 @@
   .btn.fire:disabled { opacity: .45; }
   .btn.nopar { background: #5c7cfa; }
   .btn.craft { background: #b5179e; }
+
+  /* ---- 導火線 ---- */
+  #expr .fz { position: absolute; pointer-events: none; padding: 0; border-radius: 0; }
+  #expr svg.fuse { left: 0; top: 0; width: 100%; overflow: visible; z-index: 0; }
+  #expr .flame { font-size: 22px; line-height: 1; transform: translate(-50%, -85%); font-style: normal; z-index: 2; animation: flick .35s infinite alternate; transition: left .2s; }
+  #expr .spk { left: 0; top: 0; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #fff; z-index: 3;
+    box-shadow: 0 0 6px 3px #ffd43b, 0 0 16px 7px rgba(255,146,43,.8); }
+  #expr .ember { width: 5px; height: 5px; margin: -2px 0 0 -2px; border-radius: 50%; background: #ffb74d; box-shadow: 0 0 4px #ff922b; animation: ember .65s forwards; z-index: 1; }
+  #expr .op.lit, #expr .cop.lit { box-shadow: 0 0 0 4px rgba(255,146,43,.45), 0 4px 0 #f2a900; }
+  #expr .cop.lit { border-radius: 8px; background: #ffe066; }
+  #expr .fuse .hk { animation: hk 1s infinite; }
+  @keyframes flick { from { transform: translate(-50%, -85%) scale(1) rotate(-4deg); } to { transform: translate(-50%, -90%) scale(1.12) rotate(4deg); } }
+  @keyframes ember { 0% { opacity: 1; } 100% { opacity: 0; transform: translateY(-10px) scale(.4); background: #555; } }
+  @keyframes hk { 0%,100% { fill: #c0392b; r: 5; } 50% { fill: #ffd43b; r: 8; } }
+  #expr { padding-bottom: 26px; }
 
   /* ---- 花火大会：工房・アルバム・本番の夜空 ---- */
   .goal.shop .gi { font-size: 44px; line-height: 58px; text-align: center; }
@@ -853,7 +869,7 @@ function startQ() {
     $("expr").innerHTML = ""; setMsg("", ""); $("prog").innerHTML = ""; $("qno").textContent = ""; $("combo").textContent = "";
     $("btns").innerHTML = ""; renderLog(); renderHud(); return;
   }
-  stepNo = 0;
+  stepNo = 0; fuseLitK = null;
   tokens = stripLoneParens(tokenize(set[qi]));
   lines = [toStr(tokens)];
   setMsg("", "");
@@ -869,8 +885,8 @@ function render() {
   $("qno").textContent = finished ? "" : `${qi + 1} 問目 ／ ${set.length} 問`;
   $("guide").style.display = finished ? "none" : "";
   $("guide").innerHTML = isCalc()
-    ? 'はじめに計算するところの 記号 <span class="key">＋</span><span class="key">−</span><span class="key">×</span><span class="key">÷</span> をタップして、<b>自分で計算</b>しよう。'
-    : 'はじめに計算するところの 記号 <span class="key">＋</span><span class="key">−</span><span class="key">×</span><span class="key">÷</span> をタップしよう。';
+    ? 'はじめに計算するところの 記号 <span class="key">＋</span><span class="key">−</span><span class="key">×</span><span class="key">÷</span> に <b>導火線の火</b>を とどけて、<b>自分で計算</b>しよう。'
+    : 'はじめに計算するところの 記号 <span class="key">＋</span><span class="key">−</span><span class="key">×</span><span class="key">÷</span> をタップして、<b>導火線の火</b>を とどけよう。';
 
   const ex = $("expr"); ex.innerHTML = "";
   if (finished) { renderResult(); renderLog(); return; }
@@ -889,6 +905,7 @@ function render() {
     el.dataset.k = i;
     ex.appendChild(el);
   });
+  drawExprFuse();
   renderButtons();
   renderLog();
 }
@@ -923,22 +940,27 @@ function tap(k) {
   if (!res.ok) {
     mistakes++; totalMiss++;
     const e = opEl(k); void e.offsetWidth; e.classList.add("ng");
-    setMsg("bad", res.msg);
+    fuseFizzle(e);
+    setMsg("bad", "🔥まだ 火が とどかない！ " + res.msg);
     onMiss("order");
     return;
   }
   sfx("ok");
   busy = true;
-  fireAt(opEl(k), 0.6);
+  const ex = $("expr"), oe = opEl(k);
+  ex.querySelectorAll(".hk").forEach(c => c.classList.remove("hk"));
+  fuseLitK = k;
+  const dur = sparkRun(ex, oe, () => fireAt(oe, 0.6)); // 導火線を 火花が走って、記号に 火が つく
   [k - 1, k, k + 1].forEach(i => opEl(i).classList.add("hl"));
   if (isCalc()) { startCalc(k); return; } // 計算モード：自分で計算する
   const step = applyStep(tokens, k);
   stepNo++;
   setMsg("ok", `${step.a} ${SYM[tokens[k].v]} ${step.b} ＝ ${step.r}`);
-  setTimeout(() => commitStep(step), 650);
+  setTimeout(() => commitStep(step), Math.max(650, dur + 300));
 }
 function commitStep(step) {
   tokens = step.tokens;
+  fuseLitK = null;
   lines.push(toStr(tokens));
   busy = false;
   if (tokens.length === 1) {
@@ -960,11 +982,12 @@ function hint() {
   hintO++; qHint = true;
   $("expr").querySelectorAll(".op").forEach(e => e.classList.remove("ng", "hint"));
   v.forEach(k => opEl(k).classList.add("hint"));
+  drawExprFuse(v);
   const R = regions(tokens);
   let why = "左から順に計算します。";
   if (R.paren) why = "（ ）の中を先に計算します。";
   else if (v.some(k => isMD(tokens[k].v)) && tokens.some(x => x.t === "op" && !isMD(x.v))) why = "×・÷を、＋・−より先に計算します。";
-  setMsg("info", "光っている記号からだよ。" + why);
+  setMsg("info", "🔥 光っている記号に 火が とどくよ。" + why);
 }
 
 function next() {
@@ -1953,6 +1976,89 @@ function launchAt(el, size, cols, onBurst) {
   setTimeout(() => { r.remove(); firework(c.x, y, size, cols); sfx("boom"); if (onBurst) onBurst(); }, 480);
 }
 
+/* ================= 導火線（計算の順じょ＝火が とどく順番） ================= */
+// 式の下に導火線をえがく。🔥は「いま火が ある場所」。正しい記号をタップすると、火花が導火線を走って その記号に火が つく
+function relRect(el, base) {
+  const r = el.getBoundingClientRect(), b = base.getBoundingClientRect();
+  return { l: r.left - b.left, t: r.top - b.top, w: r.width, h: r.height, cx: r.left - b.left + r.width / 2, b: r.bottom - b.top };
+}
+function drawFuse(ex, opEls, litEl, hintEls) {
+  ex.querySelectorAll(".fz").forEach(e => e.remove());
+  ex._fz = { opEls, litEl, hintEls: hintEls || [] };
+  ex._fuseY = null;
+  const items = [...ex.children].filter(e => !e.classList.contains("fz"));
+  if (items.length < 3 || !opEls.length) return;
+  const R = items.map(e => relRect(e, ex));
+  if (!R[0].h) return;
+  const mid = R[0].t + R[0].h / 2;
+  if (R.some(r => Math.abs(r.t + r.h / 2 - mid) > R[0].h * .6)) return; // 2行に おりかえしたときは 出さない
+  const y = Math.max(...R.map(r => r.b)) + 8;
+  const x0 = R[0].l - 10, x1 = R[R.length - 1].l + R[R.length - 1].w + 6;
+  const hs = new Set(ex._fz.hintEls);
+  let knots = "";
+  opEls.forEach(e => {
+    const r = relRect(e, ex);
+    knots += `<line x1="${r.cx}" y1="${y}" x2="${r.cx}" y2="${r.b - 2}" stroke="#8b5a2b" stroke-width="2"/>` +
+      `<circle class="${hs.has(e) ? "hk" : ""}" cx="${r.cx}" cy="${y}" r="5" fill="#c0392b" stroke="#7a2318" stroke-width="1.5"/>`;
+  });
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "fz fuse");
+  svg.setAttribute("height", y + 10);
+  svg.innerHTML = `<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="#8b5a2b" stroke-width="5" stroke-linecap="round"/>` +
+    `<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="#d9a066" stroke-width="2" stroke-dasharray="4 4"/>` + knots;
+  ex.appendChild(svg);
+  const fl = document.createElement("i");
+  fl.className = "fz flame"; fl.textContent = "🔥";
+  fl.style.left = (litEl && litEl.isConnected ? relRect(litEl, ex).cx : x0) + "px";
+  fl.style.top = y + "px";
+  ex.appendChild(fl);
+  ex._fuseY = y;
+}
+// 🔥から 記号まで 火花を走らせる。かかる時間（ミリ秒）を返す。演出だけなので、とちゅうで画面が かわっても 問題ない
+function sparkRun(ex, toEl, onArrive) {
+  const fl = ex.querySelector(".flame"), y = ex._fuseY;
+  if (!fl || y === null || !toEl) { if (onArrive) onArrive(); return 0; }
+  const ax = parseFloat(fl.style.left), to = relRect(toEl, ex), bx = to.cx, by = to.b - 6;
+  const dist = Math.abs(bx - ax), d1 = Math.min(420, 160 + dist * 1.1), d2 = 120;
+  fl.style.visibility = "hidden";
+  const s = document.createElement("i"); s.className = "fz spk"; ex.appendChild(s);
+  s.animate([{ transform: `translate(${ax}px,${y}px)` }, { transform: `translate(${bx}px,${y}px)`, offset: d1 / (d1 + d2) }, { transform: `translate(${bx}px,${by}px)` }],
+    { duration: d1 + d2, fill: "forwards" });
+  const n = Math.max(4, Math.round(dist / 12));
+  for (let i = 0; i <= n; i++) setTimeout(() => {
+    if (!ex.contains(s)) return;
+    const e = document.createElement("i"); e.className = "fz ember";
+    e.style.left = ax + (bx - ax) * i / n + "px"; e.style.top = y + "px";
+    ex.appendChild(e); setTimeout(() => e.remove(), 650);
+  }, d1 * i / n);
+  setTimeout(() => {
+    if (!ex.contains(s)) return;
+    s.remove(); fl.style.left = bx + "px"; fl.style.top = y + "px"; fl.style.visibility = "";
+    toEl.classList.add("lit");
+    if (onArrive) onArrive();
+  }, d1 + d2);
+  return d1 + d2;
+}
+// まちがえた記号：火が とどかず、けむりだけ
+function fuseFizzle(el) {
+  if (!el) return;
+  const c = centerOf(el);
+  firework(c.x, c.y + c.h * .45, .3, ["#adb5bd", "#ced4da"]);
+}
+// 本番・記号・計算モードの式に 導火線をえがく
+function drawExprFuse(hintKs) {
+  const ex = $("expr");
+  if (finished || !tokens.length) { ex.querySelectorAll(".fz").forEach(e => e.remove()); return; }
+  const ops = [...ex.querySelectorAll(".op")];
+  const lit = ex.querySelector(".fresh") || (fuseLitK !== null ? opEl(fuseLitK) : null);
+  drawFuse(ex, ops, lit, (hintKs || []).map(opEl));
+}
+let fuseLitK = null; // 計算モードで 筆算をしているあいだ、火が ある記号
+window.addEventListener("resize", () => {
+  const ex = $("expr");
+  if (ex._fz && ex.querySelector(".fz")) drawFuse(ex, ex._fz.opEls, ex._fz.litEl, ex._fz.hintEls);
+});
+
 /* ================= 花火工房（（ ）をつけて、注文の数をつくる）＝ 花火大会の中にある ================= */
 const CRAFT_PER = 5;
 const CRAFT = [
@@ -2076,6 +2182,7 @@ function craftRender() {
     if (cf.pair && cf.pair[1] === i) add("span", "par", "）");
     if (i < q.n) add("span", "cop", SYM[q.ops[i]]);
   }
+  drawFuse(ex, [...ex.querySelectorAll(".cop")], null, []);
 
   const bx = $("btns"); bx.innerHTML = "";
   const mk = (cls, txt, fn, dis) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; e.disabled = !!dis; bx.appendChild(e); return e; };
@@ -2118,10 +2225,11 @@ function craftLaunch(span) {
   const q = cf.set[cf.qi], seq = craftSeq;
   cf.busy = true; cf.pick = null; cf.hintSpan = null;
   let t = stripLoneParens(craftTokens(q, span));
-  const lines = [toStr(t)];
+  const lines = [toStr(t)], order = [];
   let broke = null;
   while (t.length > 1) {
     const k = validOps(t)[0];
+    order.push(t[k].id);
     const r = calc(t[k - 1].v, t[k].v, t[k + 1].v);
     if (r === null) { broke = "わり切れない ÷"; break; }
     if (r < 0) { broke = "マイナス"; break; }
@@ -2135,8 +2243,9 @@ function craftLaunch(span) {
   const stepT = setInterval(() => {
     if (seq !== craftSeq) { clearInterval(stepT); return; }
     if (i < lines.length) {
+      const op = $("expr").querySelectorAll(".cop")[order[i - 1]];
       cf.lines.push(lines[i++]); craftRenderLog();
-      fireAt($("log").lastElementChild, .45);
+      sparkRun($("expr"), op, () => fireAt(op, .45)); // 計算の順じょどおりに 導火線を 火が走る
       sfx("ok");
       return;
     }
