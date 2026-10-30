@@ -662,6 +662,7 @@ let view = "menu"; // "menu"：メニュー画面 ／ "play"：問題画面
 let playSeq = 0;   // メニューにもどったら ふえる（のこっている演出を止める）
 let cx = null, calcMiss = 0, totalCalcMiss = 0, calcSeq = 0, calcLock = false;
 let teinei = load("junjo_teinei", true); // くり上がり・くり下がりも自分で書く
+let jikkuri = load("junjo_jikkuri", true); // わり算：じっくり計算（かけ算・ひき算の補助計算を書く）
 const curL = () => LEVELS.find(L => L.id === lv);
 const isCalc = () => mode === "calc" || mode === "adv"; // 花火大会も自分で計算する
 
@@ -1531,6 +1532,7 @@ function hsMul(a, b) {
              ひけるときは 一の位から 答えを書く。ひけない位は「10 かりる」をおす
    ・おろす：つぎの位の数を 自動で おろす */
 function hsDiv(a, b) {
+  const JK = jikkuri;   // じっくり計算：かけ算の ひっ算・くり下がりを 書く／OFF：かけ算・ひき算の答えを いきなり書く
   const D = digs(a), n = D.length, dvS = String(b), dvLen = dvS.length;
   const hide = dvLen - 1;                         // 指かくしで かくす けた数
   const pw = Math.pow(10, hide), dTop = Math.floor(b / pw);
@@ -1558,7 +1560,8 @@ function hsDiv(a, b) {
     partial = st.remainder;
   }
   const steps = [];
-  for (let p = 0; p < firstPos; p++) steps.push({ k: "skip", si: 0, pos: p, upto: Number(String(a).slice(0, p + 1)) });
+  // じっくり計算でないときは「×」は書かず、商が たつ位から はじめる
+  if (JK) for (let p = 0; p < firstPos; p++) steps.push({ k: "skip", si: 0, pos: p, upto: Number(String(a).slice(0, p + 1)) });
   stages.forEach((S, s) => {
     S.trials.forEach((tr, t) => {
       if (t === 0) { const st = { k: "tateru", si: s, pos: S.pos, value: tr.q }; if (S.isZero) st.alt = 1; steps.push(st); }
@@ -1573,7 +1576,7 @@ function hsDiv(a, b) {
   // ---- 書いたもの ----
   const qv = {}, qStruck = {}, qRed = {};        // 商・へらした商
   const prod = {}, rem = {};                     // pos → { col: 数字 }／pos → { col: {v, cls} }
-  let si = 0, mult = [], masks = new Set(), bor = null, hk = 0, fx = new Set();
+  let si = 0, mult = [], masks = new Set(), bor = null, hk = 0, pk = 0, lastQ = 0, fx = new Set();
 
   const step = () => steps[si];
   const stg = s => stages[s];
@@ -1613,7 +1616,7 @@ function hsDiv(a, b) {
   }
   const hikuCol = () => stages[step().si].pos - hk;
   const botAt = (tk, col) => (prod[tk.pos] || {})[col] || 0;
-  const pending = () => { const tk = step(); if (!tk || tk.k !== "hiku" || !bor) return false; const c = hikuCol(); return (bor.cur[c] || 0) < botAt(tk, c); };
+  const pending = () => { if (!JK) return false; const tk = step(); if (!tk || tk.k !== "hiku" || !bor) return false; const c = hikuCol(); return (bor.cur[c] || 0) < botAt(tk, c); };
 
   // ---- 手順を すすめる（かける・ひくの入力いがいは 自動） ----
   function advance() {
@@ -1623,13 +1626,15 @@ function hsDiv(a, b) {
       const tk = step();
       if (!tk) return { msg, done: true };
       if (tk.k === "kakeru") {
+        lastQ = tk.q;
+        if (!JK) { prod[tk.pos] = {}; pk = 0; msg += `${b}×${tk.q} の 答えを、一の位から 書こう。`; return { msg, done: false }; }
         mult.push({ q: tk.q, ent: multEntries(tk.q), idx: 0, filled: {}, carries: {}, typing: "", rej: false, product: tk.product });
         msg += `${b}×${tk.q} を、右の かけ算の ひっ算で 一の位から 計算しよう。`;
         return { msg, done: false };
       }
       if (tk.k === "hiku" && !tk.canSub) {
         const m = curMult(); if (m) m.rej = true;
-        msg = `${b}×${tk.q || curMult().q}＝${tk.product} は ${curPartial(tk.si)} より 大きくて ひけない！ `;
+        msg = `${b}×${lastQ}＝${tk.product} は ${curPartial(tk.si)} より 大きくて ひけない！ `;
         si++; continue;
       }
       if (tk.k === "herasu") {
@@ -1675,20 +1680,20 @@ function hsDiv(a, b) {
   }
 
   const H = {
-    sid: () => si * 1000 + (step() && step().k === "kakeru" ? curMult().idx : hk) * 2 + (pending() ? 1 : 0),
+    sid: () => si * 1000 + (step() && step().k === "kakeru" ? (JK ? curMult().idx : pk) : hk) * 2 + (pending() ? 1 : 0),
     task() {
       const tk = step();
       if (!tk) return undefined;
       if (tk.k === "skip") return { v: "×" };
       if (tk.k === "tateru") return { v: tk.value };
-      if (tk.k === "kakeru") { const e = curMult().ent[curMult().idx]; return { v: e ? e.typed : undefined }; }
-      if (tk.k === "hiku") { if (pending()) return {}; const c = hikuCol(); return { v: bor.cur[c] - botAt(tk, c) }; }
+      if (tk.k === "kakeru") { if (!JK) return { v: atP(digs(tk.product), pk) }; const e = curMult().ent[curMult().idx]; return { v: e ? e.typed : undefined }; }
+      if (tk.k === "hiku") { if (!JK) return { v: Number(bor.rs[bor.rs.length - 1 - hk]) }; if (pending()) return {}; const c = hikuCol(); return { v: bor.cur[c] - botAt(tk, c) }; }
       return {};
     },
     phase() { const tk = step(); return tk ? { skip: 0, tateru: 0, herasu: 0, kakeru: 1, hiku: 2, orosu: 3 }[tk.k] : -1; },
     intro() { const tk = step(); return tk.k === "skip" ? `${tk.upto} の中に ${b} は ある？ なければ 商は たたないので「×」をおそう。`
       : hide > 0 ? `${curPartial(0)}÷${b} の 商の けんとうを つけよう（下の けたを タップすると ゆびで かくせるよ）。` : ""; },
-    isDiv: true,
+    isDiv: true, jk: JK,
     pending,
     toggleMask(key) {
       if (!maskable().has(key)) return;
@@ -1739,6 +1744,16 @@ function hsDiv(a, b) {
         if (d * b > cur) return { ok: false, msg: `${b}×${d}＝${b * d} は ${cur} より 大きいね。もっと 小さい数を たてよう。` };
         return { ok: false, msg: `${cur}−${b * d}＝${cur - b * d} で、わる数の ${b} より 大きくなるね。もっと 大きい数を たてよう。` };
       }
+      if (tk.k === "kakeru" && !JK) {
+        if (d === "×") return { ok: false, soft: true, msg: "かけ算の 答えを 数字で 書こう。" };
+        const PD = digs(tk.product), col = stg(tk.si).pos - pk, v = atP(PD, pk);
+        if (d !== v) return { ok: false, msg: `${b}×${tk.q} を もう一度 計算しよう（${PN(tk.si, col)}から 書くよ）。` };
+        prod[tk.pos][col] = d; pk++;
+        if (pk < PD.length) return { ok: true, msg: "", done: false };
+        fx.add("land" + tk.pos);
+        const r = advance();
+        return { ok: true, msg: `${b}×${tk.q}＝${tk.product}。` + r.msg, done: r.done };
+      }
       if (tk.k === "kakeru") {
         const m = curMult(), e = m.ent[m.idx];
         if (d === "×") return { ok: false, soft: true, msg: "かけ算の 答えを 数字で 書こう。" };
@@ -1767,7 +1782,8 @@ function hsDiv(a, b) {
         const c = hikuCol(), bt = botAt(tk, c), top = bor.cur[c];
         if (d === "×") return { ok: false, soft: true, msg: "ひき算の 答えを 数字で 書こう。" };
         if (pending()) return { ok: false, soft: true, msg: `${PN(tk.si, c)}は ${top} から ${bt} を ひけないね。「10 かりる」をおそう。` };
-        const v = top - bt;
+        const v = JK ? top - bt : Number(bor.rs[bor.rs.length - 1 - hk]);
+        if (!JK && d !== v) return { ok: false, msg: `${curPartial(tk.si)}−${tk.product} の ${PN(tk.si, c)}を もう一度 計算しよう。` + (top < bt ? "（ひけないときは、左の位から 10 かりて 計算するよ）" : "") };
         if (d !== v) {
           if (bor.lent.has(c) && d === bor.orig[c] - bt) return { ok: false, msg: `${PN(tk.si, c)}は となりに 1 かしたので、${top} になっているよ。` };
           if (bor.recv.has(c) && d === bt - (top - 10)) return { ok: false, msg: `下から 上を ひいていないかな？ 10 かりたので ${top}−${bt} だよ。` };
@@ -1794,6 +1810,12 @@ function hsDiv(a, b) {
         return `わる数 ${b} と ${cur} の 下の${hide === 1 ? "一の位" : `${hide}けた`}を ゆびで かくすと、${Math.floor(cur / pw)}÷${dTop}。` +
           (raw > 9 ? `${raw} は 10 いじょうなので、9 を たてよう。` : `${Math.floor(cur / pw)} の中に ${dTop} は いくつ？`);
       }
+      if (tk.k === "kakeru" && !JK) {
+        const parts = digs(b).map((x, i, A) => x * Math.pow(10, A.length - 1 - i)).filter(x => x > 0);
+        const col = stg(tk.si).pos - pk;
+        return (parts.length > 1 ? `${b}×${tk.q}＝${parts.map(x => x + "×" + tk.q).join("＋")}＝${parts.map(x => x * tk.q).join("＋")}＝${tk.product}。` : `${b}×${tk.q}＝${tk.product}。`) +
+          `${PN(tk.si, col)}には ${atP(digs(tk.product), pk)} を書こう。`;
+      }
       if (tk.k === "kakeru") {
         const m = curMult(), e = m.ent[m.idx];
         const sk = `${pn(e.col)}：${e.fd}×${m.q}${e.cin ? `＋${e.cin}（くり上がり）` : ""}＝${e.typed}。`;
@@ -1803,6 +1825,7 @@ function hsDiv(a, b) {
       }
       if (tk.k === "hiku") {
         const c = hikuCol(), bt = botAt(tk, c), top = bor.cur[c];
+        if (!JK) return `${curPartial(tk.si)}−${tk.product}＝${stg(tk.si).remainder}。一の位から じゅんに 書こう。` + (top < bt ? `${PN(tk.si, c)}は ひけないので、左の位から 10 かりて 計算するよ。` : "");
         if (pending()) return `${PN(tk.si, c)}は ${top} から ${bt} を ひけないね。「10 かりる」をおして、左の位から 10 かりよう。`;
         if (top >= 10 && bt > 0) return `${PN(tk.si, c)}：${top}−${bt}。10−${bt}＝${10 - bt}、${10 - bt}＋${top - 10}＝${top - bt}。`;
         return `${PN(tk.si, c)}：${top}−${bt}＝${top - bt}。` + (bor.lent.has(c) ? `（1 かしたので ${top} になっているよ）` : "");
@@ -1870,8 +1893,9 @@ function hsDiv(a, b) {
         for (let g = 0; g < C; g++) {
           const c = g - dvLen;
           const v = pr[c];
+          const isCurP = !JK && tk && tk.k === "kakeru" && tk.si === s && c === pos - pk;
           const ul = hasP && c >= Math.min(minC, 0) ? " ul" : "";
-          h += cell(c >= 0 ? "p" + pos + ":" + c : null, v, (v !== undefined ? "in" : "") + ul + (fx.has("land" + pos) && v !== undefined ? " land" : ""));
+          h += cell(c >= 0 ? "p" + pos + ":" + c : null, v, (isCurP ? "cur" : v !== undefined ? "in" : "") + ul + (fx.has("land" + pos) && v !== undefined ? " land" : ""));
         }
         if (!later && !hereR) continue;
         for (let g = 0; g < C; g++) {
@@ -1979,9 +2003,10 @@ function renderCalc() {
   if (!calcLock) {
     h += `<div class="ckeys">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(d => `<button data-d="${d}">${d}</button>`).join("")}` +
       (cx.how === "anzan" ? `<button class="wide" data-act="back">けす</button><span></span><button class="wide okb" data-act="ok">こたえる</button>` : "") +
-      (cx.how === "hissan" && cx.hs.isDiv ? `<button class="wide batsu" data-act="batsu">× <small>商が たたない</small></button><span></span>` +
-        `<button class="wide kariru${cx.hs.pending() ? " on" : ""}" data-act="borrow"${cx.hs.pending() ? "" : " disabled"}>↩ 10 かりる</button>` : "") + `</div>`;
+      (cx.how === "hissan" && cx.hs.isDiv ? (cx.hs.jk ? `<button class="wide batsu" data-act="batsu">× <small>商が たたない</small></button><span></span>` : "") +
+        (cx.hs.jk ? `<button class="wide kariru${cx.hs.pending() ? " on" : ""}" data-act="borrow"${cx.hs.pending() ? "" : " disabled"}>↩ 10 かりる</button>` : "") : "") + `</div>`;
     h += `<div class="cfoot"><button class="cbtn" data-act="hint">計算のヒント</button>`;
+    if (cx.how === "hissan" && cx.hs.isDiv) h += `<label class="teinei"><input type="checkbox" id="jikkuri"${jikkuri ? " checked" : ""}>じっくり計算（かけ算・ひき算も 筆算で）</label>`;
     if (cx.how === "hissan" && cx.hs.teineiUsed) h += `<label class="teinei"><input type="checkbox" id="teinei"${teinei ? " checked" : ""}>${op === "-" ? "くり下がり" : "くり上がり"}も 自分で書く</label>`;
     h += `</div>`;
   }
@@ -2061,6 +2086,11 @@ $("calc").addEventListener("click", e => {
   else calcAct(el.dataset.act);
 });
 $("calc").addEventListener("change", e => {
+  if (e.target.id === "jikkuri" && cx) {
+    jikkuri = e.target.checked; save("junjo_jikkuri", jikkuri);
+    if (cx.how === "hissan") { cx.hs = makeHs(); cx.msg = "はじめから 書きなおそう。"; cx.msgCls = "info"; }
+    renderCalc(); return;
+  }
   if (e.target.id !== "teinei" || !cx) return;
   teinei = e.target.checked; save("junjo_teinei", teinei);
   if (cx.how === "hissan") { cx.hs = makeHs(); cx.msg = "はじめから 書きなおそう。"; cx.msgCls = "info"; }
