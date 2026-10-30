@@ -231,6 +231,63 @@
   .ckeys button:active { transform: translateY(2px); box-shadow: 0 1px 0 #c9d6e6; background: #eef5ff; }
   .ckeys button.wide { grid-column: span 2; font-size: 20px; }
   .ckeys button.okb { background: var(--green); border-color: var(--green); color: #fff; }
+  .ckeys button.batsu { color: #e03131; font-size: 24px; line-height: 1.1; }
+  .ckeys button.batsu small { font-size: 13px; color: #666; display: block; }
+  .ckeys button.kariru { font-size: 19px; color: #aaa; }
+  .ckeys button.kariru:disabled { opacity: .45; cursor: default; }
+  .ckeys button.kariru.on { color: #fff; background: var(--purple); border-color: var(--purple); box-shadow: 0 3px 0 #5f3dc4; animation: glow 1s infinite; }
+
+  /* ---- わり算の ひっ算（わり算のひっ算アプリと同じ手順） ---- */
+  .dv { --cw: clamp(34px, 9vw, 52px); --mw: calc(var(--cw) * .78); display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start;
+        gap: 8px 18px; margin: 12px auto 6px; font-weight: bold; font-variant-numeric: tabular-nums; line-height: 1; }
+  .dvg { display: grid; grid-auto-rows: calc(var(--cw) * 1.08); font-size: calc(var(--cw) * .7); }
+  .dvg .c { display: flex; align-items: center; justify-content: center; position: relative; color: #333; transition: opacity .3s; }
+  .dvg .c.bar { border-top: 3px solid #333; }
+  .dvg .c.b0::before { content: ")"; position: absolute; left: -.3em; top: -.06em; font-weight: normal; font-size: 1.15em; transform: scaleY(1.3); color: #333; }
+  .dvg .c.ul { border-bottom: 3px solid #333; }
+  .dvg .c.in { color: var(--navy); }
+  .dvg .c.down { color: #1c7ed6; }
+  .dvg .c.down::after { content: "↓"; position: absolute; top: -2px; right: 2px; font-size: .38em; color: #1c7ed6; }
+  .dvg .c.drop .v { animation: dropIn .6s cubic-bezier(.34,1.4,.64,1); }
+  .dvg .c.faded { color: #c3c9cf; }
+  .dvg .c.batsu { color: #e03131; font-size: .8em; opacity: .75; }
+  .dvg .c.dim { opacity: .28; }
+  .dvg .c.hg { color: #2b8a3e; background: rgba(64,192,87,.15); border-radius: 8px; box-shadow: inset 0 0 0 2px rgba(64,192,87,.45); }
+  .dvg .c.cur { background: #fff3bf; border-radius: 8px; box-shadow: inset 0 0 0 3px #f08c00; animation: glow 1s infinite; }
+  .dvg .c.ng { background: #ffd6d6; box-shadow: inset 0 0 0 3px #e03131; animation: shake .4s; }
+  .dvg .c.mk { cursor: pointer; border-radius: 8px; box-shadow: inset 0 0 0 2px #868e96; outline: 2px dashed #adb5bd; outline-offset: -6px; }
+  .dvg .c .cv { position: absolute; inset: 2px; border-radius: 8px; z-index: 4; display: flex; align-items: center; justify-content: center;
+        background: repeating-linear-gradient(45deg, #4a5568, #4a5568 6px, #5b6b7d 6px, #5b6b7d 12px); box-shadow: 0 3px 8px rgba(44,58,74,.35); animation: maskIn .25s; }
+  .dvg .c .cv::after { content: "✋"; font-size: .6em; }
+  .dvg .c.land .v { animation: landIn .45s cubic-bezier(.34,1.5,.6,1); }
+  .dvg .c.qst > .v, .dvg .qr.st { color: #adb5bd; position: relative; }
+  .dvg .c.qst > .v::after, .dvg .qr.st::after { content: ""; position: absolute; left: -10%; right: -10%; top: 50%; height: 3px; background: #e03131; border-radius: 2px; transform: rotate(-16deg); }
+  .dvg .qr { position: absolute; left: 0; right: 0; top: calc(var(--k) * var(--cw) * -.78 + var(--cw) * .12); text-align: center; font-size: .78em; color: #e03131; }
+  .dvg .qr.pop, .dvg .bw.pop { animation: landIn .4s cubic-bezier(.34,1.5,.6,1); }
+  .dvg .c.lent > .v { color: #adb5bd; position: relative; }
+  .dvg .c.lent > .v::after { content: ""; position: absolute; left: -15%; right: -15%; top: 50%; height: 2px; background: #8a5cf0; transform: rotate(-30deg); }
+  .dvg .bw { position: absolute; top: -.3em; left: -.1em; z-index: 3; min-width: 1.5em; height: 1.5em; padding: 0 .2em; border-radius: 1em; font-size: .38em;
+        display: flex; align-items: center; justify-content: center; background: var(--purple); color: #fff; box-shadow: 0 2px 4px rgba(44,58,74,.3); }
+  .dvg .bw.rcv { left: auto; right: -.1em; opacity: .9; }
+  .mws { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .mwt { font-size: 14px; color: var(--purple); font-weight: bold; }
+  .mwl { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .mbox { position: relative; padding: 2px 4px; border-radius: 10px; background: #f8f5ff; }
+  .mh { display: grid; grid-template-rows: calc(var(--mw) * .55) var(--mw) var(--mw) var(--mw); font-size: calc(var(--mw) * .68); }
+  .mh .mc { display: flex; align-items: center; justify-content: center; position: relative; color: #333; }
+  .mh .mc.cr { font-size: .55em; color: #e8590c; align-items: flex-end; }
+  .mh .mc.op { color: var(--purple); }
+  .mh .mc.ln { border-bottom: 3px solid #333; }
+  .mh .mc.ty { color: var(--purple); background: rgba(138,92,240,.12); border-radius: 6px; }
+  .mh .mc.bl { box-shadow: inset 0 0 0 2px rgba(138,92,240,.35); border-radius: 6px; }
+  .mh .mc.cur { background: #fff3bf; border-radius: 6px; box-shadow: inset 0 0 0 3px #f08c00; animation: glow 1s infinite; }
+  .mh .mc.ng { background: #ffd6d6; box-shadow: inset 0 0 0 3px #e03131; animation: shake .4s; }
+  .mh.rej { opacity: .6; }
+  .mh .mc.sk::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 3px; background: #e03131; }
+  .mnote { font-size: 13px; color: #e03131; font-weight: bold; text-align: center; }
+  @keyframes dropIn { from { transform: translateY(-.8em); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes landIn { 0% { transform: scale(1.4); color: var(--purple); } 100% { transform: scale(1); } }
+  @keyframes maskIn { from { transform: translateY(-30%) scale(.8); opacity: 0; } to { transform: none; opacity: 1; } }
   .cfoot { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
   .teinei { font-size: 16px; color: #555; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
   .teinei input { width: 20px; height: 20px; }
@@ -1466,82 +1523,404 @@ function hsMul(a, b) {
   return H;
 }
 
-/* ---- わり算（たてる → かける → ひく → おろす） ---- */
+/* ---- わり算（わり算のひっ算アプリと同じ手順。たてる・かける・ひく・おろすの ボタン操作はなし） ----
+   ・商が たたない位には「×」を書く
+   ・たてる：わる数の最上位1けただけをのこし、下のけたを ゆびで かくして（タップ）けんとうをつける（指かくし・切り捨て）
+   ・かける：右の「かけ算の ひっ算」で、わる数×かりの商 を 一の位から書き、わり算の ひっ算に うつす
+   ・ひく　：ひけなければ、かりの商を 1 へらして かけ算から やりなおす（自動）
+             ひけるときは 一の位から 答えを書く。ひけない位は「10 かりる」をおす
+   ・おろす：つぎの位の数を 自動で おろす */
 function hsDiv(a, b) {
-  const D = digs(a), n = D.length;
-  let i0 = 0, cv = D[0];
-  while (cv < b && i0 < n - 1) { i0++; cv = cv * 10 + D[i0]; }
-  const tasks = [];
-  let wr = 0, curRow = -1, rem = 0;
-  for (let i = i0; i < n; i++) {
-    if (i > i0) { cv = rem * 10 + D[i]; tasks.push({ t: "down", row: curRow, col: i, v: D[i] }); }
-    const q = Math.floor(cv / b);
-    tasks.push({ t: "q", col: i, v: q, cur: cv, row: curRow, first: i === i0 });
-    if (q > 0) {
-      const pr = q * b, df = cv - pr, pRow = wr++, dRow = wr++, pd = digs(pr);
-      pd.forEach((v, j) => tasks.push({ t: "prod", row: pRow, col: i - (pd.length - 1 - j), v, q, cur: cv, pr }));
-      if (df > 0 || i === n - 1) {
-        const dd = digs(df);
-        dd.forEach((v, j) => tasks.push({ t: "diff", row: dRow, col: i - (dd.length - 1 - j), v, cur: cv, pr }));
-      } else tasks.push({ t: "diff0", row: dRow, col: i, v: 0, cur: cv, pr });
-      curRow = dRow; rem = df;
-    } else rem = cv;
+  const D = digs(a), n = D.length, dvS = String(b), dvLen = dvS.length;
+  const hide = dvLen - 1;                         // 指かくしで かくす けた数
+  const pw = Math.pow(10, hide), dTop = Math.floor(b / pw);
+  const estRaw = p => Math.floor(Math.floor(p / pw) / dTop);
+  const estQ = p => Math.max(1, Math.min(9, estRaw(p)));
+
+  // ---- 手順の計画（わり算のひっ算アプリの buildPlan と同じ） ----
+  let firstPos = -1, acc = 0;
+  for (let p = 0; p < n; p++) { acc = acc * 10 + D[p]; if (acc >= b) { firstPos = p; break; } }
+  if (firstPos < 0) firstPos = n - 1;
+  const stages = [];
+  let partial = 0;
+  for (let i = 0; i < n; i++) {
+    partial = partial * 10 + D[i];
+    if (i < firstPos) continue;
+    let st;
+    if (partial < b) st = { trials: [{ q: 0, product: 0, canSub: true }], finalQ: 0, remainder: partial, isZero: true };
+    else {
+      const trials = [];
+      for (let q = estQ(partial); q >= 1; q--) { const pr = q * b; trials.push({ q, product: pr, canSub: pr <= partial }); if (pr <= partial) break; }
+      const f = trials[trials.length - 1];
+      st = { trials, finalQ: f.q, remainder: partial - f.product, isZero: false };
+    }
+    stages.push({ pos: i, partial, ...st });
+    partial = st.remainder;
   }
-  const qd = {}, work = {};
-  let ti = 0;
-  const H = {
-    task: () => tasks[ti], sid: () => ti,
-    phase() { const tk = tasks[ti]; return tk ? { q: 0, prod: 1, diff: 2, diff0: 2, down: 3 }[tk.t] : -1; },
-    grid() {
-      const tk = tasks[ti];
-      const fc = tk && tk.t === "q" ? [tk.col - String(tk.cur).length + 1, tk.col] : null;
-      const isF = (r, c) => fc && r === tk.row && c >= fc[0] && c <= fc[1];
-      const rows = [
-        { cells: D.map((_, c) => ({ v: qd[c], cls: tk && tk.t === "q" && tk.col === c ? "cur" : (qd[c] !== undefined ? "in" : "") })) },
-        { lab: `<span>${b}</span><span class="brk">)</span>`, labCls: "divlab", bar: true, cells: D.map((v, c) => ({ v, cls: isF(-1, c) ? "focus" : "" })) }
-      ];
-      for (let r = 0; r < wr; r++) {
-        const w = work[r] || {}, here = tk && tk.t !== "q" && tk.row === r;
-        if (!Object.keys(w).length && !here) continue;
-        rows.push({ line: r % 2 === 0, cells: D.map((_, c) => {
-          const x = w[c], isCur = here && tk.col === c;
-          return { v: x ? x.v : "", cls: [isCur ? "cur" : "", x ? x.cls : "", isF(r, c) ? "focus" : ""].join(" ") };
-        }) });
+  const steps = [];
+  for (let p = 0; p < firstPos; p++) steps.push({ k: "skip", si: 0, pos: p, upto: Number(String(a).slice(0, p + 1)) });
+  stages.forEach((S, s) => {
+    S.trials.forEach((tr, t) => {
+      if (t === 0) { const st = { k: "tateru", si: s, pos: S.pos, value: tr.q }; if (S.isZero) st.alt = 1; steps.push(st); }
+      else steps.push({ k: "herasu", si: s, pos: S.pos, value: tr.q });
+      steps.push({ k: "kakeru", si: s, pos: S.pos, q: tr.q, product: tr.product });
+      steps.push({ k: "hiku", si: s, pos: S.pos, canSub: tr.canSub, product: tr.product });
+    });
+    if (s < stages.length - 1) steps.push({ k: "orosu", si: s, pos: stages[s + 1].pos, from: S.pos, value: D[stages[s + 1].pos] });
+  });
+  const maxRed = Math.max(0, ...stages.map(S => S.isZero ? 1 : S.trials.length - 1));
+
+  // ---- 書いたもの ----
+  const qv = {}, qStruck = {}, qRed = {};        // 商・へらした商
+  const prod = {}, rem = {};                     // pos → { col: 数字 }／pos → { col: {v, cls} }
+  let si = 0, mult = [], masks = new Set(), bor = null, hk = 0, fx = new Set();
+
+  const step = () => steps[si];
+  const stg = s => stages[s];
+  // ひかれる数のマス：1段目は わられる数、2段目からは 前の段の あまり行（おろした数も入る）
+  function minuend(s) {
+    const out = [];
+    if (s === 0) { const len = String(stages[0].partial).length; for (let c = 0; c < len; c++) out.push({ row: "d", col: c, v: D[c] }); }
+    else {
+      const r = rem[stages[s - 1].pos] || {};
+      Object.keys(r).map(Number).sort((x, y) => x - y).forEach(c => { if (r[c].cls !== "faded") out.push({ row: "r" + stages[s - 1].pos, col: c, v: r[c].v }); });
+    }
+    return out;
+  }
+  const curPartial = s => stages[s].partial;
+  const PN = (s, col) => pn(stages[s].pos - col);   // その段の数の中での 位の名前
+
+  // かけ算の ひっ算（右）：わる数×かりの商 を、一の位から 1列ずつ（その列の答えを まるごと）入力
+  function multEntries(q) {
+    if (q === 0) return [{ col: 0, typed: "0", placed: 0, carry: 0, fin: true, fd: atP(digs(b), 0), cin: 0 }];
+    const ds = digs(b), out = [];
+    let carry = 0;
+    for (let col = 0; col < ds.length; col++) {
+      const fd = atP(ds, col), cin = carry, p = fd * q + cin, fin = col === ds.length - 1;
+      carry = Math.floor(p / 10);
+      out.push({ col, typed: String(p), placed: p % 10, carry, fin, fd, cin });
+    }
+    return out;
+  }
+  const curMult = () => mult[mult.length - 1];
+
+  // ひく：くり下がりの じゅんび
+  function initBorrow(tk) {
+    const S = stg(tk.si), cur = {}, orig = {}, row = {};
+    minuend(tk.si).forEach(m => { cur[m.col] = m.v; orig[m.col] = m.v; row[m.col] = m.row; });
+    bor = { cur, orig, row, lent: new Set(), recv: new Set(), rs: String(S.remainder) };
+    hk = 0;
+  }
+  const hikuCol = () => stages[step().si].pos - hk;
+  const botAt = (tk, col) => (prod[tk.pos] || {})[col] || 0;
+  const pending = () => { const tk = step(); if (!tk || tk.k !== "hiku" || !bor) return false; const c = hikuCol(); return (bor.cur[c] || 0) < botAt(tk, c); };
+
+  // ---- 手順を すすめる（かける・ひくの入力いがいは 自動） ----
+  function advance() {
+    si++; masks = new Set();
+    let msg = "";
+    for (;;) {
+      const tk = step();
+      if (!tk) return { msg, done: true };
+      if (tk.k === "kakeru") {
+        mult.push({ q: tk.q, ent: multEntries(tk.q), idx: 0, filled: {}, carries: {}, typing: "", rej: false, product: tk.product });
+        msg += `${b}×${tk.q} を、右の かけ算の ひっ算で 一の位から 計算しよう。`;
+        return { msg, done: false };
       }
-      return { W: n, rows };
+      if (tk.k === "hiku" && !tk.canSub) {
+        const m = curMult(); if (m) m.rej = true;
+        msg = `${b}×${tk.q || curMult().q}＝${tk.product} は ${curPartial(tk.si)} より 大きくて ひけない！ `;
+        si++; continue;
+      }
+      if (tk.k === "herasu") {
+        const pos = tk.pos;
+        (qRed[pos] = qRed[pos] || []).push(tk.value);
+        qStruck[pos] = true; fx.add("red" + pos);
+        delete prod[pos];
+        msg += `商を 1 へらして ${tk.value} にしたよ。`;
+        si++; continue;
+      }
+      if (tk.k === "hiku") {
+        initBorrow(tk);
+        msg += `${curPartial(tk.si)}−${tk.product} を、一の位から 計算しよう。`;
+        return { msg, done: false };
+      }
+      if (tk.k === "orosu") {
+        const r = (rem[tk.from] = rem[tk.from] || {});
+        // 前の段が ひいて 0 になったときは、その 0 を うすくして、おろした数から 考える
+        Object.keys(r).forEach(c => { if (r[c].v === 0 && Number(c) < tk.pos && Object.keys(r).length === 1) r[c].cls = "faded"; });
+        r[tk.pos] = { v: tk.value, cls: "down" }; fx.add("down" + tk.pos);
+        mult = [];
+        msg += `${tk.value} を おろしたよ。`;
+        si++; continue;
+      }
+      // tateru / skip
+      if (tk.k === "tateru" && stages[tk.si].isZero) msg += `${curPartial(tk.si)} の中に ${b} は ある？ 商を たてよう。`;
+      else if (tk.k === "tateru") msg += hide > 0
+        ? `${curPartial(tk.si)}÷${b} の 商の けんとうを つけよう（下の けたを タップすると ゆびで かくせるよ）。`
+        : `${curPartial(tk.si)}÷${b} の 商を たてよう。`;
+      else msg += `${tk.upto} の中に ${b} は ある？ なければ「×」。`;
+      return { msg, done: false };
+    }
+  }
+
+  // たてる のときに かくせる マス
+  function maskable() {
+    const tk = step(), set = new Set();
+    if (!tk || tk.k !== "tateru" || hide === 0) return set;
+    for (let k = 0; k < hide; k++) set.add("v" + (dvLen - 1 - k));
+    const ms = minuend(tk.si);
+    ms.slice(-hide).forEach(m => set.add(m.row + ":" + m.col));
+    return set;
+  }
+
+  const H = {
+    sid: () => si * 1000 + (step() && step().k === "kakeru" ? curMult().idx : hk) * 2 + (pending() ? 1 : 0),
+    task() {
+      const tk = step();
+      if (!tk) return undefined;
+      if (tk.k === "skip") return { v: "×" };
+      if (tk.k === "tateru") return { v: tk.value };
+      if (tk.k === "kakeru") { const e = curMult().ent[curMult().idx]; return { v: e ? e.typed : undefined }; }
+      if (tk.k === "hiku") { if (pending()) return {}; const c = hikuCol(); return { v: bor.cur[c] - botAt(tk, c) }; }
+      return {};
+    },
+    phase() { const tk = step(); return tk ? { skip: 0, tateru: 0, herasu: 0, kakeru: 1, hiku: 2, orosu: 3 }[tk.k] : -1; },
+    intro() { const tk = step(); return tk.k === "skip" ? `${tk.upto} の中に ${b} は ある？ なければ 商は たたないので「×」をおそう。`
+      : hide > 0 ? `${curPartial(0)}÷${b} の 商の けんとうを つけよう（下の けたを タップすると ゆびで かくせるよ）。` : ""; },
+    isDiv: true,
+    pending,
+    toggleMask(key) {
+      if (!maskable().has(key)) return;
+      masks.has(key) ? masks.delete(key) : masks.add(key);
+    },
+    borrow() {
+      const tk = step();
+      if (!tk || tk.k !== "hiku" || !bor) return null;
+      if (!pending()) return { ok: false, soft: true, msg: "この位は そのまま ひけるよ。" };
+      const c = hikuCol(), cols = Object.keys(bor.cur).map(Number);
+      let x = c - 1;
+      while (x >= Math.min(...cols) && !(bor.cur[x] > 0)) x--;
+      if (x < Math.min(...cols)) return null;
+      for (let y = x; y < c; y++) { bor.cur[y]--; bor.lent.add(y); bor.cur[y + 1] += 10; bor.recv.add(y + 1); }
+      fx.add("bor");
+      const t = bor.cur[c];
+      return { ok: true, msg: x === c - 1 ? `${PN(tk.si, x)}から 1 かりて、${PN(tk.si, c)}は ${t} になったよ。${t}−${botAt(tk, c)} を計算しよう。`
+        : `${PN(tk.si, c - 1)}は 0 なので、${PN(tk.si, x)}から かりてきたよ。${PN(tk.si, c)}は ${t}。${t}−${botAt(tk, c)} を計算しよう。`, done: false };
     },
     input(d) {
-      const tk = tasks[ti];
-      if (d !== tk.v) {
-        if (tk.t === "q") {
-          if (d * b > tk.cur) return { ok: false, msg: `${b}×${d}＝${b * d} は ${tk.cur} より大きいね。もっと小さい数を たてよう。` };
-          return { ok: false, msg: `${tk.cur}−${b * d}＝${tk.cur - b * d} で、わる数の ${b} より大きくなるね。もっと大きい数を たてよう。` };
+      const tk = step();
+      if (!tk) return null;
+      if (tk.k === "skip") {
+        if (d !== "×") return { ok: false, msg: `${tk.upto} は ${b} より 小さいので、${tk.upto} の中に ${b} は ないね。商は たたないので「×」をおそう。` };
+        qv[tk.pos] = "×";
+        const r = advance();
+        return { ok: true, msg: r.msg, done: r.done };
+      }
+      if (tk.k === "tateru") {
+        const cur = curPartial(tk.si);
+        if (d === "×") return { ok: false, msg: cur < b ? `${cur} の中に ${b} は ないね。そういうときは 商に 0 を たてよう。` : `${cur} の中に ${b} は あるよ。商が たつね。` };
+        if (d === tk.value || (tk.alt !== undefined && d === tk.alt)) {
+          qv[tk.pos] = d;
+          if (d !== tk.value) {   // 商が0になる段で 1 と見積もったときも うけいれて、かける→ひけない→へらす で 0 にする
+            steps.splice(si + 1, 0,
+              { k: "kakeru", si: tk.si, pos: tk.pos, q: 1, product: b },
+              { k: "hiku", si: tk.si, pos: tk.pos, canSub: false, product: b, q: 1 },
+              { k: "herasu", si: tk.si, pos: tk.pos, value: 0 });
+          }
+          const r = advance();
+          return { ok: true, msg: r.msg, done: r.done };
         }
-        if (tk.t === "prod") return { ok: false, msg: `${tk.q}×${b} を もう一度 計算しよう。` };
-        return { ok: false, msg: `${tk.cur}−${tk.pr} を もう一度 計算しよう。` };
+        if (stages[tk.si].isZero) return { ok: false, msg: `${cur} は ${b} より 小さいね。商は いくつかな？` };
+        if (hide > 0) {
+          const raw = estRaw(cur);
+          return { ok: false, msg: `わる数と ${cur} の 下の${hide === 1 ? "一の位" : "けた"}を ゆびで かくして、${Math.floor(cur / pw)}÷${dTop} で けんとうを つけよう。` + (raw > 9 ? "（10 いじょうに なるときは 9 を たてるよ）" : "") };
+        }
+        if (d * b > cur) return { ok: false, msg: `${b}×${d}＝${b * d} は ${cur} より 大きいね。もっと 小さい数を たてよう。` };
+        return { ok: false, msg: `${cur}−${b * d}＝${cur - b * d} で、わる数の ${b} より 大きくなるね。もっと 大きい数を たてよう。` };
       }
-      if (tk.t === "q") qd[tk.col] = d;
-      else { (work[tk.row] = work[tk.row] || {})[tk.col] = { v: d, cls: tk.t === "diff0" ? "zero" : "in" }; }
-      ti++;
-      let msg = tk.t === "q" && d === 0 && tasks[ti] ? "0 をたてたときは、かけ算・ひき算は しないで、つぎの数をおろそう。" : "";
-      while (tasks[ti] && tasks[ti].t === "down") {
-        const dn = tasks[ti], rw = (work[dn.row] = work[dn.row] || {});
-        Object.keys(rw).forEach(c => { if (rw[c].cls === "zero") delete rw[c]; });
-        rw[dn.col] = { v: dn.v, cls: "down" };
-        msg += `${dn.v} をおろしたよ。`;
-        ti++;
+      if (tk.k === "kakeru") {
+        const m = curMult(), e = m.ent[m.idx];
+        if (d === "×") return { ok: false, soft: true, msg: "かけ算の 答えを 数字で 書こう。" };
+        const typed = m.typing + String(d);
+        if (!e.typed.startsWith(typed)) {
+          m.typing = "";
+          if (!e.fin && e.typed.length === 2 && typed === String(e.placed) && m.typing === "") return { ok: false, msg: `${e.typed} の、くり上がりの ${e.carry} から 先に書こう。` };
+          if (e.cin && Number(typed) === e.fd * m.q % 10) return { ok: false, msg: `くり上がりの ${e.cin} を たしわすれていないかな？` };
+          return { ok: false, msg: `${e.fd}×${m.q}${e.cin ? "＋" + e.cin : ""} を もう一度 計算しよう。` };
+        }
+        m.typing = typed;
+        if (typed !== e.typed) return { ok: true, msg: `つぎに ${e.placed} を書こう。`, done: false };
+        // 列が できた → 位に ふりわけ
+        if (!e.fin) { m.filled[e.col] = e.placed; if (e.carry) m.carries[e.col + 1] = e.carry; }
+        else { digs(e.typed).reverse().forEach((v, i) => { m.filled[e.col + i] = v; }); delete m.carries[e.col]; }
+        m.typing = ""; m.idx++;
+        if (m.idx < m.ent.length) return { ok: true, msg: "", done: false };
+        // かけ算 おわり → わり算の ひっ算（積の行）へ うつす
+        const S = stg(tk.si), pr = {};
+        digs(tk.product).reverse().forEach((v, i) => { pr[S.pos - i] = v; });
+        prod[tk.pos] = pr; fx.add("land" + tk.pos);
+        const r = advance();
+        return { ok: true, msg: `${b}×${tk.q}＝${tk.product} を 下に うつしたよ。` + r.msg, done: r.done };
       }
-      return { ok: true, msg, done: ti >= tasks.length };
+      if (tk.k === "hiku") {
+        const c = hikuCol(), bt = botAt(tk, c), top = bor.cur[c];
+        if (d === "×") return { ok: false, soft: true, msg: "ひき算の 答えを 数字で 書こう。" };
+        if (pending()) return { ok: false, soft: true, msg: `${PN(tk.si, c)}は ${top} から ${bt} を ひけないね。「10 かりる」をおそう。` };
+        const v = top - bt;
+        if (d !== v) {
+          if (bor.lent.has(c) && d === bor.orig[c] - bt) return { ok: false, msg: `${PN(tk.si, c)}は となりに 1 かしたので、${top} になっているよ。` };
+          if (bor.recv.has(c) && d === bt - (top - 10)) return { ok: false, msg: `下から 上を ひいていないかな？ 10 かりたので ${top}−${bt} だよ。` };
+          return { ok: false, msg: `${PN(tk.si, c)}：${top}−${bt} を もう一度 計算しよう。` };
+        }
+        (rem[tk.pos] = rem[tk.pos] || {})[c] = { v: d, cls: "in" };
+        hk++;
+        if (hk < bor.rs.length) return { ok: true, msg: pending() ? `${PN(tk.si, hikuCol())}は ひけないね。「10 かりる」をおそう。` : "", done: false };
+        bor = null;
+        const r = advance();
+        return { ok: true, msg: r.msg, done: r.done };
+      }
+      return null;
     },
     hint() {
-      const tk = tasks[ti];
-      if (tk.t === "q") {
-        const head = tk.first && i0 > 0 ? `${D.slice(0, i0).join("")} の中に ${b} はないので、${tk.cur} で考えるよ。` : "";
-        if (tk.v === 0) return head + `${tk.cur} の中に ${b} は ないね。商に 0 をたてよう。`;
-        return head + `${tk.cur} の中に ${b} は いくつ？ ${b}×□ が ${tk.cur} をこえない、いちばん大きい数を見つけよう。`;
+      const tk = step();
+      if (tk.k === "skip") return `${tk.upto} は ${b} より 小さいので、${tk.upto} の中に ${b} は ないね。商が たたない位には「×」を書こう。`;
+      if (tk.k === "tateru") {
+        const cur = curPartial(tk.si);
+        if (stages[tk.si].isZero) return `${cur} は ${b} より 小さいので、${cur} の中に ${b} は ないね。商に 0 を たてよう。`;
+        if (hide === 0) return `${cur} の中に ${b} は いくつ？ ${b}×□ が ${cur} を こえない、いちばん大きい数を 見つけよう。`;
+        maskable().forEach(k => masks.add(k));   // ゆびかくしを してみせる
+        const raw = estRaw(cur);
+        return `わる数 ${b} と ${cur} の 下の${hide === 1 ? "一の位" : `${hide}けた`}を ゆびで かくすと、${Math.floor(cur / pw)}÷${dTop}。` +
+          (raw > 9 ? `${raw} は 10 いじょうなので、9 を たてよう。` : `${Math.floor(cur / pw)} の中に ${dTop} は いくつ？`);
       }
-      if (tk.t === "prod") return `たてた ${tk.q} と、わる数の ${b} をかけよう。${tk.q}×${b}＝？`;
-      return `${tk.cur}−${tk.pr} を計算しよう。`;
+      if (tk.k === "kakeru") {
+        const m = curMult(), e = m.ent[m.idx];
+        const sk = `${pn(e.col)}：${e.fd}×${m.q}${e.cin ? `＋${e.cin}（くり上がり）` : ""}＝${e.typed}。`;
+        if (!e.fin && e.typed.length === 2) return sk + `くり上がりの ${e.carry} を 先に 上に 小さく書いて、つぎに ${e.placed} を書くよ。`;
+        if (e.fin && e.typed.length === 2) return sk + `さいごの かけ算なので、${e.typed} を そのまま書こう。`;
+        return sk;
+      }
+      if (tk.k === "hiku") {
+        const c = hikuCol(), bt = botAt(tk, c), top = bor.cur[c];
+        if (pending()) return `${PN(tk.si, c)}は ${top} から ${bt} を ひけないね。「10 かりる」をおして、左の位から 10 かりよう。`;
+        if (top >= 10 && bt > 0) return `${PN(tk.si, c)}：${top}−${bt}。10−${bt}＝${10 - bt}、${10 - bt}＋${top - 10}＝${top - bt}。`;
+        return `${PN(tk.si, c)}：${top}−${bt}＝${top - bt}。` + (bor.lent.has(c) ? `（1 かしたので ${top} になっているよ）` : "");
+      }
+      return "";
+    },
+
+    // ---- 表示 ----
+    html(shake) {
+      const tk = step(), C = dvLen + n, curStage = tk ? tk.si : stages.length - 1;
+      const act = tk ? tk.pos : -1;
+      const mk = maskable(), green = new Set();
+      if (tk && tk.k === "skip") { for (let c = 0; c <= tk.pos; c++) green.add("d:" + c); }
+      if (tk && (tk.k === "tateru" || tk.k === "kakeru")) for (let k = 0; k < dvLen; k++) green.add("v" + k);
+      if (tk && tk.k === "skip") for (let k = 0; k < dvLen; k++) green.add("v" + k);
+      if (tk && tk.k === "tateru") minuend(tk.si).forEach(m => green.add(m.row + ":" + m.col));
+      if (tk && tk.k === "kakeru") green.add("q:" + tk.pos);
+      if (tk && tk.k === "hiku" && bor) {
+        minuend(tk.si).forEach(m => green.add(m.row + ":" + m.col));
+        Object.keys(prod[tk.pos] || {}).forEach(c => green.add("p" + tk.pos + ":" + c));
+      }
+      const hc = tk && tk.k === "hiku" && bor ? hikuCol() : null;
+      const cell = (key, v, cls, extra) => {
+        const k2 = key && mk.has(key) ? ` data-mask="${key}"` : "";
+        let cl = cls || "";
+        if (key && green.has(key)) cl += " hg";
+        if (key && mk.has(key)) cl += " mk";
+        if (shake && /\bcur\b/.test(cl)) cl += " ng";
+        const cover = key && masks.has(key) ? `<i class="cv"></i>` : "";
+        return `<div class="c ${cl}"${k2}>${v === undefined || v === null ? "" : `<span class="v">${v}</span>`}${extra || ""}${cover}</div>`;
+      };
+      // くり下がりの しるし
+      const badge = (row, col) => {
+        if (!tk || tk.k !== "hiku" || !bor || bor.row[col] !== row) return { cls: "", ex: "" };
+        const L = bor.lent.has(col), R = bor.recv.has(col);
+        if (!L && !R) return { cls: "", ex: "" };
+        const pop = fx.has("bor") ? " pop" : "";
+        return { cls: L ? " lent" : "", ex: `<b class="bw${L ? "" : " rcv"}${pop}">${L ? bor.cur[col] : 10}</b>` };
+      };
+      let h = `<div class="dvg" style="grid-template-columns: repeat(${C}, var(--cw)); padding-top: calc(var(--cw) * ${(0.78 * maxRed).toFixed(2)})">`;
+      // 商
+      for (let g = 0; g < C; g++) {
+        const c = g - dvLen;
+        if (c < 0) { h += cell(null, "", ""); continue; }
+        const v = qv[c], reds = qRed[c] || [];
+        const isCur = tk && (tk.k === "tateru" || tk.k === "skip") && tk.pos === c;
+        let ex = reds.map((r, i) => `<span class="qr${i < reds.length - 1 ? " st" : ""}${fx.has("red" + c) && i === reds.length - 1 ? " pop" : ""}" style="--k:${i + 1}">${r}</span>`).join("");
+        h += cell("q:" + c, v, (isCur ? "cur" : v === "×" ? "batsu" : v !== undefined ? "in" : "") + (qStruck[c] ? " qst" : ""), ex);
+      }
+      // わる数 ) わられる数
+      for (let g = 0; g < C; g++) {
+        if (g < dvLen) { h += cell("v" + g, dvS[g], "dvs"); continue; }
+        const c = g - dvLen, bd = badge("d", c);
+        h += cell("d:" + c, D[c], "bar" + (c === 0 ? " b0" : "") + (act >= 0 && c > act ? " dim" : "") + bd.cls, bd.ex);
+      }
+      // 各段
+      for (let s = 0; s <= curStage && s < stages.length; s++) {
+        const pos = stages[s].pos, pr = prod[pos] || {}, rr = rem[pos] || {};
+        const hasP = Object.keys(pr).length > 0;
+        const hereP = tk && tk.si === s && (tk.k === "kakeru" || tk.k === "hiku" || hasP);
+        const hereR = tk && tk.si === s && tk.k === "hiku" && bor;
+        const later = rem[pos] && Object.keys(rem[pos]).length;
+        if (!hasP && !hereP && !later) continue;
+        const minC = Math.min(...Object.keys(pr).map(Number), 0);
+        for (let g = 0; g < C; g++) {
+          const c = g - dvLen;
+          const v = pr[c];
+          const ul = hasP && c >= Math.min(minC, 0) ? " ul" : "";
+          h += cell(c >= 0 ? "p" + pos + ":" + c : null, v, (v !== undefined ? "in" : "") + ul + (fx.has("land" + pos) && v !== undefined ? " land" : ""));
+        }
+        if (!later && !hereR) continue;
+        for (let g = 0; g < C; g++) {
+          const c = g - dvLen;
+          if (c < 0) { h += cell(null, "", ""); continue; }
+          const x = rr[c], bd = badge("r" + pos, c);
+          const isCur = hereR && c === hc;
+          const key = "r" + pos + ":" + c;
+          h += cell(key, x ? x.v : undefined, (isCur ? "cur" : x ? x.cls : "") + (x && x.cls === "down" && fx.has("down" + c) ? " drop" : "") + bd.cls, bd.ex);
+        }
+      }
+      h += `</div>`;
+      // かけ算の ひっ算（右）
+      let w = "";
+      if (mult.length) {
+        const COLS = 1 + Math.max(dvLen, String(b * 9).length);
+        w = `<div class="mws"><div class="mwt">✖️ かけ算の ひっ算</div><div class="mwl">`;
+        mult.forEach((m, mi) => {
+          const live = mi === mult.length - 1 && tk && tk.k === "kakeru";
+          const e = live ? m.ent[m.idx] : null;
+          const tp = {}, tc = {};
+          if (e && m.typing) {
+            const L = e.typed.length;
+            for (let i = 0; i < m.typing.length; i++) {
+              const fr = L - 1 - i;
+              if (e.fin) tp[e.col + fr] = m.typing[i]; else if (fr === 0) tp[e.col] = m.typing[i]; else tc[e.col + fr] = m.typing[i];
+            }
+          }
+          const prodLen = String(m.product).length;
+          const mc = (v, cls) => `<div class="mc ${cls || ""}">${v === undefined || v === null ? "" : v}</div>`;
+          let g = `<div class="mh${m.rej ? " rej" : ""}" style="grid-template-columns: repeat(${COLS}, var(--mw))">`;
+          for (let x = 0; x < COLS; x++) { const pc = COLS - 1 - x; const v = tc[pc] !== undefined ? tc[pc] : m.carries[pc]; g += mc(v, "cr" + (tc[pc] !== undefined ? " ty" : "")); }
+          for (let x = 0; x < COLS; x++) { const pc = COLS - 1 - x; g += mc(atP(digs(b), pc), ""); }
+          for (let x = 0; x < COLS; x++) { const pc = COLS - 1 - x; g += mc(x === 0 ? "×" : pc === 0 ? m.q : "", (x === 0 ? "op" : "") + (x > 0 ? " ln" : "")); }
+          for (let x = 0; x < COLS; x++) {
+            const pc = COLS - 1 - x;
+            let v = tp[pc] !== undefined ? tp[pc] : m.filled[pc], cls = tp[pc] !== undefined ? "ty" : "";
+            if (live && v === undefined && pc < Math.max(prodLen, e ? e.col + 1 : 0)) cls = e && pc === e.col ? "cur" : "bl";
+            if (live && e && pc === e.col && cls !== "ty") cls = "cur";
+            if (shake && cls === "cur") cls += " ng";
+            g += mc(v, cls + (m.rej && pc < prodLen ? " sk" : ""));
+          }
+          g += `</div>`;
+          w += `<div class="mbox">${g}${m.rej ? `<div class="mnote">✗ ひけない</div>` : ""}</div>`;
+        });
+        w += `</div></div>`;
+      }
+      fx = new Set();
+      return `<div class="dv">${h}${w}</div>`;
     }
   };
   return H;
@@ -1561,7 +1940,8 @@ function startCalc(k) {
   renderCalc();
 }
 function calcIntro() {
-  cx.msg = cx.op === "*" && cx.hs.swapped ? `けたの多い ${cx.hs.top} を上にして計算するよ（×は 入れかえても 答えは同じ）。` : "";
+  cx.msg = cx.op === "*" && cx.hs.swapped ? `けたの多い ${cx.hs.top} を上にして計算するよ（×は 入れかえても 答えは同じ）。`
+    : cx.hs.intro ? cx.hs.intro() : "";
   cx.msgCls = cx.msg ? "info" : "";
 }
 function gridHTML(g) {
@@ -1591,14 +1971,16 @@ function renderCalc() {
       const ph = cx.hs.phase();
       h += `<div class="phase">${["たてる", "かける", "ひく", "おろす"].map((s, i) => `<span class="${i === ph ? "cur" : ""}">${s}</span>`).join("→")}</div>`;
     }
-    h += gridHTML(cx.hs.grid());
+    h += cx.hs.html ? cx.hs.html(cx.shake) : gridHTML(cx.hs.grid());
   } else {
     h += `<div class="anz"><span>${a} ${SYM[op]} ${b} ＝</span><span class="abox">${cx.buf}</span></div>`;
   }
   h += `<div id="cmsg" class="${cx.msgCls}">${cx.msg}</div>`;
   if (!calcLock) {
     h += `<div class="ckeys">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(d => `<button data-d="${d}">${d}</button>`).join("")}` +
-      (cx.how === "anzan" ? `<button class="wide" data-act="back">けす</button><span></span><button class="wide okb" data-act="ok">こたえる</button>` : "") + `</div>`;
+      (cx.how === "anzan" ? `<button class="wide" data-act="back">けす</button><span></span><button class="wide okb" data-act="ok">こたえる</button>` : "") +
+      (cx.how === "hissan" && cx.hs.isDiv ? `<button class="wide batsu" data-act="batsu">× <small>商が たたない</small></button><span></span>` +
+        `<button class="wide kariru${cx.hs.pending() ? " on" : ""}" data-act="borrow"${cx.hs.pending() ? "" : " disabled"}>↩ 10 かりる</button>` : "") + `</div>`;
     h += `<div class="cfoot"><button class="cbtn" data-act="hint">計算のヒント</button>`;
     if (cx.how === "hissan" && cx.hs.teineiUsed) h += `<label class="teinei"><input type="checkbox" id="teinei"${teinei ? " checked" : ""}>${op === "-" ? "くり下がり" : "くり上がり"}も 自分で書く</label>`;
     h += `</div>`;
@@ -1608,6 +1990,7 @@ function renderCalc() {
 }
 function calcResult(res) {
   if (!res) return;
+  if (!res.ok && res.soft) { cx.msg = res.msg; cx.msgCls = "info"; renderCalc(); return; }
   if (!res.ok) { calcMiss++; totalCalcMiss++; cx.msg = res.msg; cx.msgCls = "bad"; cx.shake = true; if (onMiss("calc")) return; }
   else { cx.msg = res.msg || ""; cx.msgCls = res.msg ? "info" : ""; }
   if (res.ok && res.done) { calcDone(); return; }
@@ -1621,6 +2004,8 @@ function calcInput(d) {
 function calcAct(act) {
   if (!cx || calcLock) return;
   if (act === "hint") return calcHint();
+  if (act === "batsu") { if (cx.how === "hissan" && cx.hs.isDiv) calcResult(cx.hs.input("×")); return; }
+  if (act === "borrow") { if (cx.how === "hissan" && cx.hs.isDiv) calcResult(cx.hs.borrow()); return; }
   if (act === "switch") {
     cx.how = cx.how === "hissan" ? "anzan" : "hissan"; cx.buf = "";
     if (cx.how === "hissan") { cx.hs = makeHs(); calcIntro(); } else { cx.msg = ""; cx.msgCls = ""; }
@@ -1668,8 +2053,9 @@ function calcDone() {
   }, 1100);
 }
 $("calc").addEventListener("click", e => {
-  const el = e.target.closest("[data-d],[data-top],[data-act]");
+  const el = e.target.closest("[data-d],[data-top],[data-act],[data-mask]");
   if (!el || !cx || calcLock) return;
+  if (el.dataset.mask !== undefined) { if (cx.how === "hissan" && cx.hs.toggleMask) { cx.hs.toggleMask(el.dataset.mask); renderCalc(); } return; }
   if (el.dataset.d !== undefined) calcInput(Number(el.dataset.d));
   else if (el.dataset.top !== undefined) { if (cx.how === "hissan" && cx.hs.tapTop) calcResult(cx.hs.tapTop(Number(el.dataset.top))); }
   else calcAct(el.dataset.act);
@@ -1683,6 +2069,7 @@ $("calc").addEventListener("change", e => {
 document.addEventListener("keydown", e => {
   if (!cx || calcLock || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
   if (/^[0-9]$/.test(e.key)) { calcInput(Number(e.key)); e.preventDefault(); }
+  else if (cx.how === "hissan" && cx.hs.isDiv && /^[xX*]$/.test(e.key)) { calcAct("batsu"); e.preventDefault(); }
   else if (cx.how === "anzan" && e.key === "Backspace") { calcAct("back"); e.preventDefault(); }
   else if (cx.how === "anzan" && e.key === "Enter") { calcAct("ok"); e.preventDefault(); }
 });
