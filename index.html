@@ -46,8 +46,8 @@
   .rules b { color: var(--navy); }
 
   /* ---- モード ---- */
-  .modes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 14px; }
-  @media (max-width: 560px) { .modes { grid-template-columns: repeat(2, 1fr); } .modes .mode:last-child { grid-column: 1 / -1; } }
+  .modes { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 14px; }
+  @media (max-width: 560px) { .modes { grid-template-columns: repeat(2, 1fr); } }
   .mode {
     position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px;
     border: 3px solid var(--c); background: #fff; color: var(--c); border-radius: 18px; padding: 8px 4px 9px; cursor: pointer;
@@ -615,6 +615,37 @@
   @media (max-width: 420px) { .sk-ops { gap: 8px; } .sk-op { width: 64px; height: 64px; font-size: 34px; } }
   #log .sk-ll { font-size: .8em; line-height: 1.6; margin: 2px 0; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; } }
+  /* ---- ブロック（分配のきまり） ---- */
+  .bp { display: flex; flex-direction: column; gap: 12px; }
+  .bp-kind { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .bp-kind button { font-size: 20px; font-weight: bold; padding: 8px 16px; border-radius: 14px; border: 3px solid #cfe5e5; background: #fff; color: var(--ink); cursor: pointer; }
+  .bp-kind button.on { background: #0f8b8d; border-color: #0f8b8d; color: #fff; box-shadow: 0 4px 0 #0a6062; }
+  .bp-nums { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; align-items: center; }
+  .bp-st { display: flex; align-items: center; gap: 6px; border: 3px solid var(--sc); border-radius: 14px; padding: 4px 8px; background: #fff; }
+  .bp-st .lb { font-size: 14px; color: var(--sc); font-weight: bold; white-space: nowrap; }
+  .bp-st button { width: 44px; height: 44px; border-radius: 12px; border: none; background: color-mix(in srgb, var(--sc) 15%, #fff); color: var(--sc); font-size: 26px; font-weight: bold; cursor: pointer; }
+  .bp-st button:disabled { opacity: .3; cursor: default; }
+  .bp-st .v { min-width: 38px; text-align: center; font-size: 28px; font-weight: bold; color: var(--sc); }
+  .bp-btn { font-size: 17px; font-weight: bold; padding: 10px 16px; border-radius: 14px; border: none; background: #e3f3f3; color: #0a6062; cursor: pointer; }
+  .bp-btn.main { background: #0f8b8d; color: #fff; box-shadow: 0 4px 0 #0a6062; }
+  .bp-expr { position: relative; height: 1.5em; font-size: clamp(24px, 5.6vw, 44px); font-weight: bold; overflow: hidden; }
+  .bp-expr .tk { position: absolute; left: 0; top: 0; white-space: pre; will-change: transform, opacity; }
+  .bp-meas { position: absolute; left: 0; right: 0; top: 0; display: flex; justify-content: center; visibility: hidden; white-space: pre; }
+  .bp-stage svg { width: 100%; max-width: 680px; height: auto; margin: 0 auto; }
+  .bp-slide { display: flex; align-items: center; gap: 10px; padding: 0 4px; }
+  .bp-slide span { font-size: 15px; font-weight: bold; color: var(--sub); white-space: nowrap; }
+  .bp-slide input[type=range] { flex: 1; -webkit-appearance: none; appearance: none; height: 16px; border-radius: 999px; margin: 14px 0; outline: none;
+    background: linear-gradient(90deg, #0f8b8d var(--p, 0%), #e3ecee var(--p, 0%)); }
+  .bp-slide input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 46px; height: 46px; border-radius: 50%; background: #fff; border: 6px solid #0f8b8d; box-shadow: 0 3px 0 #0a6062; cursor: grab; }
+  .bp-slide input[type=range]::-moz-range-thumb { width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 6px solid #0f8b8d; box-shadow: 0 3px 0 #0a6062; cursor: grab; }
+  .bp-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .bp-res { text-align: center; font-size: clamp(18px, 4.2vw, 28px); font-weight: bold; min-height: 2.8em; }
+  .bp-res .ok { display: block; color: #0f8b8d; font-size: .8em; margin-top: 4px; animation: bpPop .5s; }
+  @keyframes bpPop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .bp-note { font-size: 15px; color: var(--sub); text-align: center; margin: 0; line-height: 1.7; }
+  .bp-note b { color: var(--ink); font-size: 17px; }
+  @media (max-width: 760px) { .modes { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 560px) { .modes { grid-template-columns: repeat(2, 1fr); } .bp-st button { width: 40px; height: 40px; } }
 </style>
 </head>
 <body>
@@ -641,6 +672,7 @@
       <div id="lvdesc"></div>
     </div>
     <div id="advArea" style="display:none"></div>
+    <div id="bpArea" style="display:none"></div>
   </div>
 
   <div class="card" id="playCard">
@@ -940,7 +972,7 @@ const starHTML = (n, max = 3) => [...Array(max)].map((_, i) => `<span class="${i
 
 /* ================= 画面 ================= */
 const $ = id => document.getElementById(id);
-const MODE_COLOR = { num: "#3d8bfd", calc: "#f08c00", adv: "#8a5cf0", craft: "#b5179e", shiki: "#2a9d55", kimari: "#0c8599" };
+const MODE_COLOR = { num: "#3d8bfd", calc: "#f08c00", adv: "#8a5cf0", craft: "#b5179e", shiki: "#2a9d55", kimari: "#0c8599", bunpai: "#c2532b" };
 let hintO = 0, hintC = 0, qHint = false, combo = 0, perf = [], resInfo = null;
 
 function renderTop() {
@@ -957,6 +989,7 @@ function renderLevels() {
     { m: "num",  ic: "🔣", t: "記号モード", s: "順じょを えらぶ", c: `${cnt("num")}/4` },
     { m: "calc", ic: "✏️", t: "計算モード", s: "自分で 計算する", c: `${cnt("calc")}/4` },
     { m: "shiki", ic: "📝", t: "式をつくろう", s: "文章題から 式", c: `${SHIKI.filter(S => skRec(S.id).st >= 2).length}/3` },
+    { m: "bunpai", ic: "🧱", t: "ブロック", s: "（ ）を 分ける", c: "" },
     { m: "kimari", ic: "🔍", t: "計算のきまり", s: "□に 数を 入れる", c: `${KIMARI.filter(K => (kimariRec[K.id] || 0) >= 2).length}/3` },
     { m: "adv",  ic: open ? "🎆" : "🏮", t: "花火大会", s: open ? "会場を めぐる" : `あと ${rest}レベル`, c: "" }
   ];
@@ -967,6 +1000,7 @@ function renderLevels() {
   if (mode === "craft") { renderCraftLevels(); return; }
   if (mode === "shiki") { renderShikiLevels(); return; }
   if (mode === "kimari") { renderKimariLevels(); return; }
+  if (mode === "bunpai") { renderBunpai(); return; }
   $("levels").classList.remove("craft");
 
   $("levels").innerHTML = LEVELS.filter(L => L.mode === mode).map(L => {
@@ -1027,12 +1061,14 @@ function goMenu() {
 }
 // メニュー画面と問題画面を わけて表示する
 function setView() {
-  const play = view === "play", inAdv = mode === "adv";
+  const play = view === "play", inAdv = mode === "adv", inBp = mode === "bunpai";
   document.querySelector(".hero").style.display = play ? "none" : "";
   $("selCard").style.display = play ? "none" : "";
-  $("lvArea").style.display = inAdv ? "none" : "";
+  $("lvArea").style.display = inAdv || inBp ? "none" : "";
   $("advArea").style.display = inAdv ? "" : "none";
-  $("teacherCard").style.display = !play && !inAdv ? "" : "none";
+  $("bpArea").style.display = inBp ? "" : "none";
+  if (!inBp) BP.anim++; // 自動で動いていたら止める
+  $("teacherCard").style.display = !play && !inAdv && !inBp ? "" : "none";
   $("ruleCard").style.display = play && !(adv && adv.boss) ? "" : "none";
   $("playCard").style.display = play ? "" : "none";
   $("logCard").style.display = play ? "" : "none";
@@ -3607,6 +3643,189 @@ $("resetAdv").onclick = () => {
   if (!confirm("花火大会の進みぐあい（特製玉もふくむ）を はじめに もどしますか？")) return;
   advData = { pos: 0, st: {}, tama: 0 }; saveAdv(); renderLevels();
 };
+
+/* ================= ブロック（分配のきまり）：(○＋□)×△ ＝ ○×△＋□×△ を 動かして 見る ================= */
+// ★や クリアには 入れない。記録も 保存しない（しらべる コーナー）
+const BP = { kind: "+", a: 8, b: 2, c: 7, t: 0, cel: false, half: false, anim: 0, pos: null };
+const BP_COL = { a: "#f08c00", b: "#3d8bfd", c: "#2a9d55", ng: "#e5484d" };
+const bpClamp = v => Math.max(0, Math.min(1, v));
+const bpEase = v => v < .5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2;
+// 数の はんい：たし算 ○□ 1〜10／ひき算 ○ 2〜10・□ は ○ より小さい／△ 2〜10
+function bpLim(k) {
+  if (k === "c") return [2, 10];
+  if (BP.kind === "+") return [1, 10];
+  return k === "a" ? [2, 10] : [1, BP.a - 1];
+}
+function bpFix() {
+  ["a", "c", "b"].forEach(k => { const [lo, hi] = bpLim(k); BP[k] = Math.max(lo, Math.min(hi, BP[k])); });
+}
+function bpRandom() {
+  const r = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+  if (BP.kind === "+") { BP.a = r(2, 9); BP.b = r(1, 6); }
+  else { BP.a = r(4, 10); BP.b = r(1, BP.a - 2); }
+  BP.c = r(3, 9);
+}
+const bpOp = () => BP.kind === "+" ? "＋" : "−";
+const bpAns = () => (BP.kind === "+" ? BP.a + BP.b : BP.a - BP.b) * BP.c;
+
+function renderBunpai() {
+  bpFix();
+  const plus = BP.kind === "+", op = bpOp();
+  const lb = plus ? { a: "上の たて", b: "下の たて", c: "よこ" } : { a: "はじめの たて", b: "とる たて", c: "よこ" };
+  const st = k => {
+    const [lo, hi] = bpLim(k);
+    return `<div class="bp-st" style="--sc:${BP_COL[k]}"><span class="lb">${lb[k]}</span>` +
+      `<button data-bs="${k}-" ${BP[k] <= lo ? "disabled" : ""} aria-label="へらす">−</button><span class="v">${BP[k]}</span>` +
+      `<button data-bs="${k}+" ${BP[k] >= hi ? "disabled" : ""} aria-label="ふやす">＋</button></div>`;
+  };
+  // 式の ことば（A：(○＋□)×△ ＝ 答え／B：○×△＋□×△ ＝ 答え）
+  const T = { lp: "（", a: BP.a, op, b: BP.b, rp: "）", x1: "×", c1: BP.c, x2: "×", c2: BP.c, eq: " ＝ ", ans: bpAns() };
+  const colr = k => k === "a" ? BP_COL.a : k === "b" ? BP_COL.b : k[0] === "c" ? BP_COL.c : "var(--ink)";
+  const sp = k => `<span data-k="${k}" style="color:${colr(k)}">${T[k]}</span>`;
+  const A = ["lp", "a", "op", "b", "rp", "x1", "c1", "eq", "ans"], B = ["a", "x1", "c1", "op", "b", "x2", "c2", "eq", "ans"];
+  $("bpArea").innerHTML = `<div class="bp">
+    <div class="bp-kind">
+      <button data-bk="+" class="${plus ? "on" : ""}">（○＋□）×△</button>
+      <button data-bk="-" class="${plus ? "" : "on"}">（○−□）×△</button>
+    </div>
+    <div class="bp-nums">${st("a")}${st("b")}${st("c")}<button class="bp-btn" data-bp="rnd">🎲 おまかせ</button></div>
+    <div class="bp-expr" id="bpExpr">
+      <div class="bp-meas" id="bpMA">${A.map(sp).join("")}</div>
+      <div class="bp-meas" id="bpMB">${B.map(sp).join("")}</div>
+      ${Object.keys(T).map(k => `<span class="tk" id="bpT_${k}" style="color:${colr(k)}">${T[k]}</span>`).join("")}
+    </div>
+    <div class="bp-stage">${bpSVG()}</div>
+    <div class="bp-slide"><span>くっつける</span><input type="range" id="bpRange" min="0" max="1000" value="${Math.round(BP.t * 1000)}" aria-label="ブロックを 分ける"><span>分ける</span></div>
+    <div class="bp-btns"><button class="bp-btn main" data-bp="go">▶ ゆっくり 分ける</button><button class="bp-btn" data-bp="back">↺ くっつける</button></div>
+    <div class="bp-res" id="bpRes"></div>
+    <p class="bp-note">${plus
+      ? "（ ）の中を 先に 計算しても、×△ を それぞれに かけて あとで たしても、答えは 同じ。<br><b>（○＋□）×△ ＝ ○×△ ＋ □×△</b>"
+      : "（ ）の中を 先に 計算しても、×△ を それぞれに かけて あとで ひいても、答えは 同じ。<br><b>（○−□）×△ ＝ ○×△ − □×△</b>"}</p>
+  </div>`;
+  bpMeasure();
+  bpApply();
+}
+
+// 式の ことばの 位置を はかる（A の形と B の形）
+function bpMeasure() {
+  const box = $("bpExpr"); if (!box || !box.offsetWidth) { BP.pos = null; return; }
+  const L0 = box.getBoundingClientRect().left;
+  const get = id => { const o = {}; $(id).querySelectorAll("[data-k]").forEach(e => { const r = e.getBoundingClientRect(); o[e.dataset.k] = { x: r.left - L0, w: r.width }; }); return o; };
+  const A = get("bpMA"), B = get("bpMB");
+  A.x2 = A.x1; A.c2 = A.c1;                                // あとから 出てくる ×△ は、もとの ×△ から 分かれる
+  B.lp = { x: B.a.x - A.lp.w * .8, w: A.lp.w }; B.rp = { x: B.b.x + B.b.w, w: A.rp.w }; // （ ）は その場で うすくなる
+  BP.pos = { A, B };
+}
+
+// ブロックの 絵（SVG）。分ける うごきは bpApply で transform を かえるだけ
+function bpSVG() {
+  const { a, b, c } = BP, plus = BP.kind === "+";
+  const W = 680, Lm = 92, Tm = 50, LabW = 260;
+  const s = Math.min(36, (W - Lm - 24 - LabW) / c, 440 / (a + b + 1.8));
+  const gap = s * 1.8, H = Tm + (a + b) * s + gap + 12, r = s * .38, gx = Lm + c * s, fs = 24;
+  BP.geo = { s, gap };
+  const dots = (r0, n, fill, op) => {
+    let o = "";
+    for (let i = 0; i < n; i++) for (let j = 0; j < c; j++) {
+      const x = Lm + (j + .5) * s, y = Tm + (r0 + i + .5) * s;
+      o += `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}"/>`;
+      if (op === "x") { const d = r * .62; o += `<path d="M${x - d} ${y - d}L${x + d} ${y + d}M${x + d} ${y - d}L${x - d} ${y + d}" stroke="${BP_COL.ng}" stroke-width="${Math.max(2, s * .1)}" stroke-linecap="round"/>`; }
+    }
+    return o;
+  };
+  // たての 数（左の線）と よこの 数（上の線）
+  const vbar = (x, r0, n, col, v) => {
+    const y1 = Tm + r0 * s + 3, y2 = Tm + (r0 + n) * s - 3;
+    return `<path d="M${x + 6} ${y1}H${x}V${y2}H${x + 6}" fill="none" stroke="${col}" stroke-width="3"/>` +
+      `<text x="${x - 16}" y="${(y1 + y2) / 2 + 9}" font-size="${fs + 2}" font-weight="bold" fill="${col}" text-anchor="middle">${v}</text>`;
+  };
+  const hbar = (y, id, op) => `<g ${id ? `id="${id}"` : ""} opacity="${op}"><path d="M${Lm + 3} ${y + 6}V${y}H${gx - 3}V${y + 6}" fill="none" stroke="${BP_COL.c}" stroke-width="3"/>` +
+    `<text x="${(Lm + gx) / 2}" y="${y - 7}" font-size="${fs}" font-weight="bold" fill="${BP_COL.c}" text-anchor="middle">${c}</text></g>`;
+  const lab = (id, y, txt, col) => `<text id="${id}" x="${gx + 18}" y="${y + 9}" font-size="${fs + 2}" font-weight="bold" fill="${col}">${txt}</text>`;
+  const op = bpOp(), ans = bpAns();
+  let base, stay = "", move, labs;
+  if (plus) {
+    base = dots(0, a, BP_COL.a) + vbar(Lm - 18, 0, a, BP_COL.a, a);
+    move = dots(a, b, BP_COL.b) + vbar(Lm - 18, a, b, BP_COL.b, b) + hbar(Tm + a * s - s * .45, "bpC2", 0) +
+      lab("bpLB", Tm + (a + b / 2) * s, `${b}×${c}＝${b * c}`, BP_COL.b);
+    labs = lab("bpL0", Tm + (a + b) * s / 2, `(${a}${op}${b})×${c}＝${ans}`, "#2f2e3a") +
+      lab("bpLA", Tm + a * s / 2, `${a}×${c}＝${a * c}`, BP_COL.a);
+  } else {
+    // ひき算：○ たて ぜんぶ から □ たて（✕）を とる。分けると、とった ところに ブロックが もどり（○×△）、✕ の ブロック（□×△）が はなれる
+    base = dots(0, a - b, BP_COL.a) + vbar(Lm - 58, 0, a, BP_COL.a, a);
+    stay = `<g id="bpStay" opacity="0">${dots(a - b, b, BP_COL.a)}</g>`;
+    move = dots(a - b, b, "#a9cdfd", "x") + vbar(Lm - 18, a - b, b, BP_COL.b, b) + hbar(Tm + (a - b) * s - s * .45, "bpC2", 0) +
+      lab("bpLB", Tm + (a - b + b / 2) * s, `${b}×${c}＝${b * c} を とる`, BP_COL.b);
+    labs = lab("bpL0", Tm + (a - b) * s / 2, `(${a}${op}${b})×${c}＝${ans}`, "#2f2e3a") +
+      lab("bpLA", Tm + a * s / 2, `${a}×${c}＝${a * c}`, BP_COL.a);
+  }
+  return `<svg id="bpSvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="ブロックの 図">` +
+    hbar(Tm - 12, "", 1) + base + stay + `<g id="bpMove">${move}</g>` + labs + `</svg>`;
+}
+
+// スライダーの 位置 t（0＝くっついている／1＝分かれた）に あわせて 絵と 式を かえる
+function bpApply() {
+  const t = BP.t, plus = BP.kind === "+", g = BP.geo; if (!g) return;
+  const set = (id, attr, v) => { const e = $(id); if (e) e.setAttribute(attr, v); };
+  const dy = plus ? t * g.gap : t * (BP.b * g.s + g.gap);
+  set("bpMove", "transform", `translate(0 ${dy.toFixed(2)})`);
+  set("bpStay", "opacity", bpClamp(t * 1.4).toFixed(3));
+  set("bpC2", "opacity", bpClamp((t - .4) / .5).toFixed(3));
+  set("bpL0", "opacity", bpClamp(1 - t * 2.2).toFixed(3));
+  set("bpLA", "opacity", bpClamp((t - .55) / .4).toFixed(3));
+  set("bpLB", "opacity", bpClamp((t - .55) / .4).toFixed(3));
+  const rg = $("bpRange"); if (rg) { rg.style.setProperty("--p", (t * 100).toFixed(1) + "%"); if (Number(rg.value) !== Math.round(t * 1000)) rg.value = Math.round(t * 1000); }
+  // 式の 形を かえる
+  if (BP.pos) {
+    const { A, B } = BP.pos, e = bpEase(t);
+    for (const k in A) {
+      const el = $("bpT_" + k); if (!el) continue;
+      el.style.transform = `translateX(${(A[k].x + (B[k].x - A[k].x) * e).toFixed(1)}px)`;
+      el.style.opacity = k === "lp" || k === "rp" ? bpClamp(1 - t * 1.8) : k === "x2" || k === "c2" ? bpClamp(t * 3) : 1;
+    }
+  }
+  // 下の 計算
+  const { a, b, c } = BP, op = bpOp(), ans = bpAns(), inner = plus ? a + b : a - b;
+  const half = t >= .5;
+  if (half && !BP.half) sfx("ok");
+  BP.half = half;
+  let h = half
+    ? `<span style="color:${BP_COL.a}">${a}×${c}</span>${op}<span style="color:${BP_COL.b}">${b}×${c}</span> ＝ ${a * c}${op}${b * c} ＝ ${ans}`
+    : `（<span style="color:${BP_COL.a}">${a}</span>${op}<span style="color:${BP_COL.b}">${b}</span>）×${c} ＝ ${inner}×${c} ＝ ${ans}`;
+  if (t >= .999) h += `<span class="ok">⭕ どちらも ${ans}こ！　（${a}${op}${b}）×${c} ＝ ${a}×${c}${op}${b}×${c}</span>`;
+  const res = $("bpRes"); if (res && res.innerHTML !== h) res.innerHTML = h;
+  if (t >= .999 && !BP.cel) { BP.cel = true; sfx("fanfare"); setTimeout(() => fireAt($("bpRes"), 1), 50); }
+  if (t < .2) BP.cel = false;
+}
+
+// ゆっくり 動かす（先生が 見せるときにも）
+function bpAnimTo(to, ms) {
+  const id = ++BP.anim, from = BP.t, t0 = performance.now();
+  const step = now => {
+    if (id !== BP.anim) return;
+    const p = Math.min(1, (now - t0) / ms);
+    BP.t = from + (to - from) * p; bpApply();
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function bpReset() { BP.anim++; BP.t = 0; BP.cel = false; BP.half = false; renderBunpai(); }
+
+$("bpArea").addEventListener("click", e => {
+  const k = e.target.closest("[data-bk]");
+  if (k) { if (BP.kind !== k.dataset.bk) { BP.kind = k.dataset.bk; if (BP.kind === "-" && BP.b >= BP.a) BP.a = Math.min(10, BP.b + 3); bpReset(); } return; }
+  const s = e.target.closest("[data-bs]");
+  if (s) { const [key, d] = [s.dataset.bs[0], s.dataset.bs[1]]; BP[key] += d === "+" ? 1 : -1; bpReset(); return; }
+  const b = e.target.closest("[data-bp]"); if (!b) return;
+  if (b.dataset.bp === "rnd") { bpRandom(); bpReset(); return; }
+  if (b.dataset.bp === "go") { if (BP.t >= .999) { BP.t = 0; bpApply(); } bpAnimTo(1, Math.round(2200 * (1 - BP.t)) + 200); return; }
+  if (b.dataset.bp === "back") bpAnimTo(0, Math.round(700 * BP.t) + 100);
+});
+$("bpArea").addEventListener("input", e => {
+  if (e.target.id !== "bpRange") return;
+  BP.anim++; BP.t = Number(e.target.value) / 1000; bpApply();
+});
+window.addEventListener("resize", () => { if (mode === "bunpai" && view === "menu") { bpMeasure(); bpApply(); } });
 
 renderCustomList();
 $("advFree").checked = advFree;
