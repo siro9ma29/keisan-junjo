@@ -46,8 +46,8 @@
   .rules b { color: var(--navy); }
 
   /* ---- モード ---- */
-  .modes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
-  @media (max-width: 560px) { .modes { grid-template-columns: repeat(2, 1fr); } }
+  .modes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 14px; }
+  @media (max-width: 560px) { .modes { grid-template-columns: repeat(2, 1fr); } .modes .mode:last-child { grid-column: 1 / -1; } }
   .mode {
     position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px;
     border: 3px solid var(--c); background: #fff; color: var(--c); border-radius: 18px; padding: 8px 4px 9px; cursor: pointer;
@@ -591,6 +591,27 @@
   .sk-row .sk-k { width: 2.6em; font-size: .55em; color: var(--sub); text-align: right; }
   .sk-row.ans .sk-eq { color: #d6336c; }
   .sk-note { font-size: 15px; margin: 8px 0 0; }
+  /* ---- 計算のきまり ---- */
+  .km { text-align: center; }
+  .km-eq { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 2px; font-size: clamp(26px, 6.2vw, 44px); font-weight: bold; font-variant-numeric: tabular-nums; margin: 10px 0 4px; }
+  .km-side { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
+  @media (max-width: 560px) { .km-eq { flex-direction: column; } }
+  .km-o { padding: 0 1px; color: var(--navy); }
+  .km-o.eq { padding: 0 .25em; }
+  .km-v { color: var(--navy); }
+  .km-n { font: inherit; color: var(--navy); min-width: 1.6em; padding: 2px 6px; background: #eef5ff; border: 3px solid #bcd3ea; border-radius: 12px; box-shadow: 0 4px 0 #bcd3ea; cursor: pointer; border-bottom-color: var(--u, #bcd3ea); }
+  .km-n[style*="--u"] { box-shadow: 0 4px 0 var(--u); }
+  .km-n:active { transform: translateY(3px); box-shadow: 0 1px 0 #bcd3ea; }
+  .km-n:disabled { cursor: default; transform: none; }
+  .km-n.hint { animation: glow 1s infinite; border-color: #f08c00; }
+  .km-n.ng { background: #ffe3e3; border-color: #e03131; animation: shake .4s; }
+  .km-b { font: inherit; min-width: 1.6em; height: 1.35em; padding: 0 4px; display: inline-flex; align-items: center; justify-content: center; background: #fff; border: 3px dashed #868e96; border-radius: 10px; color: #c92a2a; cursor: pointer; }
+  .km-b.act { border: 3px solid #f08c00; background: #fff4e6; animation: glow 1s infinite; }
+  .km-b.ng { animation: shake .4s; }
+  .km-b.fill { border: 3px solid var(--u); color: var(--u); background: #fff; cursor: default; animation: pop .3s; }
+  .km-ok { margin-left: .3em; color: #d6336c; font-size: 1.1em; animation: stamp .35s; }
+  .km-rule { margin: 12px auto 0; max-width: 34em; padding: 10px 14px; background: #e6fcf5; border: 2px solid #96f2d7; border-radius: 14px; font-size: 16px; }
+  .km-f { font-size: clamp(16px, 4.2vw, 22px); font-weight: bold; color: #0c8599; margin-bottom: 4px; }
   @media (max-width: 420px) { .sk-ops { gap: 8px; } .sk-op { width: 64px; height: 64px; font-size: 34px; } }
   #log .sk-ll { font-size: .8em; line-height: 1.6; margin: 2px 0; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; } }
@@ -919,7 +940,7 @@ const starHTML = (n, max = 3) => [...Array(max)].map((_, i) => `<span class="${i
 
 /* ================= 画面 ================= */
 const $ = id => document.getElementById(id);
-const MODE_COLOR = { num: "#3d8bfd", calc: "#f08c00", adv: "#8a5cf0", craft: "#b5179e", shiki: "#2a9d55" };
+const MODE_COLOR = { num: "#3d8bfd", calc: "#f08c00", adv: "#8a5cf0", craft: "#b5179e", shiki: "#2a9d55", kimari: "#0c8599" };
 let hintO = 0, hintC = 0, qHint = false, combo = 0, perf = [], resInfo = null;
 
 function renderTop() {
@@ -936,6 +957,7 @@ function renderLevels() {
     { m: "num",  ic: "🔣", t: "記号モード", s: "順じょを えらぶ", c: `${cnt("num")}/4` },
     { m: "calc", ic: "✏️", t: "計算モード", s: "自分で 計算する", c: `${cnt("calc")}/4` },
     { m: "shiki", ic: "📝", t: "式をつくろう", s: "文章題から 式", c: `${SHIKI.filter(S => skRec(S.id).st >= 2).length}/3` },
+    { m: "kimari", ic: "🔍", t: "計算のきまり", s: "□に 数を 入れる", c: `${KIMARI.filter(K => (kimariRec[K.id] || 0) >= 2).length}/3` },
     { m: "adv",  ic: open ? "🎆" : "🏮", t: "花火大会", s: open ? "会場を めぐる" : `あと ${rest}レベル`, c: "" }
   ];
   $("modes").innerHTML = MODES.map(x => `<button class="mode${mode === x.m || (x.m === "adv" && mode === "craft") ? " on" : ""}${x.m === "adv" && !open ? " locked" : ""}" style="--c:${MODE_COLOR[x.m]}" data-m="${x.m}">` +
@@ -944,6 +966,7 @@ function renderLevels() {
   if (mode === "adv") { renderAdv(); return; }
   if (mode === "craft") { renderCraftLevels(); return; }
   if (mode === "shiki") { renderShikiLevels(); return; }
+  if (mode === "kimari") { renderKimariLevels(); return; }
   $("levels").classList.remove("craft");
 
   $("levels").innerHTML = LEVELS.filter(L => L.mode === mode).map(L => {
@@ -971,6 +994,8 @@ $("lvArea").addEventListener("click", e => {
   if (c) { craftLv = Number(c.dataset.cl); craftNewSet(); return; }
   const sl = e.target.closest("[data-sl]");
   if (sl) { shikiLv = Number(sl.dataset.sl); shikiNewSet(); return; }
+  const kl = e.target.closest("[data-kl]");
+  if (kl) { kimariLv = Number(kl.dataset.kl); kimariNewSet(); return; }
   if (e.target.closest("[data-skself]")) { const R = skRec(shikiLv); R.self = !R.self; R.streak = 0; skSave(); renderLevels(); return; }
   const b = e.target.closest("[data-lv]"); if (!b) return;
   lv = Number(b.dataset.lv);
@@ -992,7 +1017,7 @@ function setMode(m) {
 }
 // 問題画面の とちゅうの処理や演出を止める
 function stopPlay() {
-  playSeq++; craftSeq++; shikiSeq++;
+  playSeq++; craftSeq++; shikiSeq++; kimariSeq++;
   cx = null; calcSeq++; calcLock = false; busy = false; renderCalc();
 }
 function goMenu() {
@@ -2358,7 +2383,7 @@ function backToMap() { leaveAdv(); stopPlay(); mode = "adv"; goMenu(); }
 function renderHud() {
   const hud = $("hud");
   if (!adv) {
-    if (mode === "craft" || mode === "shiki") return;
+    if (mode === "craft" || mode === "shiki" || mode === "kimari") return;
     const L = lv > 0 ? curL() : null, c = MODE_COLOR[mode] || MODE_COLOR.num;
     hud.innerHTML = `<div class="shud" style="--c:${c}"><button class="mback" data-hud="menu">◀ メニュー</button>
       <div class="st"><b>${L ? L.name : "先生の問題"}</b><span>${mode === "calc" ? "✏️ 計算モード" : "🔣 記号モード"}${L ? "　" + L.short : ""}</span></div></div>`;
@@ -2395,6 +2420,10 @@ $("hud").addEventListener("click", e => {
   if (b.dataset.hud === "shopback") { stopPlay(); goMenu(); return; }
   if (b.dataset.hud === "shikiback") {
     if (sk && !sk.finished && sk.solved.some(Boolean) && !confirm("メニューに もどりますか？（とちゅうの問題は やりなおしになるよ）")) return;
+    stopPlay(); goMenu(); return;
+  }
+  if (b.dataset.hud === "kimariback") {
+    if (km && !km.finished && km.solved.some(Boolean) && !confirm("メニューに もどりますか？（とちゅうの問題は やりなおしになるよ）")) return;
     stopPlay(); goMenu(); return;
   }
   if (b.dataset.hud === "tama") {
@@ -3293,6 +3322,231 @@ function skRenderResult() {
   mk("reset", "メニューへ", () => { stopPlay(); goMenu(); });
 }
 
+/* ================= 計算のきまり（□に 数を 入れて たしかめる） ================= */
+// 左の 式の 数を タップして、右の 式の □に 入れる。入れかえ・まとめ方・分けて かける きまり
+const KIMARI_PER = 5;
+const KIMARI = [
+  { id: 1, name: "レベル1", short: "入れかえ・まとめ方", tags: ["■＋●＝●＋■", "■×●＝●×■", "（■＋●）＋▲＝■＋（●＋▲）", "（■×●）×▲＝■×（●×▲）"], types: ["k+", "k*", "m+", "m*"] },
+  { id: 2, name: "レベル2", short: "（ ）の 中に かける", tags: ["（■＋●）×▲＝■×▲＋●×▲", "（■−●）×▲＝■×▲−●×▲"], types: ["b+", "b+", "b-"] },
+  { id: 3, name: "レベル3", short: "まぜて", tags: ["レベル1・2が まざる", "□の 場所が かわる"], types: ["k+", "k*", "m+", "m*", "b+", "b-"], mix: true }
+];
+const KM_RULE = {
+  "k+": { f: "■＋●＝●＋■", say: "たし算は、たす数と たされる数を 入れかえても 答えは 同じ。" },
+  "k*": { f: "■×●＝●×■", say: "かけ算は、かける数と かけられる数を 入れかえても 答えは 同じ。" },
+  "m+": { f: "（■＋●）＋▲＝■＋（●＋▲）", say: "たし算だけの 式は、どこから 先に たしても 答えは 同じ。" },
+  "m*": { f: "（■×●）×▲＝■×（●×▲）", say: "かけ算だけの 式は、どこから 先に かけても 答えは 同じ。" },
+  "b+": { f: "（■＋●）×▲＝■×▲＋●×▲", say: "（ ）の 中の 数に、それぞれ かけてから たしても 答えは 同じ。" },
+  "b-": { f: "（■−●）×▲＝■×▲−●×▲", say: "（ ）の 中の 数に、それぞれ かけてから ひいても 答えは 同じ。" }
+};
+let kimariLv = 1, km = null, kimariSeq = 0;
+let kimariRec = load("junjo_kimari", {}); // { [レベル]: ★ }
+const kmSave = () => save("junjo_kimari", kimariRec);
+const curK = () => KIMARI.find(K => K.id === kimariLv);
+
+// 3つの ちがう数
+function kmNums(type) {
+  for (;;) {
+    let a, b, c;
+    if (type === "k+") { a = rnd(12, 89); b = rnd(12, 89); c = 0; }
+    else if (type === "k*") { a = rnd(12, 40); b = rnd(2, 9); c = 0; }
+    else if (type === "m+") { a = rnd(12, 79); b = rnd(11, 59); c = Math.random() < .5 ? (10 - b % 10) % 10 + 10 * rnd(1, 3) : rnd(11, 49); }
+    else if (type === "m*") {
+      const P = [[25, 4], [5, 2], [50, 2], [20, 5], [25, 8]];
+      if (Math.random() < .6) { const p = pick(P); b = p[0]; c = p[1]; a = rnd(3, 19); } else { a = rnd(3, 19); b = rnd(2, 9); c = rnd(2, 9); }
+    }
+    else if (type === "b+") { c = rnd(3, 9); if (Math.random() < .5) { a = rnd(5, 9); b = 10 - a; } else { a = rnd(6, 15); b = rnd(2, 9); } }
+    else { c = rnd(3, 9); if (Math.random() < .5) { b = rnd(1, 5); a = 10 + b; } else { a = rnd(8, 15); b = rnd(2, a - 3); } }
+    const ns = c ? [a, b, c] : [a, b];
+    if (new Set(ns).size === ns.length && ns.every(n => n > 0)) return { a, b, c };
+  }
+}
+// 1問：left＝左の 式（数と 記号）、right＝右の 式（□は { ans }）
+function kmMake(type, mix) {
+  const { a, b, c } = kmNums(type), B = v => ({ ans: v });
+  const op = type === "b-" ? "−" : "＋";
+  let left, right;
+  if (type === "k+") { left = [a, "＋", b]; right = [b, "＋", B(a)]; }
+  else if (type === "k*") { left = [a, "×", b]; right = [b, "×", B(a)]; }
+  else if (type === "m+") { left = ["（", a, "＋", b, "）", "＋", c]; right = [a, "＋", "（", B(b), "＋", B(c), "）"]; }
+  else if (type === "m*") { left = ["（", a, "×", b, "）", "×", c]; right = [a, "×", "（", B(b), "×", B(c), "）"]; }
+  else {
+    left = ["（", a, op, b, "）", "×", c];
+    // □に する 場所：レベル2は かける数（▲）の 2つ、レベル3は 4つの 数から 2つ
+    let at = [1, 3];
+    if (mix) { const C = [[0, 2], [1, 3], [0, 1], [2, 3], [0, 3], [1, 2]]; at = pick(C); }
+    const v = [a, c, b, c];
+    const s = k => at.includes(k) ? B(v[k]) : v[k];
+    right = [s(0), "×", s(1), op, s(2), "×", s(3)];
+  }
+  return { type, left, right };
+}
+function kmBuild(K) {
+  const ts = [...K.types].sort(() => Math.random() - .5);
+  while (ts.length < KIMARI_PER) ts.push(pick(K.types));
+  // 同じ 式が 1セットに 2回 出ないように する
+  const seen = new Set();
+  return ts.slice(0, KIMARI_PER).sort(() => Math.random() - .5).map(t => {
+    let q, key, n = 0;
+    do { q = kmMake(t, K.mix); key = kmText(q, "left") + "=" + kmText(q, "right"); } while (seen.has(key) && ++n < 50);
+    seen.add(key); return q;
+  });
+}
+
+function renderKimariLevels() {
+  $("levels").classList.add("craft");
+  $("levels").innerHTML = KIMARI.map(K => {
+    const st = kimariRec[K.id] || 0;
+    return `<button class="lvc${kimariLv === K.id ? " cur" : ""}${st === 3 ? " clr" : ""}" style="--mc:${MODE_COLOR.kimari}" data-kl="${K.id}">` +
+      `<span class="ln">${K.name}</span><span class="lt">${K.short}</span><span class="ls">${starHTML(st)}</span></button>`;
+  }).join("");
+  $("tbtnBox").innerHTML = "";
+  const st = kimariRec[kimariLv] || 0;
+  $("lvdesc").innerHTML = curK().tags.map(s => `<span class="tag">${s}</span>`).join("") +
+    `<p class="sk-note">左の 式と 同じ 答えに なるように、□に 数を 入れよう。数は、左の 式の 数を タップすると 入るよ。</p>` +
+    `<div class="crit"><b>★の めやす</b>（${KIMARI_PER}問）<ul>` +
+    ["ぜんぶ とく", "まちがい・ヒント 合わせて 2回まで", "ノーミス（ヒントなし）"]
+      .map((t, i) => `<li class="${i < st ? "got" : ""}"><span class="s">${"★".repeat(i + 1)}</span>${t}</li>`).join("") +
+    `</ul></div>`;
+}
+
+/* ---- 問題画面 ---- */
+function kimariNewSet() {
+  cx = null; calcSeq++; calcLock = false; busy = false; done = false; finished = false; renderCalc();
+  kimariSeq++;
+  const set = kmBuild(curK());
+  km = { set, qi: 0, miss: 0, hints: 0, solved: set.map(() => false), perf: set.map(() => false), finished: false, res: null, lines: [] };
+  view = "play";
+  renderLevels();
+  kimariStartQ();
+  window.scrollTo(0, 0);
+}
+function kimariStartQ() {
+  kimariSeq++;
+  const q = km.set[km.qi];
+  q.right.forEach(t => { if (typeof t === "object") { t.v = null; t.src = -1; } });
+  Object.assign(km, { q, act: kmFirstEmpty(q), hintLv: 0, qMiss: 0, qHint: false, glow: -1, ng: -1, ngSrc: -1, qDone: false });
+  setMsg("", "");
+  kimariRender();
+}
+const kmBlanks = q => q.right.map((t, i) => typeof t === "object" ? i : -1).filter(i => i >= 0);
+const kmFirstEmpty = q => kmBlanks(q).find(i => q.right[i].v === null) ?? -1;
+const KM_COLS = ["#1c7ed6", "#e8590c", "#2f9e44", "#ae3ec9"];
+
+function kimariRender() {
+  $("hud").innerHTML = `<div class="shud" style="--c:${MODE_COLOR.kimari}"><button class="mback" data-hud="kimariback">◀ メニュー</button>
+    <div class="st"><b>🔍 計算のきまり ${curK().name}</b><span>${curK().short}</span></div></div>`;
+  $("combo").textContent = "";
+  $("prog").innerHTML = km.set.map((_, i) => `<i class="${km.solved[i] ? (km.perf[i] ? "perf" : "ok") : ""}${i === km.qi && !km.finished ? " now" : ""}"></i>`).join("");
+  if (km.finished) { $("qno").textContent = ""; $("guide").style.display = "none"; kmRenderResult(); kmRenderLog(); return; }
+  const q = km.q;
+  $("qno").textContent = `${km.qi + 1} 問目 ／ ${km.set.length} 問`;
+  $("guide").style.display = "";
+  $("guide").innerHTML = km.qDone ? "左と 右の 式は、同じ 答えに なるね！" : "<b>左の 式の 数</b>を タップして、<b>光っている □</b>に 入れよう。";
+  // 左の 式：数は タップできる。□に 入れた 数には、その □と 同じ 色の 下線
+  const used = {};
+  q.right.forEach(t => { if (typeof t === "object" && t.src >= 0) used[t.src] = KM_COLS[kmBlanks(q).indexOf(q.right.indexOf(t)) % 4]; });
+  const L = q.left.map((t, i) => typeof t === "number"
+    ? `<button class="km-n${km.glow === i ? " hint" : ""}${km.ngSrc === i ? " ng" : ""}" data-kn="${i}"${km.qDone ? " disabled" : ""}${used[i] ? ` style="--u:${used[i]}"` : ""}>${t}</button>`
+    : `<span class="km-o">${t}</span>`).join("");
+  const R = q.right.map((t, i) => {
+    if (typeof t !== "object") return `<span class="${typeof t === "number" ? "km-v" : "km-o"}">${t}</span>`;
+    const col = KM_COLS[kmBlanks(q).indexOf(i) % 4];
+    if (t.v !== null) return `<span class="km-b fill" style="--u:${col}">${t.v}</span>`;
+    return `<button class="km-b${km.act === i ? " act" : ""}${km.ng === i ? " ng" : ""}" data-kb="${i}">${km.ng === i ? "×" : ""}</button>`;
+  }).join("");
+  let h = `<div class="km"><div class="km-eq"><span class="km-side">${L}</span><span class="km-side"><span class="km-o eq">＝</span>${R}</span>` +
+    (km.qDone ? `<span class="km-ok">○</span>` : "") + `</div>`;
+  if (km.qDone) {
+    const r = KM_RULE[q.type];
+    h += `<div class="km-rule"><div class="km-f">${r.f}</div><div>${r.say}</div></div>`;
+  }
+  $("expr").innerHTML = h + `</div>`;
+
+  const bx = $("btns"); bx.innerHTML = "";
+  const mk = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; bx.appendChild(e); };
+  if (!km.qDone) mk("hintb", "ヒント", kmHint);
+  else mk("next big", km.qi === km.set.length - 1 ? "けっかを見る ▶" : "つぎの問題 ▶", kmNext);
+  kmRenderLog();
+}
+function kmRenderLog() {
+  const lg = $("log");
+  if (!km || km.finished || !km.lines.length) { lg.innerHTML = '<div class="empty">□を ぜんぶ うめると、ここに できた 式が 残ります。</div>'; return; }
+  lg.innerHTML = km.lines.map(s => `<div class="sk-ll">・${s}</div>`).join("");
+}
+const kmText = (q, side) => q[side].map(t => typeof t === "object" ? t.ans : t).join("");
+
+$("expr").addEventListener("click", e => {
+  if (mode !== "kimari" || !km || km.finished || km.qDone) return;
+  const b = e.target.closest("[data-kb]"); if (b) { km.act = Number(b.dataset.kb); km.ng = -1; km.ngSrc = -1; kimariRender(); return; }
+  const n = e.target.closest("[data-kn]"); if (n) kmTapNum(Number(n.dataset.kn));
+});
+// 左の 数を タップ → いま 光っている □に 入れる
+function kmTapNum(i) {
+  const q = km.q, bl = q.right[km.act];
+  if (!bl) return;
+  const v = q.left[i];
+  if (v === bl.ans) {
+    bl.v = v; bl.src = i; km.ng = -1; km.ngSrc = -1; km.glow = -1; km.hintLv = 0;
+    sfx("ok");
+    km.act = kmFirstEmpty(q);
+    if (km.act < 0) { kmSolved(); return; }
+    setMsg("", "");
+    kimariRender(); return;
+  }
+  km.miss++; km.qMiss++; km.ng = km.act; km.ngSrc = i;
+  sfx("ng");
+  setMsg("info", `× ${v}では ないみたい。` + kmWhy(q, km.act, false));
+  kimariRender();
+}
+// まちがえたとき・ヒント1：きまりを ことばで
+function kmWhy(q, at, full) {
+  const t = q.type, l = q.left.filter(x => typeof x === "number");
+  if (t === "k+" || t === "k*") return full ? `${l[0]}と ${l[1]}を 入れかえた 式に なるよ。` : "左の 式の 数を 入れかえた 式だよ。";
+  if (t === "m+" || t === "m*") return full ? `${l[0]}、${l[1]}、${l[2]}の 順番は そのままで、（ ）の 場所だけ かわるよ。` : "数の 順番は そのままだよ。";
+  if (!full) return `（ ）の 中の ${l[0]}にも ${l[1]}にも、同じ 数を かけるよ。`;
+  const sameSide = at < 3; // 右の 式の 前半（■×▲）か 後半（●×▲）か
+  return `（ ）の 中の ${l[0]}にも ${l[1]}にも、${l[2]}を かけるよ。□は ${sameSide ? `${l[0]}×${l[2]}` : `${l[1]}×${l[2]}`} の ほうだね。`;
+}
+function kmHint() {
+  if (km.qDone) return;
+  const q = km.q;
+  km.hints++; km.qHint = true; km.hintLv++;
+  if (km.hintLv === 1) setMsg("info", "💡 " + kmWhy(q, km.act, true));
+  else { km.glow = q.left.findIndex(x => x === q.right[km.act].ans); setMsg("info", "💡 光っている 数を タップしてみよう。"); }
+  kimariRender();
+}
+function kmSolved() {
+  const q = km.q, perf = km.qMiss === 0 && !km.qHint;
+  km.qDone = true; km.solved[km.qi] = true; km.perf[km.qi] = perf;
+  km.lines.push(`${kmText(q, "left")}＝${kmText(q, "right")}`);
+  setMsg("done", perf ? "○ せいかい！ ノーミス！" : "○ せいかい！");
+  kimariRender();
+  setTimeout(() => { launchAt($("expr"), 1.2); sfx(perf ? "perfect" : "solved"); }, 200);
+}
+function kmNext() {
+  if (km.qi < km.set.length - 1) { km.qi++; kimariStartQ(); window.scrollTo(0, 0); return; }
+  const m = km.miss + km.hints, st = m === 0 ? 3 : m <= 2 ? 2 : 1, prev = kimariRec[kimariLv] || 0;
+  km.res = { st, prev };
+  if (st > prev) { kimariRec[kimariLv] = st; kmSave(); }
+  km.finished = true; setMsg("", "");
+  if (st === 3) { confetti(80); sfx("fanfare"); } else sfx("solved");
+  kimariRender();
+}
+function kmRenderResult() {
+  const r = km.res, K = curK();
+  let h = `<div class="result"><div class="rstars">${starHTML(r.st)}</div>`;
+  h += `<div class="big">計算のきまり ${K.name} ${r.st === 3 ? "かんぺき！" : "おつかれさま"}</div>`;
+  h += `<div class="stats"><span>問題 ${km.set.length}問</span><span${km.miss === 0 ? ' class="z"' : ""}>まちがい ${km.miss}</span><span${km.hints === 0 ? ' class="z"' : ""}>ヒント ${km.hints}</span></div>`;
+  if (r.st > r.prev && r.prev > 0) h += `<p><span class="newrec">さいこう記録 こうしん！</span></p>`;
+  $("expr").innerHTML = h + "</div>";
+  const b = $("btns"); b.innerHTML = "";
+  const mk = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; b.appendChild(e); };
+  mk("again", "ちがう問題で もう一度", kimariNewSet);
+  const nx = KIMARI.find(x => x.id === kimariLv + 1);
+  if (nx) mk("next" + (r.st >= 2 ? " big" : ""), nx.name + " へ ▶", () => { kimariLv = nx.id; kimariNewSet(); });
+  mk("reset", "メニューへ", () => { stopPlay(); goMenu(); });
+}
+
 /* ================= 先生用：問題の追加 ================= */
 function validate(str) {
   const t = tokenize(str);
@@ -3347,7 +3601,7 @@ $("resetStars").onclick = () => {
   if (!confirm("この端末の ★の記録を すべて消しますか？")) return;
   stars = {}; best = {}; save("junjo_stars", stars); save("junjo_best", best);
   craftStars = {}; save("junjo_craft", craftStars);
-  shikiRec = {}; skSave(); renderLevels();
+  shikiRec = {}; skSave(); kimariRec = {}; kmSave(); renderLevels();
 };
 $("resetAdv").onclick = () => {
   if (!confirm("花火大会の進みぐあい（特製玉もふくむ）を はじめに もどしますか？")) return;
