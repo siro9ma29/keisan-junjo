@@ -2948,7 +2948,7 @@ function genShiki(type) {
   const P = pick(SK_PAIRS), a = skPrice(80, 200), n = rnd(2, 5);
   let b; do b = skPrice(50, 150); while (b === a);
   return { type, unit: "円", root: 1, decoys: [], l1: 7,
-    chunks: [`${a}円の`, P[0], "と", `${b}円の`, P[1], "を", "1組にして、", `${n}組`, "買います。", "代金は", "いくらですか。"],
+    chunks: [`${a}円の`, P[0], "と", `${b}円の`, P[1], "を", "組にして、", `${n}組`, "買います。", "代金は", "いくらですか。"],
     steps: [
       { op: "+", a: a, b: b, ka: 0, ko: 2, kb: 3, ul: [2, 2], core: [2], lo: 0, hi: 6, label: "1組の 代金", find: "1組に する ものを 合わせる ことば", opHint: AND_HINT },
       { op: "*", a: { s: 0 }, b: n, ko: 6, kb: 7, ul: [6, 7], core: [7], lo: 6, hi: 8, label: "ぜんぶの 代金", find: "何組 買うかが わかる ところ", opHint: TIMES(n, "組", "1組の 代金"),
