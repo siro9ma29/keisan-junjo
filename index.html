@@ -46,7 +46,8 @@
   .rules b { color: var(--navy); }
 
   /* ---- モード ---- */
-  .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .modes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  @media (max-width: 560px) { .modes { grid-template-columns: repeat(2, 1fr); } }
   .mode {
     position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px;
     border: 3px solid var(--c); background: #fff; color: var(--c); border-radius: 18px; padding: 8px 4px 9px; cursor: pointer;
@@ -556,6 +557,37 @@
   @keyframes heartOut { 0%{transform:scale(1.6);color:#fff} 100%{transform:scale(1)} }
   @keyframes flashB { 0%{background:#3a3550} 100%{} }
   @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+  /* ---- 式をつくろう ---- */
+  #expr .sk { width: 100%; font-size: 18px; font-weight: normal; }
+  #expr .sk span { padding: 0; border-radius: 0; }
+  .sk-box { background: #fffdf6; border: 2px solid var(--line); border-radius: 16px; padding: 10px 12px; }
+  .sk-l1 { white-space: nowrap; overflow: hidden; font-size: 30px; line-height: 1.7; padding-bottom: 4px; }
+  .sk-l2 { font-size: 20px; line-height: 1.8; color: #555; margin-top: 4px; border-top: 1px dashed var(--line); padding-top: 4px; }
+  #expr .sk-ch { font: inherit; color: var(--ink); background: none; border: none; padding: 0 1px; margin: 0; border-radius: 6px; line-height: inherit; white-space: nowrap; }
+  #expr .sk-l2 .sk-ch { color: #555; }
+  #expr button.sk-ch { cursor: pointer; border-bottom: 2px dotted #d8cfbd; }
+  #expr .sk-ch.ul { border-bottom: 5px solid #e8590c; background: #fff3d6; }
+  #expr .sk-ch.sel { border-bottom: 5px dashed #e8590c; background: #fff3d6; }
+  #expr .sk-ch.dn { border-bottom: 4px solid #51b26d; }
+  .sk-tree { position: relative; height: 0; margin-top: 6px; font-weight: bold; font-variant-numeric: tabular-nums; }
+  .sk-node { position: absolute; top: 0; white-space: nowrap; background: #e6f7ec; border: 2px solid #8fd19e; border-radius: 12px; padding: 0 10px; line-height: 1.6; }
+  .sk-node.anim { animation: dropIn .35s; }
+  .sk-node.now { background: #fff3d6; border-color: #f2a900; }
+  .sk-node.root { background: #ffe9f1; border-color: #f06595; }
+  #expr .sk-node .sk-sub { background: rgba(255,255,255,.7); border-radius: 6px; padding: 0 2px; }
+  .sk-q { display: inline-block; min-width: 1.1em; text-align: center; margin: 0 4px; color: #e8590c; animation: glow 1s infinite; border-radius: 6px; }
+  .sk-ops { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 14px 0 4px; }
+  .sk-op { font: inherit; font-size: 40px; font-weight: bold; width: 76px; height: 76px; color: var(--navy); background: #eef5ff; border: 3px solid #bcd3ea; border-radius: 18px; box-shadow: 0 5px 0 #bcd3ea; cursor: pointer; }
+  .sk-op:active { transform: translateY(3px); box-shadow: 0 2px 0 #bcd3ea; }
+  .sk-op.ng { background: #ffd6d6; border-color: #e03131; color: #b03030; animation: shake .4s; }
+  .sk-op.hint { animation: glow 1s infinite; border-color: #f08c00; }
+  .sk-fin { margin: 14px auto 0; width: fit-content; font-size: clamp(26px, 6vw, 40px); font-weight: bold; font-variant-numeric: tabular-nums; }
+  .sk-row { display: flex; gap: 12px; align-items: baseline; }
+  .sk-row .sk-k { width: 2.6em; font-size: .55em; color: var(--sub); text-align: right; }
+  .sk-row.ans .sk-eq { color: #d6336c; }
+  .sk-note { font-size: 15px; margin: 8px 0 0; }
+  @media (max-width: 420px) { .sk-ops { gap: 8px; } .sk-op { width: 64px; height: 64px; font-size: 34px; } }
+  #log .sk-ll { font-size: .8em; line-height: 1.6; margin: 2px 0; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; } }
 </style>
 </head>
@@ -882,7 +914,7 @@ const starHTML = (n, max = 3) => [...Array(max)].map((_, i) => `<span class="${i
 
 /* ================= 画面 ================= */
 const $ = id => document.getElementById(id);
-const MODE_COLOR = { num: "#3d8bfd", calc: "#f08c00", adv: "#8a5cf0", craft: "#b5179e" };
+const MODE_COLOR = { num: "#3d8bfd", calc: "#f08c00", adv: "#8a5cf0", craft: "#b5179e", shiki: "#2a9d55" };
 let hintO = 0, hintC = 0, qHint = false, combo = 0, perf = [], resInfo = null;
 
 function renderTop() {
@@ -898,6 +930,7 @@ function renderLevels() {
   const MODES = [
     { m: "num",  ic: "🔣", t: "記号モード", s: "順じょを えらぶ", c: `${cnt("num")}/4` },
     { m: "calc", ic: "✏️", t: "計算モード", s: "自分で 計算する", c: `${cnt("calc")}/4` },
+    { m: "shiki", ic: "📝", t: "式をつくろう", s: "文章題から 式", c: `${SHIKI.filter(S => skRec(S.id).st >= 2).length}/3` },
     { m: "adv",  ic: open ? "🎆" : "🏮", t: "花火大会", s: open ? "会場を めぐる" : `あと ${rest}レベル`, c: "" }
   ];
   $("modes").innerHTML = MODES.map(x => `<button class="mode${mode === x.m || (x.m === "adv" && mode === "craft") ? " on" : ""}${x.m === "adv" && !open ? " locked" : ""}" style="--c:${MODE_COLOR[x.m]}" data-m="${x.m}">` +
@@ -905,6 +938,7 @@ function renderLevels() {
   setView();
   if (mode === "adv") { renderAdv(); return; }
   if (mode === "craft") { renderCraftLevels(); return; }
+  if (mode === "shiki") { renderShikiLevels(); return; }
   $("levels").classList.remove("craft");
 
   $("levels").innerHTML = LEVELS.filter(L => L.mode === mode).map(L => {
@@ -930,6 +964,9 @@ $("modes").addEventListener("click", e => {
 $("lvArea").addEventListener("click", e => {
   const c = e.target.closest("[data-cl]");
   if (c) { craftLv = Number(c.dataset.cl); craftNewSet(); return; }
+  const sl = e.target.closest("[data-sl]");
+  if (sl) { shikiLv = Number(sl.dataset.sl); shikiNewSet(); return; }
+  if (e.target.closest("[data-skself]")) { const R = skRec(shikiLv); R.self = !R.self; R.streak = 0; skSave(); renderLevels(); return; }
   const b = e.target.closest("[data-lv]"); if (!b) return;
   lv = Number(b.dataset.lv);
   if (lv === 0 && !custom.length) { renderLevels(); return; } // 先生の問題がまだないときは 説明だけ
@@ -950,7 +987,7 @@ function setMode(m) {
 }
 // 問題画面の とちゅうの処理や演出を止める
 function stopPlay() {
-  playSeq++; craftSeq++;
+  playSeq++; craftSeq++; shikiSeq++;
   cx = null; calcSeq++; calcLock = false; busy = false; renderCalc();
 }
 function goMenu() {
@@ -2316,7 +2353,7 @@ function backToMap() { leaveAdv(); stopPlay(); mode = "adv"; goMenu(); }
 function renderHud() {
   const hud = $("hud");
   if (!adv) {
-    if (mode === "craft") return;
+    if (mode === "craft" || mode === "shiki") return;
     const L = lv > 0 ? curL() : null, c = MODE_COLOR[mode] || MODE_COLOR.num;
     hud.innerHTML = `<div class="shud" style="--c:${c}"><button class="mback" data-hud="menu">◀ メニュー</button>
       <div class="st"><b>${L ? L.name : "先生の問題"}</b><span>${mode === "calc" ? "✏️ 計算モード" : "🔣 記号モード"}${L ? "　" + L.short : ""}</span></div></div>`;
@@ -2351,6 +2388,10 @@ $("hud").addEventListener("click", e => {
     stopPlay(); goMenu(); return;
   }
   if (b.dataset.hud === "shopback") { stopPlay(); goMenu(); return; }
+  if (b.dataset.hud === "shikiback") {
+    if (sk && !sk.finished && sk.solved.some(Boolean) && !confirm("メニューに もどりますか？（とちゅうの問題は やりなおしになるよ）")) return;
+    stopPlay(); goMenu(); return;
+  }
   if (b.dataset.hud === "tama") {
     if (!adv || advData.tama <= 0 || adv.hearts >= HEARTS) return;
     advData.tama--; saveAdv();
@@ -2837,6 +2878,406 @@ function craftRenderResult() {
   mk("reset", "工房メニューへ", () => { stopPlay(); goMenu(); });
 }
 
+/* ================= 式をつくろう（文章題から式を立てる） ================= */
+// 文の 下線の ところを 見て 何算かを えらび、1つの 式に まとめる。数は 自動で 入る
+const SHIKI_PER = 5;     // 1レベルの問題数
+const SHIKI_SELF_AT = 5; // ノーミスで この数だけ 続けてとけたら、自分で 線を ひく問題に 移る
+const SHIKI = [
+  { id: 1, name: "レベル1", short: "× と ＋", tags: ["「〜を いくつ」は ×", "「と」で 合わせる", "（ ）なし"], types: ["t1", "t2"] },
+  { id: 2, name: "レベル2", short: "（ ）を つかう", tags: ["「と」で 合わせて 1つに", "おつり・〜組分", "（ ）あり"], types: ["t3", "t4"] },
+  { id: 3, name: "レベル3", short: "まぜて", tags: ["レベル1・2が まざる", "（ ）が いるかを 見分ける"], types: ["t1", "t2", "t3", "t4"] }
+];
+let shikiLv = 1, sk = null, shikiSeq = 0;
+let shikiRec = load("junjo_shiki", {}); // { [レベル]: { st: ★, streak: ノーミスの連続, self: 自分で 線を ひく } }
+const skRec = id => shikiRec[id] || (shikiRec[id] = { st: 0, streak: 0, self: false });
+const skSave = () => save("junjo_shiki", shikiRec);
+const curS = () => SHIKI.find(S => S.id === shikiLv);
+
+/* ---- 問題をつくる ---- */
+// [名前, 数えることば, 1つの ねだんの 下限, 上限]
+const SK_ITEMS = [["えんぴつ", "本", 30, 90], ["ボールペン", "本", 60, 150], ["ノート", "さつ", 80, 200], ["けしゴム", "こ", 40, 100],
+  ["画用紙", "まい", 10, 40], ["シール", "まい", 20, 80], ["ガム", "こ", 30, 90], ["ジュース", "本", 80, 150]];
+const SK_PAIRS = [["パン", "牛にゅう"], ["おにぎり", "お茶"], ["ノート", "えんぴつ"], ["サンドイッチ", "ジュース"], ["ケーキ", "紅茶"]];
+const skPrice = (lo, hi) => rnd(lo / 10, hi / 10) * 10;
+function skTwo() { const a = pick(SK_ITEMS); let b; do b = pick(SK_ITEMS); while (b === a); return [a, b]; }
+const AND_HINT = "「と」は、2つを 合わせる ことば。合わせるのは 何算かな？";
+const TIMES = (n, u, what) => `${what}が ${n}${u}分。同じ 数の いくつ分は 何算かな？`;
+
+// steps：アプリが 線を ひく順。a・b は 数か {s:番号}（前の ステップの 答え）
+// ul＝アプリが ひく線／core＝線に かならず 入る ところ／lo〜hi＝線を ひいてよい はんい
+function genShiki(type) {
+  if (type === "t1") { // a×m＋b×n
+    const [X, Y] = skTwo(), a = skPrice(X[2], X[3]), b = skPrice(Y[2], Y[3]), m = rnd(2, 6), n = rnd(2, 6);
+    return { type, unit: "円", root: 2, decoys: [], l1: 6,
+      chunks: [`${a}円の`, X[0], `${m}${X[1]}`, "と", `${b}円の`, Y[0], `${n}${Y[1]}を`, "買いました。", "代金は", "いくらですか。"],
+      steps: [
+        { op: "*", a: a, b: m, ul: [0, 2], core: [0, 2], lo: 0, hi: 2, label: `${X[0]}の 代金`, find: `${X[0]}の 代金が わかる ところ（数が 2つ）`, opHint: TIMES(m, X[1], `1${X[1]} ${a}円の ${X[0]}`) },
+        { op: "*", a: b, b: n, ul: [4, 6], core: [4, 6], lo: 4, hi: 6, label: `${Y[0]}の 代金`, find: `${Y[0]}の 代金が わかる ところ（数が 2つ）`, opHint: TIMES(n, Y[1], `1${Y[1]} ${b}円の ${Y[0]}`) },
+        { op: "+", a: { s: 0 }, b: { s: 1 }, ul: [3, 3], core: [3], lo: 0, hi: 6, label: "ぜんぶの 代金", find: "2つの 代金を 合わせる ことば", opHint: AND_HINT,
+          early: "「と」は 2つを 合わせる ことば。合わせる ものを、先に 1つずつ 式に しよう。" }
+      ] };
+  }
+  if (type === "t2") { // a＋b×n
+    const [X, Y] = skTwo(), a = skPrice(Math.max(X[2], 60), Math.max(X[3], 150)), b = skPrice(Y[2], Y[3]), n = rnd(2, 6);
+    return { type, unit: "円", root: 1, l1: 6,
+      chunks: [`${a}円の`, X[0], `1${X[1]}`, "と", `${b}円の`, Y[0], `${n}${Y[1]}を`, "買いました。", "代金は", "いくらですか。"],
+      steps: [
+        { op: "*", a: b, b: n, ul: [4, 6], core: [4, 6], lo: 4, hi: 6, label: `${Y[0]}の 代金`, find: `${Y[0]}の 代金が わかる ところ（数が 2つ）`, opHint: TIMES(n, Y[1], `1${Y[1]} ${b}円の ${Y[0]}`) },
+        { op: "+", a: a, b: { s: 0 }, ul: [3, 3], core: [3], lo: 0, hi: 6, label: "ぜんぶの 代金", find: "2つの 代金を 合わせる ことば", opHint: AND_HINT,
+          early: `「と」で 合わせる 前に、${Y[0]}の 代金を 先に 式に しよう。` }
+      ],
+      decoys: [{ core: [0, 2], lo: 0, hi: 2, msg: `${X[0]}は 1${X[1]}だけ だから、${a}円の まま。かけ算に しなくて いいよ。ほかの ところを さがそう。` }] };
+  }
+  if (type === "t3") { // c−(a＋b)
+    const [X, Y] = skTwo(), c = pick([500, 1000, 1000]);
+    let a, b; do { a = skPrice(50, c === 500 ? 250 : 500); b = skPrice(50, c === 500 ? 250 : 400); } while (a === b || c - a - b < 50);
+    return { type, unit: "円", root: 1, decoys: [], l1: 7,
+      chunks: [`${c}円`, "出して、", `${a}円の`, X[0], "と", `${b}円の`, Y[0], "を", "買いました。", "おつりは", "いくらですか。"],
+      steps: [
+        { op: "+", a: a, b: b, ul: [4, 4], core: [4], lo: 2, hi: 7, label: "買った 代金", find: "買った ものを 合わせる ことば", opHint: AND_HINT },
+        { op: "-", a: c, b: { s: 0 }, ul: [0, 1], core: [0], lo: 0, hi: 1, alt: [{ core: [9], lo: 8, hi: 9 }], label: "おつり", find: "出した お金が わかる ところ（「おつり」を もとめるよ）",
+          opHint: `出した ${c}円から、買った 代金を はらうと、のこりは？`, early: "おつりを 出す 前に、買った ものの 代金を 先に 合わせよう。" }
+      ] };
+  }
+  // t4：(a＋b)×n
+  const P = pick(SK_PAIRS), a = skPrice(80, 200), n = rnd(2, 5);
+  let b; do b = skPrice(50, 150); while (b === a);
+  return { type, unit: "円", root: 1, decoys: [], l1: 7,
+    chunks: [`${a}円の`, P[0], "と", `${b}円の`, P[1], "を", "1組にして、", `${n}組`, "買います。", "代金は", "いくらですか。"],
+    steps: [
+      { op: "+", a: a, b: b, ul: [2, 2], core: [2], lo: 0, hi: 6, label: "1組の 代金", find: "1組に する ものを 合わせる ことば", opHint: AND_HINT },
+      { op: "*", a: { s: 0 }, b: n, ul: [7, 7], core: [7], lo: 6, hi: 8, label: "ぜんぶの 代金", find: "何組 買うかが わかる ところ", opHint: TIMES(n, "組", "1組の 代金"),
+        early: "まず、1組の 代金を 式に しよう。" }
+    ] };
+}
+function skBuild(S) {
+  const out = [], seen = new Set();
+  for (let g = 0; out.length < SHIKI_PER && g < 200; g++) {
+    const type = S.types[out.length % S.types.length], q = genShiki(type), key = q.chunks.join("");
+    if (!seen.has(key)) { seen.add(key); out.push(q); }
+  }
+  for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [out[i], out[j]] = [out[j], out[i]]; }
+  return out;
+}
+
+/* ---- 式の文字・計算 ---- */
+const skPrec = op => (op === "*" || op === "/") ? 2 : 1;
+// P＝true なら、いる（ ）をつける
+function skExpr(q, i, P) {
+  const s = q.steps[i];
+  const part = (x, right) => {
+    if (typeof x === "number") return String(x);
+    const c = q.steps[x.s], str = skExpr(q, x.s, P);
+    const need = P && (skPrec(c.op) < skPrec(s.op) || (right && skPrec(c.op) === skPrec(s.op) && (s.op === "-" || s.op === "/")));
+    return need ? `(${str})` : str;
+  };
+  return part(s.a, false) + s.op + part(s.b, true);
+}
+const skDisp = str => toStr(tokenize(str));
+// 計算の順じょどおりに 1ステップずつ。[{line, a, op, b}]
+function skTrace(str) {
+  let t = tokenize(str); const out = [];
+  while (t.length > 1) {
+    const k = validOps(t)[0], st = applyStep(t, k);
+    out.push({ a: st.a, op: t[k].v, b: st.b, r: st.r });
+    t = st.tokens; out[out.length - 1].line = toStr(t);
+  }
+  return out;
+}
+// 式の かたまり（前の ステップの 答え）は わくで かこむ
+function skHTML(q, i) {
+  const s = q.steps[i];
+  const part = x => typeof x === "number" ? `<span>${x}</span>` : `<span class="sk-blk">${skHTML(q, x.s)}</span>`;
+  return part(s.a) + `<b class="sk-o">${SYM[s.op]}</b>` + part(s.b);
+}
+// 前の ステップの 答えは「ことば」で 書く（（ ）の答えを 先に 見せない）
+function skWords(q, i) {
+  const s = q.steps[i], w = x => typeof x === "number" ? String(x) : `「${q.steps[x.s].label}」`;
+  return w(s.a) + SYM[s.op] + w(s.b);
+}
+const skDeps = s => [s.a, s.b].filter(x => typeof x !== "number").map(x => x.s);
+const skAvail = i => !sk.done[i] && skDeps(sk.q.steps[i]).every(d => sk.done[d]);
+const skUsed = i => sk.q.steps.some((s, j) => sk.done[j] && skDeps(s).includes(i));
+
+// 木の深さ（数だけの ステップ＝1）。深い ほど 下の 段に 式が できる
+function skDepth(q, i) { return 1 + Math.max(0, ...skDeps(q.steps[i]).map(d => skDepth(q, d))); }
+// 線の 下に 出す 式。いま 考えている 記号は □
+function skNodeHTML(q, i, now) {
+  const s = q.steps[i];
+  const part = (x, right) => {
+    if (typeof x === "number") return String(x);
+    const c = q.steps[x.s], str = skDisp(skExpr(q, x.s, true));
+    const need = skPrec(c.op) < skPrec(s.op) || (right && skPrec(c.op) === skPrec(s.op) && (s.op === "-" || s.op === "/"));
+    return `<span class="sk-sub">${need ? `（${str}）` : str}</span>`;
+  };
+  return part(s.a, false) + (now ? `<b class="sk-q">□</b>` : `<b class="sk-o">${SYM[s.op]}</b>`) + part(s.b, true);
+}
+// 1行めが 横に おさまる 大きさに して、式を 線の まん中の 下に おく
+function skLayout() {
+  const box = document.querySelector("#expr .sk-box"); if (!box) return;
+  const l1 = box.querySelector(".sk-l1"), tree = box.querySelector(".sk-tree");
+  let fs = 30; l1.style.fontSize = fs + "px";
+  while (l1.scrollWidth > l1.clientWidth + 1 && fs > 12) { fs--; l1.style.fontSize = fs + "px"; }
+  tree.style.fontSize = Math.max(17, Math.round(fs * 1.05)) + "px";
+  box.querySelector(".sk-l2").style.fontSize = Math.min(20, Math.max(15, fs)) + "px";
+  const W = tree.clientWidth, base = tree.getBoundingClientRect().left;
+  let rows = 0;
+  tree.querySelectorAll(".sk-node").forEach(n => {
+    const [a, b] = n.dataset.ul.split(",").map(Number);
+    const ea = box.querySelector(`.sk-l1 [data-k="${a}"]`) || l1.lastElementChild, eb = box.querySelector(`.sk-l1 [data-k="${b}"]`) || l1.lastElementChild;
+    const x0 = ea.getBoundingClientRect().left - base, x1 = eb.getBoundingClientRect().right - base;
+    const w = n.offsetWidth, r = Number(n.dataset.row);
+    n.style.left = Math.max(0, Math.min(W - w, (x0 + x1) / 2 - w / 2)) + "px";
+    n.style.top = (r * 2.2) + "em";
+    rows = Math.max(rows, r + 1);
+  });
+  tree.style.height = rows ? (rows * 2.2) + "em" : "0";
+}
+window.addEventListener("resize", () => { if (mode === "shiki" && sk && !sk.finished && view === "play") skLayout(); });
+
+/* ---- メニュー ---- */
+function renderShikiLevels() {
+  $("levels").classList.add("craft");
+  $("levels").innerHTML = SHIKI.map(S => {
+    const st = skRec(S.id).st;
+    return `<button class="lvc${shikiLv === S.id ? " cur" : ""}${st === 3 ? " clr" : ""}" style="--mc:${MODE_COLOR.shiki}" data-sl="${S.id}">` +
+      `<span class="ln">${S.name}</span><span class="lt">${S.short}</span><span class="ls">${starHTML(st)}</span></button>`;
+  }).join("");
+  const R = skRec(shikiLv);
+  $("tbtnBox").innerHTML = `<button class="tbtn" data-skself="1">先生用：線を ${R.self ? "自分で ひく" : "アプリが ひく"}（タップで きりかえ）</button>`;
+  $("lvdesc").innerHTML = curS().tags.map(s => `<span class="tag">${s}</span>`).join("") +
+    `<p class="sk-note">文の 線の ところを 見て、何算かを えらぼう。1つの 式に まとめたら、（ ）が いるかも 考えるよ。<br>` +
+    (R.self ? "✏️ いまは <b>自分で 線を ひく</b> 問題だよ。" : `✏️ ノーミスで ${SHIKI_SELF_AT}問 続けて とけたら、<b>自分で 線を ひく</b> 問題に なるよ。（いま ${R.streak}問）`) + `</p>` +
+    `<div class="crit"><b>★の めやす</b>（${SHIKI_PER}問）<ul>` +
+    ["ぜんぶ とく", "まちがい・ヒント 合わせて 2回まで", "ノーミス（ヒントなし）"]
+      .map((t, i) => `<li class="${i < R.st ? "got" : ""}"><span class="s">${"★".repeat(i + 1)}</span>${t}</li>`).join("") +
+    `</ul></div>`;
+}
+
+/* ---- 問題画面 ---- */
+function shikiNewSet() {
+  cx = null; calcSeq++; calcLock = false; busy = false; done = false; finished = false; renderCalc();
+  shikiSeq++;
+  const set = skBuild(curS());
+  sk = { set, qi: 0, miss: 0, hints: 0, solved: set.map(() => false), perf: set.map(() => false), finished: false, res: null };
+  view = "play";
+  renderLevels();
+  shikiStartQ();
+  window.scrollTo(0, 0);
+}
+function shikiStartQ() {
+  shikiSeq++;
+  const q = sk.set[sk.qi];
+  Object.assign(sk, { q, done: q.steps.map(() => false), cur: null, phase: "", sel: null, hintLv: 0, qMiss: 0, qHint: false, busy: false, ng: null, glow: null, lines: [], qDone: false, note: "", shown: new Set() });
+  sk.self = skRec(shikiLv).self;
+  setMsg("", "");
+  skNextStep();
+}
+function skNextStep() {
+  sk.hintLv = 0; sk.ng = null; sk.glow = null; sk.sel = null;
+  if (sk.done.every(Boolean)) { skFinishQ(); return; }
+  else if (sk.self) { sk.phase = "sel"; sk.cur = null; }
+  else { sk.phase = "op"; sk.cur = sk.q.steps.findIndex((_, i) => skAvail(i)); }
+  shikiRender();
+}
+
+function shikiRender() {
+  const R = skRec(shikiLv);
+  $("hud").innerHTML = `<div class="shud" style="--c:${MODE_COLOR.shiki}"><button class="mback" data-hud="shikiback">◀ メニュー</button>
+    <div class="st"><b>📝 式をつくろう ${curS().name}</b><span>${curS().short}　✏️ 線：${sk.self ? "自分で ひく" : `アプリが ひく（自分で ひくまで あと ${SHIKI_SELF_AT - R.streak}問）`}</span></div></div>`;
+  $("combo").textContent = "";
+  $("prog").innerHTML = sk.set.map((_, i) => `<i class="${sk.solved[i] ? (sk.perf[i] ? "perf" : "ok") : ""}${i === sk.qi && !sk.finished ? " now" : ""}"></i>`).join("");
+  if (sk.finished) { $("qno").textContent = ""; $("guide").style.display = "none"; skRenderResult(); skRenderLog(); return; }
+  const q = sk.q;
+  $("qno").textContent = `${sk.qi + 1} 問目 ／ ${sk.set.length} 問`;
+  $("guide").style.display = "";
+  $("guide").innerHTML = {
+    sel: "式に する ところに <b>線を ひこう</b>。はじめと おわりの ことばを タップしてね。",
+    op: "<b>線の ところ</b>は、何算かな？",
+    fin: "式が できた！ 計算の 順じょで 答えを 出そう。"
+  }[sk.phase] || "";
+
+  // 文：式に つかう ところ（1行め）は 折り返さない。すぐ下に、線の ところを あらわす 式が できていく
+  const S = sk.phase === "op" ? q.steps[sk.cur].ul : null;
+  const doneUL = new Set();
+  q.steps.forEach((s, i) => { if (sk.done[i]) for (let k = s.ul[0]; k <= s.ul[1]; k++) doneUL.add(k); });
+  const ch = k => {
+    const cls = ["sk-ch"];
+    if (S && k >= S[0] && k <= S[1]) cls.push("ul");
+    else if (sk.sel && k >= sk.sel[0] && k <= sk.sel[1]) cls.push("sel");
+    else if (doneUL.has(k)) cls.push("dn");
+    return sk.phase === "sel" ? `<button class="${cls.join(" ")}" data-ck="${k}" data-k="${k}">${q.chunks[k]}</button>` : `<span class="${cls.join(" ")}" data-k="${k}">${q.chunks[k]}</span>`;
+  };
+  const idx = q.chunks.map((_, k) => k);
+  let h = `<div class="sk"><div class="sk-box"><div class="sk-l1">` + idx.slice(0, q.l1 + 1).map(ch).join("") + `</div><div class="sk-tree">`;
+  q.steps.forEach((s, i) => {
+    const now = sk.phase === "op" && i === sk.cur;
+    if (!sk.done[i] && !now) return;
+    const key = `${i}${now ? "n" : "d"}`, anim = !sk.shown.has(key); sk.shown.add(key);
+    h += `<div class="sk-node${anim ? " anim" : ""}${now ? " now" : ""}${i === q.root && sk.done[i] ? " root" : ""}" data-ul="${s.ul[0]},${s.ul[1]}" data-row="${skDepth(q, i) - 1}">${skNodeHTML(q, i, now)}</div>`;
+  });
+  h += `</div><div class="sk-l2">` + idx.slice(q.l1 + 1).map(ch).join("") + `</div></div>`;
+
+  if (sk.phase === "op") {
+    h += `<div class="sk-ops">` + ["+", "-", "*", "/"].map(o =>
+      `<button class="sk-op${sk.ng === o ? " ng" : ""}${sk.glow === o ? " hint" : ""}" data-op="${o}"${sk.busy ? " disabled" : ""}>${SYM[o]}</button>`).join("") + `</div>`;
+  }
+  if (sk.phase === "fin") {
+    const ex = skExpr(q, q.root, true), tr = skTrace(ex);
+    h += `<div class="sk-fin"><div class="sk-row"><span class="sk-k">式</span><span class="sk-eq">${skDisp(ex)}</span></div>` +
+      tr.map(x => `<div class="sk-row"><span class="sk-k"></span><span class="sk-eq">＝${x.line}</span></div>`).join("") +
+      `<div class="sk-row ans"><span class="sk-k">答え</span><span class="sk-eq">${tr[tr.length - 1].r}${q.unit}</span></div></div>`;
+  }
+  $("expr").innerHTML = h + `</div>`;
+  skLayout();
+
+  const bx = $("btns"); bx.innerHTML = "";
+  const mk = (cls, txt, fn, dis) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; e.disabled = !!dis; bx.appendChild(e); return e; };
+  if (sk.phase === "sel") {
+    mk("again", "この線で けってい", skJudgeSel, !sk.sel || sk.busy);
+    if (sk.sel) mk("reset", "線を けす", () => { sk.sel = null; setMsg("", ""); shikiRender(); });
+  }
+  if (sk.phase === "sel" || sk.phase === "op") mk("hintb", "ヒント", skHint, sk.busy);
+  if (sk.phase === "fin") mk("next big", sk.qi === sk.set.length - 1 ? "けっかを見る ▶" : "つぎの問題 ▶", skNext);
+  skRenderLog();
+}
+function skRenderLog() {
+  const lg = $("log");
+  if (!sk || sk.finished || !sk.lines.length) { lg.innerHTML = '<div class="empty">式を つくると、ここに 考えた 流れが 残ります。</div>'; return; }
+  lg.innerHTML = sk.lines.map(s => `<div class="sk-ll">・${s}</div>`).join("");
+}
+
+$("expr").addEventListener("click", e => {
+  if (mode !== "shiki" || !sk || sk.finished) return;
+  const c = e.target.closest("[data-ck]"); if (c) { skTapChunk(Number(c.dataset.ck)); return; }
+  const o = e.target.closest("[data-op]"); if (o) { skTapOp(o.dataset.op, o); return; }
+});
+
+// 自分で 線を ひく：1回目＝はじめ、2回目＝おわり。もう一度 タップすると ひきなおし
+function skTapChunk(k) {
+  if (sk.phase !== "sel" || sk.busy) return;
+  if (sk.sel && sk.sel[0] === sk.sel[1]) {
+    if (sk.sel[0] === k) { sk.sel = null; setMsg("", ""); }
+    else { sk.sel = [Math.min(sk.sel[0], k), Math.max(sk.sel[0], k)]; setMsg("info", "線が ひけたら「この線で けってい」を おそう。"); }
+  } else { sk.sel = [k, k]; setMsg("info", "線の おわりの ことばを タップしよう。（1つだけなら そのまま けってい）"); }
+  shikiRender();
+}
+function skJudgeSel() {
+  if (!sk.sel || sk.busy) return;
+  const q = sk.q, [x, y] = sk.sel, inSel = k => k >= x && k <= y;
+  const fit1 = r => r.core.every(inSel) && x >= r.lo && y <= r.hi;
+  const fits = s => fit1(s) || (s.alt || []).some(fit1);
+  const cand = q.steps.map((_, i) => i).filter(i => !sk.done[i] && fits(q.steps[i]));
+  const ok = cand.find(skAvail);
+  const txt = q.chunks.slice(x, y + 1).join("");
+  if (ok !== undefined) {
+    sk.cur = ok; sk.phase = "op"; sk.hintLv = 0; sk.ng = null; sk.glow = null;
+    if (y <= q.l1 && fit1(q.steps[ok])) q.steps[ok].ul = [x, y]; // ひいた線を そのまま のこす（式は その下に できる）
+    sfx("ok"); setMsg("ok", "○ いい ところに 線が ひけたね！ つぎは 何算かな？");
+    sk.lines.push(`線「${txt}」`);
+    shikiRender(); return;
+  }
+  sk.sel = null;
+  if (cand.length) { setMsg("info", q.steps[cand[0]].early || "先に ほかの ところを 式に しよう。"); shikiRender(); return; }
+  const dc = (q.decoys || []).find(fits);
+  if (dc) { setMsg("info", dc.msg); shikiRender(); return; }
+  if (q.steps.some((s, i) => sk.done[i] && fits(s))) { setMsg("info", "そこは もう 式に したよ。ほかの ところを さがそう。"); shikiRender(); return; }
+  skMiss();
+  const many = q.steps.filter((s, i) => !sk.done[i] && s.core.every(inSel)).length >= 2;
+  const part = q.steps.some((s, i) => skAvail(i) && s.core.some(inSel));
+  setMsg("bad", many ? "× 1本の 線には、1つの 計算だけ。線を みじかく してみよう。"
+    : part ? "× おしい！ 式に するには、ことばや 数が たりないよ。線を のばしてみよう。"
+    : "× 数や、計算の しかたが わかる ことばに 線を ひいてみよう。");
+  sfx("ng"); shikiRender();
+}
+function skMiss() { sk.miss++; sk.qMiss++; }
+
+function skTapOp(o, el) {
+  if (sk.phase !== "op" || sk.busy) return;
+  const q = sk.q, s = q.steps[sk.cur];
+  if (o !== s.op) {
+    skMiss(); sk.ng = o; sfx("ng");
+    setMsg("bad", `× もう一度 考えよう。${s.opHint}`);
+    shikiRender(); return;
+  }
+  sk.done[sk.cur] = true; sk.busy = true; sk.ng = null; sk.glow = null;
+  const f = skWords(q, sk.cur);
+  sk.lines.push(`${q.chunks.slice(s.ul[0], s.ul[1] + 1).join("")} → ${SYM[s.op]}　${s.label}は ${f}`);
+  sfx("ok"); fireAt(el, 1);
+  setMsg("ok", `○ そうだね！ ${s.label}は ${f}`);
+  const seq = shikiSeq;
+  shikiRender();
+  setTimeout(() => { if (seq !== shikiSeq) return; sk.busy = false; skNextStep(); }, 900);
+}
+
+// さいごの ステップが できたら、1つの 式に なる（（ ）は 自動で つく）
+function skFinishQ() {
+  const q = sk.q, flat = skExpr(q, q.root, false), full = skExpr(q, q.root, true);
+  const inner = q.steps.find((s, i) => i !== q.root && skDeps(q.steps[q.root]).includes(i) && skPrec(s.op) < skPrec(q.steps[q.root].op) || (i !== q.root && q.steps[q.root].op === "-" && skDeps(q.steps[q.root]).includes(i)));
+  setMsg("done", flat !== full
+    ? `式が できた！（ ）で、${inner ? inner.label : "先に 計算する ところ"}を 先に 計算するよ。`
+    : "式が できた！ ×は ＋より 先に 計算するから、（ ）は いらないね。");
+  sk.lines.push(`1つの 式 → ${skDisp(full)}`);
+  sk.phase = "fin"; sk.cur = null; sk.qDone = true;
+  skSolved();
+  shikiRender();
+}
+function skSolved() {
+  const R = skRec(shikiLv), perf = sk.qMiss === 0 && !sk.qHint;
+  sk.solved[sk.qi] = true; sk.perf[sk.qi] = perf;
+  if (!R.self) {
+    R.streak = perf ? R.streak + 1 : 0;
+    if (R.streak >= SHIKI_SELF_AT) { R.self = true; sk.note = "self"; }
+  }
+  skSave();
+  setTimeout(() => { launchAt($("expr"), 1.2); sfx(perf ? "perfect" : "solved"); }, 200);
+  if (sk.note === "self") {
+    setTimeout(() => openOv(`<div class="ovart">✏️</div><h2>${SHIKI_SELF_AT}問 れんぞく ノーミス！</h2><p>つぎの 問題からは、<b>自分で 線を ひいて</b> 式を つくろう。</p><div class="btns"><button class="btn again" data-ov="ok">やってみる！</button></div>`, {}), 900);
+    sfx("fanfare");
+  }
+}
+function skHint() {
+  if (sk.busy) return;
+  const q = sk.q;
+  sk.hints++; sk.qHint = true; sk.hintLv++;
+  if (sk.phase === "sel") {
+    const i = q.steps.findIndex((_, j) => skAvail(j));
+    if (sk.hintLv === 1) { setMsg("info", `💡 さがすのは「${q.steps[i].find}」だよ。`); shikiRender(); return; }
+    sk.cur = i; sk.phase = "op"; sk.hintLv = 0;
+    setMsg("info", "💡 ここに 線が ひけるよ。何算かな？"); shikiRender(); return;
+  }
+  if (sk.phase === "op") {
+    const s = q.steps[sk.cur];
+    if (sk.hintLv === 1) setMsg("info", `💡 ${s.opHint}`);
+    else { sk.glow = s.op; setMsg("info", "💡 光っている 記号を おしてみよう。"); }
+    shikiRender(); return;
+  }
+}
+function skNext() {
+  if (sk.qi < sk.set.length - 1) { sk.qi++; shikiStartQ(); window.scrollTo(0, 0); return; }
+  const R = skRec(shikiLv), m = sk.miss + sk.hints, st = m === 0 ? 3 : m <= 2 ? 2 : 1;
+  sk.res = { st, prev: R.st };
+  if (st > R.st) { R.st = st; skSave(); }
+  sk.finished = true; setMsg("", "");
+  if (st === 3) { confetti(80); sfx("fanfare"); } else sfx("solved");
+  shikiRender();
+}
+function skRenderResult() {
+  const r = sk.res, S = curS(), R = skRec(shikiLv);
+  let h = `<div class="result"><div class="rstars">${starHTML(r.st)}</div>`;
+  h += `<div class="big">式をつくろう ${S.name} ${r.st === 3 ? "かんぺき！" : "おつかれさま"}</div>`;
+  h += `<div class="stats"><span>問題 ${sk.set.length}問</span><span${sk.miss === 0 ? ' class="z"' : ""}>まちがい ${sk.miss}</span><span${sk.hints === 0 ? ' class="z"' : ""}>ヒント ${sk.hints}</span></div>`;
+  if (r.st > r.prev && r.prev > 0) h += `<p><span class="newrec">さいこう記録 こうしん！</span></p>`;
+  h += R.self ? `<p>✏️ 線を 自分で ひいて 式が つくれるように なったね。</p>` : `<p>✏️ 自分で 線を ひく 問題まで、あと ノーミス ${SHIKI_SELF_AT - R.streak}問。</p>`;
+  $("expr").innerHTML = h + "</div>";
+  const b = $("btns"); b.innerHTML = "";
+  const mk = (cls, txt, fn) => { const e = document.createElement("button"); e.className = "btn " + cls; e.textContent = txt; e.onclick = fn; b.appendChild(e); };
+  mk("again", "ちがう問題で もう一度", shikiNewSet);
+  const nx = SHIKI.find(x => x.id === shikiLv + 1);
+  if (nx) mk("next" + (r.st >= 2 ? " big" : ""), nx.name + " へ ▶", () => { shikiLv = nx.id; shikiNewSet(); });
+  mk("reset", "メニューへ", () => { stopPlay(); goMenu(); });
+}
+
 /* ================= 先生用：問題の追加 ================= */
 function validate(str) {
   const t = tokenize(str);
@@ -2890,7 +3331,8 @@ $("advFree").onchange = e => { advFree = e.target.checked; save("junjo_advfree",
 $("resetStars").onclick = () => {
   if (!confirm("この端末の ★の記録を すべて消しますか？")) return;
   stars = {}; best = {}; save("junjo_stars", stars); save("junjo_best", best);
-  craftStars = {}; save("junjo_craft", craftStars); renderLevels();
+  craftStars = {}; save("junjo_craft", craftStars);
+  shikiRec = {}; skSave(); renderLevels();
 };
 $("resetAdv").onclick = () => {
   if (!confirm("花火大会の進みぐあい（特製玉もふくむ）を はじめに もどしますか？")) return;
