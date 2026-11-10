@@ -3015,7 +3015,15 @@ function genShiki(type) {
         { op: "+", a: a, b: b, ka: 2, ko: 4, kb: 5, ul: [4, 4], core: [4], lo: 2, hi: 7, label: "買った 代金", find: "買った ものを 合わせる ことば", opHint: AND_HINT },
         { op: "-", a: c, b: { s: 0 }, ka: 0, ko: 1, ul: [0, 1], core: [0], lo: 0, hi: 1, alt: [{ core: [9], lo: 8, hi: 9 }], label: "おつり", find: "出した お金が わかる ところ（「おつり」を もとめるよ）",
           opHint: `出した ${c}円から、買った 代金を はらうと、のこりは？`, early: "おつりを 出す 前に、買った ものの 代金を 先に 合わせよう。" }
-      ] };
+      ],
+      // 「買いました」→ 子どもが 買った 代金（step 0）を（ ）で かこむ。かこむまで −（step 1）に すすめない
+      paren: { after: 0, ul: [8, 8], core: [8], lo: 7, hi: 8, items: `${X[0]}と ${Y[0]}`,
+        word: "買いました", name: "買った 代金", unitNm: "まとめて はらう 代金", who: "買ったのは",
+        find: "買った ものの 代金を まとめて はらう ことば",
+        guide: "<b>「買いました」</b>の 代金は、2つ まとめて はらうよ。買った 代金を <b>（ ）で かこもう</b>。かこむ はじめと おわりの 数を タップしてね。",
+        notYet: "まず、買った ものを 合わせる 式を つくろう。",
+        ngOut: `× 出した ${c}円は、買った 代金には 入らないよ。買ったのは ${X[0]}と ${Y[0]}。`,
+        early: "おつりを 出す 前に、買った 代金を まとめよう。まず「買いました」に 線を ひいて、買った 代金を（ ）で かこもう。" } };
   }
   // t4：(a＋b)×n
   const P = pick(SK_PAIRS), a = skPrice(80, 200), n = rnd(2, 5);
@@ -3029,7 +3037,11 @@ function genShiki(type) {
     ],
     // 「組にして」→ 子どもが 1組の 代金（step 0）を（ ）で かこむ。かこむまで ×（step 1）に すすめない
     paren: { after: 0, ul: [6, 6], core: [6], lo: 6, hi: 6, items: `${P[0]}と ${P[1]}`,
+      word: "組にして", name: "1組の 代金", unitNm: "1組の まとまり", who: "1組に するのは",
       find: "2つを 1つの まとまりに する ことば",
+      guide: "<b>「組にして」</b>は、2つを 1組の まとまりに する ことば。1組の 代金を <b>（ ）で かこもう</b>。かこむ はじめと おわりの 数を タップしてね。",
+      notYet: "まず、1組に する ものを 合わせる 式を つくろう。",
+      ngOut: `× 「何組」の 数は、1組の 中には 入らないよ。1組に するのは ${P[0]}と ${P[1]}。`,
       early: "「組にして」は、2つを 1つの まとまりに する ことば。まず「組にして」に 線を ひいて、1組の 代金を（ ）で かこもう。" } };
 }
 function skBuild(S) {
@@ -3078,7 +3090,7 @@ function skWords(q, i) {
   return w(s.a) + SYM[s.op] + w(s.b);
 }
 const skDeps = s => [s.a, s.b].filter(x => typeof x !== "number").map(x => x.s);
-// 「組にして」の（ ）を まだ つけていない（＋は できた）
+// 「組にして」「買いました」の（ ）を まだ つけていない（＋は できた）
 const skNeedPar = () => !!sk.q.paren && sk.done[sk.q.paren.after] && !sk.par;
 const skParDone = x => sk.q.paren && sk.q.paren.after === x ? sk.par : sk.done[x]; // （ ）を 見せてよいか
 const skAvail = i => !sk.done[i] && skDeps(sk.q.steps[i]).every(d => sk.done[d]) &&
@@ -3191,7 +3203,7 @@ function skNextStep() {
   sk.hintLv = 0; sk.ng = null; sk.glow = null; sk.sel = null; sk.pp = null; sk.parGlow = null; sk.parNg = null; sk.parNew = false;
   if (sk.done.every(Boolean)) { skFinishQ(); return; }
   else if (sk.self) { sk.phase = "sel"; sk.cur = null; }
-  else if (skNeedPar()) { sk.phase = "paren"; sk.cur = null; } // アプリが「組にして」に 線を ひく
+  else if (skNeedPar()) { sk.phase = "paren"; sk.cur = null; } // アプリが「組にして」「買いました」に 線を ひく
   else { sk.phase = "op"; sk.cur = sk.q.steps.findIndex((_, i) => skAvail(i)); }
   shikiRender();
 }
@@ -3209,7 +3221,7 @@ function shikiRender() {
   $("guide").innerHTML = {
     sel: "式に する ところに <b>線を ひこう</b>。はじめと おわりの ことばを タップしてね。",
     op: "<b>線の ところ</b>は、何算かな？",
-    paren: "<b>「組にして」</b>は、2つを 1組の まとまりに する ことば。1組の 代金を <b>（ ）で かこもう</b>。かこむ はじめと おわりの 数を タップしてね。",
+    paren: q.paren ? q.paren.guide : "",
     fin: "式が できた！ 計算の 順じょで 答えを 出そう。"
   }[sk.phase] || "";
 
@@ -3285,11 +3297,11 @@ function skJudgeSel() {
   if (q.paren && !sk.par && fit1(q.paren)) {
     if (skNeedPar()) {
       sk.phase = "paren"; sk.cur = null; sk.hintLv = 0; sk.pp = null;
-      sfx("ok"); setMsg("ok", "○ いい ところに 線が ひけたね！ 1組の 代金を（ ）で かこもう。");
+      sfx("ok"); setMsg("ok", `○ いい ところに 線が ひけたね！ ${q.paren.name}を（ ）で かこもう。`);
       sk.lines.push(`線「${txt}」`);
       shikiRender(); return;
     }
-    sk.sel = null; setMsg("info", "まず、1組に する ものを 合わせる 式を つくろう。"); shikiRender(); return;
+    sk.sel = null; setMsg("info", q.paren.notYet); shikiRender(); return;
   }
   const cand = q.steps.map((_, i) => i).filter(i => !sk.done[i] && fits(q.steps[i]));
   const ok = cand.find(skAvail);
@@ -3331,9 +3343,9 @@ function skTapPar(ti) {
   if (lo === L && hi === H) {
     sk.par = true; sk.parNew = true; sk.busy = true;
     const f = skWords(q, P.after);
-    sk.lines.push(`組にして → （ ）　（${f}）が 1組の まとまり`);
+    sk.lines.push(`${P.word} → （ ）　（${f}）が ${P.unitNm}`);
     sfx("ok");
-    setMsg("ok", `○ そうだね！（${f}）が 1組の 代金。（ ）の 中は 1つの まとまりで、先に 計算するよ。`);
+    setMsg("ok", `○ そうだね！（${f}）が ${P.name}。（ ）の 中は 1つの まとまりで、先に 計算するよ。`);
     const seq = shikiSeq;
     shikiRender();
     fireAt(document.querySelector(`#expr [data-pt="${L}"]`), 1);
@@ -3341,9 +3353,9 @@ function skTapPar(ti) {
     return;
   }
   skMiss(); sfx("ng"); sk.parNg = [lo, hi];
-  setMsg("bad", hi > H
-    ? `× 「何組」の 数は、1組の 中には 入らないよ。1組に するのは ${P.items}。`
-    : `× 1組に するのは ${P.items}。その 2つの 代金が ぜんぶ（ ）に 入るように かこもう。`);
+  setMsg("bad", lo < L || hi > H
+    ? P.ngOut
+    : `× ${P.who} ${P.items}。その 2つの 代金が ぜんぶ（ ）に 入るように かこもう。`);
   shikiRender();
 }
 
@@ -3398,10 +3410,10 @@ function skHint() {
   if (sk.phase === "sel" && skNeedPar()) {
     if (sk.hintLv === 1) { setMsg("info", `💡 さがすのは「${q.paren.find}」だよ。`); shikiRender(); return; }
     sk.phase = "paren"; sk.hintLv = 0; sk.sel = null; sk.pp = null;
-    setMsg("info", "💡「組にして」に 線が ひけるよ。1組の 代金を（ ）で かこもう。"); shikiRender(); return;
+    setMsg("info", `💡「${q.paren.word}」に 線が ひけるよ。${q.paren.name}を（ ）で かこもう。`); shikiRender(); return;
   }
   if (sk.phase === "paren") {
-    if (sk.hintLv === 1) setMsg("info", `💡 1組に するのは ${q.paren.items}。その 2つの 代金の 数を さがそう。`);
+    if (sk.hintLv === 1) setMsg("info", `💡 ${q.paren.who} ${q.paren.items}。その 2つの 代金の 数を さがそう。`);
     else { sk.parGlow = skParRange(); sk.pp = null; setMsg("info", "💡 光っている 2つの 数を タップしよう。"); }
     shikiRender(); return;
   }
