@@ -2997,14 +2997,15 @@ function genShiki(type) {
   }
   if (type === "t2") { // a＋b×n
     const [X, Y] = skTwo(), a = skPrice(Math.max(X[2], 60), Math.max(X[3], 150)), b = skPrice(Y[2], Y[3]), n = rnd(2, 6);
-    return { type, unit: "円", root: 1, l1: 6,
-      chunks: [`${a}円の`, X[0], `1${X[1]}`, "と", `${b}円の`, Y[0], `${n}${Y[1]}を`, "買いました。", "代金は", "いくらですか。"],
+    // 1つだけ 買う ものは「1こ」を 書かない（ふつうの 文章題の 書き方に 合わせる）
+    return { type, unit: "円", root: 1, l1: 5,
+      chunks: [`${a}円の`, X[0], "と", `${b}円の`, Y[0], `${n}${Y[1]}を`, "買いました。", "代金は", "いくらですか。"],
       steps: [
-        { op: "*", a: b, b: n, grp: 1, ul: [4, 6], core: [4, 6], lo: 4, hi: 6, label: `${Y[0]}の 代金`, find: `${Y[0]}の 代金が わかる ところ（数が 2つ）`, opHint: TIMES(n, Y[1], `1${Y[1]} ${b}円の ${Y[0]}`) },
-        { op: "+", a: a, b: { s: 0 }, ka: 0, ko: 3, ul: [3, 3], core: [3], lo: 0, hi: 6, label: "ぜんぶの 代金", find: "2つの 代金を 合わせる ことば", opHint: AND_HINT,
+        { op: "*", a: b, b: n, grp: 1, ul: [3, 5], core: [3, 5], lo: 3, hi: 5, label: `${Y[0]}の 代金`, find: `${Y[0]}の 代金が わかる ところ（数が 2つ）`, opHint: TIMES(n, Y[1], `1${Y[1]} ${b}円の ${Y[0]}`) },
+        { op: "+", a: a, b: { s: 0 }, ka: 0, ko: 2, ul: [2, 2], core: [2], lo: 0, hi: 5, label: "ぜんぶの 代金", find: "2つの 代金を 合わせる ことば", opHint: AND_HINT,
           early: `「と」で 合わせる 前に、${Y[0]}の 代金を 先に 式に しよう。` }
       ],
-      decoys: [{ core: [0, 2], lo: 0, hi: 2, msg: `${X[0]}は 1${X[1]}だけ だから、${a}円の まま。かけ算に しなくて いいよ。ほかの ところを さがそう。` }] };
+      decoys: [{ core: [0], lo: 0, hi: 1, msg: `${X[0]}は 1${X[1]}だけ だから、${a}円の まま。かけ算に しなくて いいよ。ほかの ところを さがそう。` }] };
   }
   if (type === "t3") { // c−(a＋b)
     const [X, Y] = skTwo(), c = pick([500, 1000, 1000]);
