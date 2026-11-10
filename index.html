@@ -576,6 +576,7 @@
   #expr .sk-tk.q, #expr .sk-tk .q { color: #e8590c; animation: glow 1s infinite; }
   #expr .sk-tk.wait, #expr .sk-tk .wait { color: #b8b0a0; }
   #expr .sk-tk.hide { visibility: hidden; }
+  #expr .sk-tk.nw { animation: dropIn .35s ease-out; } /* 線を ひいたら 下に 出てくる */
   /* （ ）で かこむ：タップできる 数・えらんだ 数・ヒント・できた（ ） */
   #expr .sk-tk.pt { cursor: pointer; border: 2px dashed #e8590c; background: #fff; }
   #expr .sk-tk.pp { background: #fff3d6; border-style: solid; }
@@ -3101,18 +3102,20 @@ function skRowHTML(q) {
   const par = c => c ? `<span class="sk-par${sk.parNew ? " new" : ""}">${c}</span>` : "";
   return skTokens(q, q.root).map((t, ti) => {
     const cur = sk.phase === "op" && t.st === sk.cur, cls = ["sk-tk"];
+    // 線が ひかれた ところ（いま えらぶ／もう できた）の 数と □ だけ 見せる。場所は とっておく（あとで ずれない ように）
+    const vis = sk.done[t.st] || cur;
+    if (!vis) cls.push("hide");
+    else if (!sk.shown.has(ti)) { sk.shown.add(ti); cls.push("nw"); }
     let txt, pt = "";
     if (t.grp) {
-      const o = sk.done[t.st] ? `<span class="op">${SYM[t.op]}</span>` : `<span class="${cur ? "q" : sk.self ? "hide" : "wait"}">□</span>`;
+      const o = sk.done[t.st] ? `<span class="op">${SYM[t.op]}</span>` : `<span class="q">□</span>`;
       txt = par(t.pre) + t.a + o + t.b + par(t.post);
     } else if (t.op) {
       if (sk.done[t.st]) { txt = SYM[t.op]; cls.push("op"); }
-      else if (cur) { txt = "□"; cls.push("q"); }
-      else if (!sk.self) { txt = "□"; cls.push("wait"); }
-      else { txt = "□"; cls.push("hide"); } // 自分で 線を ひくときは、まだ 見せない
+      else { txt = "□"; if (cur) cls.push("q"); }
     } else {
       txt = par(t.pre) + t.v + par(t.post);
-      if (sk.phase === "paren") { // 数を タップして（ ）で かこむ
+      if (sk.phase === "paren" && vis) { // 数を タップして（ ）で かこむ
         cls.push("pt"); pt = ` data-pt="${ti}"`;
         if (sk.pp === ti) cls.push("pp");
         if (sk.parGlow && sk.parGlow.includes(ti)) cls.push("ph");
